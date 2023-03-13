@@ -1,6 +1,6 @@
 #include "FATriangle.h"
 
-namespace FAShape
+namespace FAShapes
 {
 	Triangle::Triangle(FAMath::Vector3D* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
 		: mVertexList{ vertexList }, mIndexList{ p0Index, p1Index, p2Index }

@@ -19,15 +19,4 @@ namespace FARender
 	/**@brief Update our current frame value to go to the next frame.
 	*/
 	void nextFrame();
-
-	/** @struct DrawArguments ""
-	*	@brief Has all the data that are used as parameters to draw an object.
-	*/
-	struct DrawArguments
-	{
-		UINT indexCount;
-		UINT locationFirstIndex;
-		INT indexOfFirstVertex;
-		INT indexOfConstantData;
-	};
 }

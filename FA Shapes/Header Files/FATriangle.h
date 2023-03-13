@@ -6,7 +6,7 @@
 *	@brief File has a Triangle class under the namespace FAShape.
 */
 
-namespace FAShape
+namespace FAShapes
 {
 	/** @class Triangle ""
 	*	@brief The class stores a pointer to a vertex list and indices to the vertices of the triangle.
