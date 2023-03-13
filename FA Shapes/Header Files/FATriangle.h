@@ -1,9 +1,10 @@
 #pragma once
 
 #include "FAVector3D.h"
+#include "FAShapesUtility.h"
 
 /** @file FATriangle.h
-*	@brief File has a Triangle class under the namespace FAShape.
+*	@brief File has a Triangle class under the namespace FAShapes.
 */
 
 namespace FAShapes
@@ -18,7 +19,7 @@ namespace FAShapes
 		/**@brief Constructor.
 		* If the 3 vertices that make up the triangle are colinear, a runtime_exception is thrown.
 		*/
-		Triangle(FAMath::Vector3D* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index);
+		Triangle(FAMath::Vector3D* vertexList = nullptr, unsigned int p0Index = 0, unsigned int p1Index = 0, unsigned int p2Index = 0);
 
 		/**@brief Returns the P0 vertex of the triangle.
 		*/
@@ -69,7 +70,7 @@ namespace FAShapes
 
 
 	private:
-		FAMath::Vector3D* mVertexList; //pointer to an vertex list
+		Vertex* mVertexList; //pointer to a vertex list
 		unsigned int mIndexList[3]; //indices into a vertex list
 		bool isColinear();
 	};

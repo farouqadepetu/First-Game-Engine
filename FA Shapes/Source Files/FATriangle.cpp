@@ -5,8 +5,11 @@ namespace FAShapes
 	Triangle::Triangle(FAMath::Vector3D* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
 		: mVertexList{ vertexList }, mIndexList{ p0Index, p1Index, p2Index }
 	{
-		if (isColinear())
-			throw std::runtime_error("The triangle vertices are colinear");
+		if mVertexList != nullptr)
+		{
+			if (isColinear())
+				throw std::runtime_error("The triangle vertices are colinear");
+		}
 	}
 
 	FAMath::Vector3D Triangle::getP0()

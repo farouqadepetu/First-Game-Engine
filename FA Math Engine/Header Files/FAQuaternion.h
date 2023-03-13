@@ -14,9 +14,7 @@
 namespace FAMath
 {
 	/** @class Quaternion ""
-	*
 	*	The datatype for the components is float.\n
-	*
 	*/
 	class Quaternion
 	{
