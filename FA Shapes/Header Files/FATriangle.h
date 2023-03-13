@@ -19,19 +19,19 @@ namespace FAShapes
 		/**@brief Constructor.
 		* If the 3 vertices that make up the triangle are colinear, a runtime_exception is thrown.
 		*/
-		Triangle(FAMath::Vector3D* vertexList = nullptr, unsigned int p0Index = 0, unsigned int p1Index = 0, unsigned int p2Index = 0);
+		Triangle(Vertex* vertexList = nullptr, unsigned int p0Index = 0, unsigned int p1Index = 0, unsigned int p2Index = 0);
 
 		/**@brief Returns the P0 vertex of the triangle.
 		*/
-		FAMath::Vector3D getP0();
+		Vertex getP0();
 
 		/**@brief Returns the P1 vertex of the triangle.
 		*/
-		FAMath::Vector3D getP1();
+		Vertex getP1();
 
 		/**@brief Returns the P2 vertex of the triangle.
 		*/
-		FAMath::Vector3D getP2();
+		Vertex getP2();
 
 		/**@brief Returns the index of where P0 is in the vertex list.
 		*/
@@ -55,7 +55,7 @@ namespace FAShapes
 
 		/**@brief Sets the pointer to a vertex list to the specified pointers.
 		*/
-		void setVertexList(FAMath::Vector3D* vertexList);
+		void setVertexList(Vertex* vertexList);
 
 		/**@brief Sets the indices of the vertices that make up the triangle to the specified vertices.
 		* If the 3 vertices that make up the triangle are colinear, a runtime_exception is thrown.
@@ -66,7 +66,7 @@ namespace FAShapes
 		*	sets the indices of the vertices that make up the triangle to the specified vertices.
 		* If the 3 vertices that make up the triangle are colinear, a runtime_exception is thrown.
 		*/
-		void setTriangle(FAMath::Vector3D* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index);
+		void setTriangle(Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index);
 
 
 	private:

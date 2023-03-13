@@ -2,27 +2,27 @@
 
 namespace FAShapes
 {
-	Triangle::Triangle(FAMath::Vector3D* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
+	Triangle::Triangle(Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
 		: mVertexList{ vertexList }, mIndexList{ p0Index, p1Index, p2Index }
 	{
-		if mVertexList != nullptr)
+		if (mVertexList != nullptr)
 		{
 			if (isColinear())
 				throw std::runtime_error("The triangle vertices are colinear");
 		}
 	}
 
-	FAMath::Vector3D Triangle::getP0()
+	Vertex Triangle::getP0()
 	{
 		return mVertexList[mIndexList[0]];
 	}
 
-	FAMath::Vector3D Triangle::getP1()
+	Vertex Triangle::getP1()
 	{
 		return mVertexList[mIndexList[1]];
 	}
 
-	FAMath::Vector3D Triangle::getP2()
+	Vertex Triangle::getP2()
 	{
 		return mVertexList[mIndexList[2]];
 	}
@@ -45,8 +45,8 @@ namespace FAShapes
 	//Normal of a traingle is (p1 - p0) x (p2 - p0)
 	FAMath::Vector3D Triangle::getNormal()
 	{
-		FAMath::Vector3D p01{ mVertexList[mIndexList[1]] - mVertexList[mIndexList[0]] };
-		FAMath::Vector3D p02{ mVertexList[mIndexList[2]] - mVertexList[mIndexList[0]] };
+		FAMath::Vector3D p01{ mVertexList[mIndexList[1]].position - mVertexList[mIndexList[0]].position };
+		FAMath::Vector3D p02{ mVertexList[mIndexList[2]].position - mVertexList[mIndexList[0]].position };
 
 		return crossProduct(p01, p02);
 	}
@@ -55,9 +55,9 @@ namespace FAShapes
 	//< (x1 + x2 + x3) / 3, (y1 + y2 + y3) / 3, (z1 + z2 + z3) / 3 >
 	FAMath::Vector3D Triangle::getCenter()
 	{
-		FAMath::Vector3D p0{ mVertexList[mIndexList[0]] };
-		FAMath::Vector3D p1{ mVertexList[mIndexList[1]] };
-		FAMath::Vector3D p2{ mVertexList[mIndexList[2]] };
+		FAMath::Vector3D p0{ mVertexList[mIndexList[0]].position };
+		FAMath::Vector3D p1{ mVertexList[mIndexList[1]].position };
+		FAMath::Vector3D p2{ mVertexList[mIndexList[2]].position };
 
 		float x{ (p0.x() + p1.x() + p2.x()) / 3.0f };
 		float y{ (p0.y() + p1.y() + p2.y()) / 3.0f };
@@ -66,7 +66,7 @@ namespace FAShapes
 		return FAMath::Vector3D(x, y, z);
 	}
 
-	void Triangle::setVertexList(FAMath::Vector3D* vertexList)
+	void Triangle::setVertexList(Vertex* vertexList)
 	{
 		mVertexList = vertexList;
 	}
@@ -81,7 +81,7 @@ namespace FAShapes
 			throw std::runtime_error("The triangle vertices are colinear");
 	}
 
-	void Triangle::setTriangle(FAMath::Vector3D* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
+	void Triangle::setTriangle(Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
 	{
 		mVertexList = vertexList;
 		mIndexList[0] = p0Index;
@@ -96,8 +96,8 @@ namespace FAShapes
 	//The area of a triangle is |((p1 - p0) x (p2 - p0))| / 2
 	bool Triangle::isColinear()
 	{
-		FAMath::Vector3D p01{ mVertexList[mIndexList[1]] - mVertexList[mIndexList[0]] };
-		FAMath::Vector3D p02{ mVertexList[mIndexList[2]] - mVertexList[mIndexList[0]] };
+		FAMath::Vector3D p01{ mVertexList[mIndexList[1]].position - mVertexList[mIndexList[0]].position };
+		FAMath::Vector3D p02{ mVertexList[mIndexList[2]].position - mVertexList[mIndexList[0]].position };
 
 		float area = length(crossProduct(p01, p02)) / 2.0f;
 
