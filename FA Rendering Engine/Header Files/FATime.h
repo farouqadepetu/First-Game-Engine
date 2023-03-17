@@ -5,7 +5,6 @@
 */
 
 #include <Windows.h>
-#include <iostream>
 
 /** @class Time ""
 *	@brief This class is used to get the time between each frame. You can stop start, reset and get the total time.

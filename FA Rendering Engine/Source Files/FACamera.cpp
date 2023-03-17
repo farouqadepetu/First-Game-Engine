@@ -4,7 +4,7 @@ namespace FACamera
 {
 	Camera::Camera() :
 		m_cameraPosition{ vec3(0.0f, 0.0f, 0.0f) }, m_n{ vec3(0.0f, 0.0f, 1.0f) }, m_u{ 1.0f, 0.0f, 0.0f }, m_v{ 0.0f, 1.0f, 0.0f },
-		m_near{ 1.0f }, m_far{ 100.f }, m_verticalFov{ 45.0f }, m_aspectRatio{ 1.0f }, m_cameraVelocity{ 10.0f }, m_rotateVelocity{ 0.5f }
+		m_near{ 1.0f }, m_far{ 100.f }, m_verticalFov{ 45.0f }, m_aspectRatio{ 1.0f }, m_cameraVelocity{ 10.0f }, m_rotateVelocity{ 0.25f }
 	{}
 
 	Camera::Camera(vec3 cameraPosition, vec3 x, vec3 y, vec3 z,
@@ -117,14 +117,14 @@ namespace FACamera
 		return m_aspectRatio;
 	}
 
-	mat4 Camera::perspectiveProjectionTransformationMatrix()
+	mat4 Camera::perspectiveProjectionMatrix()
 	{
 		return m_perspectiveProjectionMatrix;
 	}
 
-	mat4 Camera::viewPerspectiveProjectionTransformationMatrix()
+	mat4 Camera::viewPerspectiveProjectionMatrix()
 	{
-		return m_viewPerspectiveProjectionTransformationMatrix;
+		return m_viewPerspectiveProjectionMatrix;
 	}
 
 	/* View transformation matrix
@@ -133,7 +133,7 @@ namespace FACamera
 	*		uz							vz						nz				0
 	* -cameraPosition dot u		-cameraPosition dot v	-cameraPosition dot n	1
 	*/
-	void Camera::updateViewTransformationMatrix()
+	void Camera::updateViewMatrix()
 	{
 		//Orthonormalize the camera space axes
 		
@@ -165,7 +165,7 @@ namespace FACamera
 	* n = znear
 	* vFov = vertical field of view
 	*/
-	void Camera::updatePerspectiveProjectionTransformationMatrix()
+	void Camera::updatePerspectiveProjectionMatrix()
 	{
 		double angle{ m_verticalFov / 2.0 };
 		angle = angle * PI / 180.0;
@@ -180,9 +180,9 @@ namespace FACamera
 		m_perspectiveProjectionMatrix.setRow(3, vec4(0.0f, 0.0f, -(m_near * m_far) / fMinusN, 0.0f));
 	}
 
-	void Camera::updateViewPerspectiveProjectionTransformationMatrix()
+	void Camera::updateViewPerspectiveProjectionMatrix()
 	{
-		m_viewPerspectiveProjectionTransformationMatrix = m_viewMatrix * m_perspectiveProjectionMatrix;
+		m_viewPerspectiveProjectionMatrix = m_viewMatrix * m_perspectiveProjectionMatrix;
 	}
 
 	//velocity = distance/time
@@ -258,10 +258,18 @@ namespace FACamera
 		vec4 cameraY(m_v);
 		vec4 cameraZ(m_n);
 
+		vec4 resX(cameraX * rotateY);
+		vec4 resY(cameraY * rotateY);
+		vec4 resZ(cameraZ * rotateY);
+
 		//rotate the x, y and z axis around the world's y-axis
-		m_u = vec3(cameraX * rotateY);
+		m_u = vec3(resX.x(), resX.y(), resX.z());
+		m_v = vec3(resY.x(), resY.y(), resY.z());
+		m_n = vec3(resZ.x(), resZ.y(), resZ.z());
+
+		/*m_u = vec3(cameraX * rotateY);
 		m_v = vec3(cameraY * rotateY);
-		m_n = vec3(cameraZ * rotateY);
+		m_n = vec3(cameraZ * rotateY);*/
 	}
 
 	//To look up or down you rotate the camera around its u vector. 
@@ -275,9 +283,16 @@ namespace FACamera
 		vec4 cameraY(m_v);
 		vec4 cameraZ(m_n);
 
+		vec4 resY(cameraY * rotateY);
+		vec4 resZ(cameraZ * rotateY);
+
 		//rotate the camera's y and z axis around the cameras x-axis
-		m_v = vec3(cameraY * rotateY);
-		m_n = vec3(cameraZ * rotateY);
+		m_v = vec3(resY.x(), resY.y(), resY.z());
+		m_n = vec3(resZ.x(), resZ.y(), resZ.z());
+
+
+		/*m_v = vec3(cameraY * rotateY);
+		m_n = vec3(cameraZ * rotateY);*/
 	}
 
 	void Camera::keyboardInput(float dt)
@@ -299,12 +314,17 @@ namespace FACamera
 	}
 
 
-	void Camera::mouseInput(FAMath::Vector2D currentMousePosition)
+	void Camera::mouseInput()
 	{
+		POINT currMousePos{};
+		GetCursorPos(&currMousePos);
+
+		FAMath::Vector2D currentMousePosition(currMousePos.x, currMousePos.y);
+
 		FAMath::Vector2D mousePositionDiff(currentMousePosition - lastMousePosition);
 
 		//if the mouse goes outside the window and comes back into the window, the camera won't be rotated.
-		if (length(mousePositionDiff) < 10.0f)
+		if (length(mousePositionDiff) < 5.0f && (GetAsyncKeyState(VK_LBUTTON) & 0x8000))
 		{
 			rotateCameraLeftRight(m_rotateVelocity * mousePositionDiff.x());
 			rotateCameraUpDown(m_rotateVelocity * mousePositionDiff.y());

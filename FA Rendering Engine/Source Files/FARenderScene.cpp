@@ -57,8 +57,8 @@ namespace FARender
 	{
 		return mCBVHeapRootParameter;
 	}
-
-	const DrawArguments& RenderScene::drawArgument(const std::wstring& groupName, const std::wstring& objectName) const
+	
+	const FAShapes::DrawArguments& RenderScene::drawArgument(const std::wstring& groupName, const std::wstring& objectName) const
 	{
 		return mDrawArgs.at(groupName).at(objectName);
 	}
@@ -120,14 +120,14 @@ namespace FARender
 	}
 
 	void RenderScene::createPSO(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const std::wstring& psoName,
-		const std::wstring& rsName, const std::wstring& rStateName, const std::wstring& vsName, const std::wstring& psName,
-		const std::wstring& inputLayoutName,
+		const std::wstring& rootSignatureName, const std::wstring& rStateName, 
+		const std::wstring& vsName, const std::wstring& psName, const std::wstring& inputLayoutName,
 		const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsvFormat, UINT sampleCount)
 	{
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC pState{};
 		ZeroMemory(&pState, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC)); //fills the block of memory with zeros
 
-		pState.pRootSignature = mRootSignatures.at(rsName).Get();
+		pState.pRootSignature = mRootSignatures.at(rootSignatureName).Get();
 
 		pState.VS.pShaderBytecode = (BYTE*)mShaders.at(vsName)->GetBufferPointer();
 		pState.VS.BytecodeLength = mShaders.at(vsName)->GetBufferSize();
@@ -193,11 +193,12 @@ namespace FARender
 		mRootSignatures[name] = rootSignature;
 	}
 
-	void RenderScene::storeDrawArgument(const std::wstring& groupName, const std::wstring& objectName, const DrawArguments& drawArgs)
+	void RenderScene::storeDrawArgument(const std::wstring& groupName, const std::wstring& objectName, 
+		const FAShapes::DrawArguments& drawArgs)
 	{
-		DrawArguments temp{};
+		FAShapes::DrawArguments temp{};
 		temp.indexCount = drawArgs.indexCount;
-		temp.locationFirstIndex = drawArgs.locationFirstIndex;
+		temp.locationOfFirstIndex = drawArgs.locationOfFirstIndex;
 		temp.indexOfFirstVertex = drawArgs.indexOfFirstVertex;
 		temp.indexOfConstantData = drawArgs.indexOfConstantData;
 
@@ -295,9 +296,9 @@ namespace FARender
 		const std::wstring& psoName, const std::wstring& rootSignatureName,
 		const D3D_PRIMITIVE_TOPOLOGY& primitive)
 	{
-		commandList->IASetVertexBuffers(0, 1, &mVertexBuffers[vbName].vertexBufferView());
+		commandList->IASetVertexBuffers(0, 1, &mVertexBuffers.at(vbName).vertexBufferView());
 
-		commandList->IASetIndexBuffer(&mIndexBuffers[ibName].indexBufferView());
+		commandList->IASetIndexBuffer(&mIndexBuffers.at(ibName).indexBufferView());
 
 		commandList->SetPipelineState(mPSOs.at(psoName).Get());
 
@@ -306,7 +307,7 @@ namespace FARender
 		commandList->IASetPrimitiveTopology(primitive);
 
 		//draw all the objects the share the same PSO, root signature and primitive
-		for (const std::pair<std::wstring, DrawArguments>& i : mDrawArgs.at(drawArgsGroupName))
+		for (const std::pair<std::wstring, FAShapes::DrawArguments>& i : mDrawArgs.at(drawArgsGroupName))
 		{
 			//Get the address of the first view in the constant buffer view heap
 			CD3DX12_GPU_DESCRIPTOR_HANDLE handle =
@@ -317,7 +318,7 @@ namespace FARender
 			commandList->SetGraphicsRootDescriptorTable(0, handle);
 
 			commandList->DrawIndexedInstanced(i.second.indexCount, 1,
-				i.second.locationFirstIndex, i.second.indexOfFirstVertex, 0);
+				i.second.locationOfFirstIndex, i.second.indexOfFirstVertex, 0);
 		}
 	}
 

@@ -21,7 +21,9 @@ namespace FARender
 	{
 	public:
 
-		Text() = default;
+		Text(const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& deviceContext,
+			const Microsoft::WRL::ComPtr<IDWriteFactory>& writeFactory,
+			const D2D1_RECT_F& textLocation, const std::wstring& textString, float textSize, const D2D1_COLOR_F& textColor);
 
 		/**@brief Initializes the format of the text.
 		*/

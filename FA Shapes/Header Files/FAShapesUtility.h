@@ -1,6 +1,7 @@
 #pragma once
 
-#include "FAVector3D.h"
+//#include "FAVector3D.h"
+#include "FAMathEngine.h"
 #include "FAColor.h"
 
 namespace FAShapes

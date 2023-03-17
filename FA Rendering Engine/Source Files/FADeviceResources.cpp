@@ -6,6 +6,12 @@ namespace FARender
 {
 	//-----------------------------------------------------------------------------------------------------------------------
 	//DEVICE RESOURCES FUNCTION DEFINITIONS
+
+	DeviceResources::DeviceResources(unsigned int width, unsigned int height, HWND windowHandle)
+	{
+		initializeDirect3D(width, height, windowHandle);
+	}
+
 	DeviceResources::~DeviceResources()
 	{
 		if (mDirect3DDevice != nullptr)
@@ -143,7 +149,7 @@ namespace FARender
 		mCurrentFrameFenceValue[currentFrame] = ++mFenceValue;
 	}
 
-	void  DeviceResources::initializeDirect3D(HWND handle)
+	void  DeviceResources::initializeDirect3D(unsigned int width, unsigned int height, HWND handle)
 	{
 		enableDebugLayer();
 		createDirect3DDevice();
@@ -160,6 +166,9 @@ namespace FARender
 		checkMSAASupport();
 		createMSAARTVHeap();
 		createMSAADSVHeap();
+
+		resize(width, height, handle);
+		mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr);
 	}
 
 	void DeviceResources::enableDebugLayer()
@@ -308,7 +317,7 @@ namespace FARender
 		depthBufferDescription.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		depthBufferDescription.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
-		D3D12_CLEAR_VALUE depthBufferClearValue;
+		D3D12_CLEAR_VALUE depthBufferClearValue{};
 		depthBufferClearValue.Format = mDepthStencilFormat;
 		depthBufferClearValue.DepthStencil.Depth = 1.0f;
 		depthBufferClearValue.DepthStencil.Stencil = 0;

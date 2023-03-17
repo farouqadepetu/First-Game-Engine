@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <string>
 #include "FARenderingUtility.h"
+#include "FAShapesUtility.h"
 #include "FADeviceResources.h"
 #include "FABuffer.h"
 
@@ -77,7 +78,7 @@ namespace FARender
 		/*@brief Returns a constant reference to the draw argument with the specifed name in the specified group.
 		* Throws an out_of_range exception if the draw argument does not exist.
 		*/
-		const DrawArguments& drawArgument(const std::wstring& groupName, const std::wstring& objectName) const;
+		const FAShapes::DrawArguments& drawArgument(const std::wstring& groupName, const std::wstring& objectName) const;
 
 		/*@brief Loads a shader's bytecode and stores it with the specified name.
 		*/
@@ -89,7 +90,8 @@ namespace FARender
 
 		/*@brief Stores an array of input element descriptions with the specified name.
 		*/
-		void storeInputElementDescriptions(const std::wstring& name, const D3D12_INPUT_ELEMENT_DESC* inputElementLayout, UINT numElements);
+		void storeInputElementDescriptions(const std::wstring& name, const D3D12_INPUT_ELEMENT_DESC* inputElementLayout, 
+			UINT numElements);
 
 		/*@brief Creates a rasterization description and stores it with the specified name.
 		*/
@@ -98,8 +100,8 @@ namespace FARender
 		/*@brief Creates a PSO and stores it with the specified name.
 		*/
 		void createPSO(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const std::wstring& psoName,
-			const std::wstring& rsName, const std::wstring& rStateName, const std::wstring& vsName, const std::wstring& psName,
-			const std::wstring& inputLayoutName,
+			const std::wstring& rootSignatureName, const std::wstring& rStateName, 
+			const std::wstring& vsName, const std::wstring& psName, const std::wstring& inputLayoutName,
 			const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsvFormat, UINT sampleCount);
 
 		/*@brief Creates a root signature and stores it with the specified name.
@@ -109,7 +111,8 @@ namespace FARender
 
 		/*@brief Stores a DrawArgument object with the specified name in the specified group.
 		*/
-		void storeDrawArgument(const std::wstring& groupName, const std::wstring& objectName, const DrawArguments& drawArgs);
+		void storeDrawArgument(const std::wstring& groupName, const std::wstring& objectName, 
+			const FAShapes::DrawArguments& drawArgs);
 
 		/*@brief Creates a vertex buffer with the specified name and stores all of given data in the vertex buffer.
 		* Execute commands and the flush command queue after calling createVertexBuffer() and createIndexBuffer().
@@ -197,7 +200,7 @@ namespace FARender
 
 		//Groups all of the objects draw arguments that are in the same vertex buffer and index buffer,
 		//and uses the same shaders, rasterization states, PSO, and root signatures.
-		std::unordered_map<std::wstring, std::unordered_map<std::wstring, DrawArguments> > mDrawArgs;
+		std::unordered_map<std::wstring, std::unordered_map<std::wstring, FAShapes::DrawArguments> > mDrawArgs;
 
 		//Stores all of the vertex buffers and index buffers for this scene.
 		std::unordered_map<std::wstring, VertexBuffer> mVertexBuffers;

@@ -19,7 +19,19 @@ namespace FAWindow
 	class Window
 	{
 	public:
-		Window();
+		//Window();
+
+		/**@brief Creates and displays a window.
+		*  Registers a default window class with the OS with the specified instance, class name and window procdure.
+		*/
+		Window(const HINSTANCE& hInstance, const std::wstring& windowClassName, const std::wstring& windowName,
+			WNDPROC winProcFunction, unsigned int width, unsigned int height, void* additionalData = nullptr);
+
+		/**@brief Creates and displays a window.
+		*  Registers the specified window class with the OS.
+		*/
+		Window(const HINSTANCE& hInstance, const WNDCLASSEX& windowClass, const std::wstring& windowName,
+			unsigned int width, unsigned int height, void* additionalData = nullptr);
 
 		/**@brief Returns the window handle.
 		*/
@@ -27,41 +39,19 @@ namespace FAWindow
 
 		/**@brief Returns the width of the window.
 		*/
-		unsigned int width();
+		unsigned int width() const ;
 
 		/**@brief Returns the height of the window.
 		*/
-		unsigned int height();
-
-		/**@brief Returns a reference to the bool variable that tells you if the window is minimized or not.
-		*/
-		bool& minimized();
-
-		/**@brief Returns a reference to the bool variable that tells you if the window is maximized or not.
-		*/
-		bool& maximized();
-
-		/**@brief Returns a reference to the bool variable that tells you if the window is being resized or not.
-		*/
-		bool& resizing();
-
-		void registerWindowClass(const WNDCLASSEX& windowClass);
-
-		/**@brief Registers the window class and creates the window.
-		*/
-		void createWindow(const HINSTANCE& hInstance, const std::wstring& windowName, unsigned int width, unsigned int height);
-
-		/**@brief Updates and shows the window.
-		*/
-		void showWindow();
+		unsigned int height() const;
 
 	private:
 		HWND mWindowHandle;
+
 		WNDCLASSEX mWindowClass;
+		std::wstring mWindowClassName;
+
 		unsigned int mWidth;
 		unsigned int mHeight;
-		bool mMinimized;
-		bool mMaximized;
-		bool mResizing;
 	};
 }

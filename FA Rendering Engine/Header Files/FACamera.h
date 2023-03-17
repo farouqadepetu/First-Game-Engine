@@ -9,12 +9,7 @@
 *
 */
 
-
-#include "FAVector2D.h"
-#include "FAVector3D.h"
-#include "FAVector4D.h"
-#include "FAMatrix4x4.h"
-#include "FAQuaternion.h"
+#include "FAMathEngine.h"
 #include <Windows.h>
 
 typedef FAMath::Vector2D vec2;
@@ -47,7 +42,8 @@ namespace FACamera
 		*	zfar = 1000.0f\n
 		*	aspect ratio = 1.0f\n
 		*	fov = 45 degrees\n
-		*	The constant velocity of the camera when moved is 1000.0f.
+		*	The constant velocity of the camera when moved is 10.0f.
+		*	The rotate velocity is 0.5f.
 		*/
 		Camera();
 
@@ -60,6 +56,7 @@ namespace FACamera
 		*	Sets the frustum properties for perspective projection to the given znear, zar, aspectRatio and fov values.\n
 		*	vFov should be in degrees.\n
 		*	The constant velocity of the camera when moved is set to the given cameraVelocity;
+		*	The rotate velocity of the camera is set the to specified rotateVelocity.
 		*/
 		Camera(vec3 cameraPosition, vec3 x, vec3 y, vec3 z,
 			float znear, float zfar, float aspectRatio, float vFov, float cameraVelocity, float rotateVelocity);
@@ -142,24 +139,24 @@ namespace FACamera
 
 		/**@brief Returns the perspective projection transformation matrix of this camera.
 		*/
-		mat4 perspectiveProjectionTransformationMatrix();
+		mat4 perspectiveProjectionMatrix();
 
 		/**@brief Returns the view perspective projection transformation matrix of this camera.
 		*/
-		mat4 viewPerspectiveProjectionTransformationMatrix();
+		mat4 viewPerspectiveProjectionMatrix();
 
 		/**@brief After modifying the camera position and/or orientation, call this to rebuild the view transformation matrix.
 		*/
-		void updateViewTransformationMatrix();
+		void updateViewMatrix();
 
 		/**@brief After modifying any of the frustrum properties, call this to rebuild the perspective projection transformation matrix.
 		*/
-		void updatePerspectiveProjectionTransformationMatrix();
+		void updatePerspectiveProjectionMatrix();
 
 		/**@brief After modifying view and/or perspective projection transformation matrix, 
 		*	call this to rebuild the view perspective projection transformation matrix.
 		*/
-		void updateViewPerspectiveProjectionTransformationMatrix();
+		void updateViewPerspectiveProjectionMatrix();
 
 		/**@brief Moves the camera left along the camera's x-axis
 		*/
@@ -202,7 +199,7 @@ namespace FACamera
 
 		/**@brief Rotates camera on mouse movement.
 		*/
-		void mouseInput(FAMath::Vector2D currentMousePosition);
+		void mouseInput();
 
 	private:
 		//camera position in world coordinates
@@ -227,7 +224,7 @@ namespace FACamera
 		float m_aspectRatio;
 		mat4 m_perspectiveProjectionMatrix;
 
-		mat4 m_viewPerspectiveProjectionTransformationMatrix;
+		mat4 m_viewPerspectiveProjectionMatrix;
 
 		float m_cameraVelocity;
 		float m_rotateVelocity;

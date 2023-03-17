@@ -20,7 +20,7 @@ namespace FARender
 	{
 	public:
 
-		DeviceResources() = default;
+		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle);
 
 		DeviceResources(const DeviceResources&) = delete;
 		DeviceResources& operator=(const DeviceResources&) = delete;
@@ -143,9 +143,10 @@ namespace FARender
 		* Queries descriptor sizes.\n
 		* Creates command objects.\n
 		* Creates a swap chain.\n
-		* Creates a render target view and depth/stencil view heap.
+		* Creates a render target view and a depth/stencil view heap.
+		* Creates the initial render target buffers, depth stencil buffer, MSAA buffers and text buffers.
 		*/
-		void initializeDirect3D(HWND handle);
+		void initializeDirect3D(unsigned int width, unsigned int height, HWND handle);
 
 		/**@brief Synchronizes the CPU and GPU.
 		*	Use this function to make sure all of the commands in command list are executed by the GPU
@@ -179,6 +180,14 @@ namespace FARender
 		*/
 		void resetCommandAllocator();
 
+		/**@briefTransistions the render target buffer.
+		*/
+		void rtBufferTransition(Text* text);
+
+		/*@brief Renders the text.
+		*/
+		void textDraw(Text* textToRender = nullptr, UINT numText = 0);
+
 		/**@brief Executes the command list.
 		*/
 		void execute();
@@ -190,24 +199,6 @@ namespace FARender
 		/*@brief Calls the necessary functions to let the user draw their objects.
 		*/
 		void draw();
-
-		/*@brief Transistions the render target buffer.
-		*/
-		void rtBufferTransition(Text* text);
-
-		/**@brief Resets the text buffers.
-		*	Call before calling the text resize function and the rendering resize funciton.
-		*/
-		void resetTextBuffers();
-
-		/**@brief Resizes the necessary text buffers.
-		* Call before calling the rendering resize funciton.
-		*/
-		void textResize(const HWND& handle);
-
-		/**@brief Renders the text.
-		*/
-		void textDraw(Text* textToRender = nullptr, UINT numText = 0);
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Device> mDirect3DDevice;
@@ -247,8 +238,6 @@ namespace FARender
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mMSAADSVDescriptorHeap;
 		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAARenderTargetBuffer;
 		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAADepthStencilBuffer;
-
-
 
 		Microsoft::WRL::ComPtr<ID3D11Device> mDevice11;
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> mDevice11Context;
@@ -294,5 +283,14 @@ namespace FARender
 		void createMSAARenderTargetBufferAndView(int width, int height);
 		void createMSAADepthStencilBufferAndView(int width, int height);
 
+		/* Resets the text buffers.
+		* Gets called in the resize function.
+		*/
+		void resetTextBuffers();
+
+		/*Resizes the necessary text buffers.
+		* Gets called in the resize function.
+		*/
+		void textResize(const HWND& handle);
 	};
 }

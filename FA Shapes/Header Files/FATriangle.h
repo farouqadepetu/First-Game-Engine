@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FAVector3D.h"
+//#include "FAVector3D.h"
 #include "FAShapesUtility.h"
 
 /** @file FATriangle.h
@@ -23,35 +23,35 @@ namespace FAShapes
 
 		/**@brief Returns the P0 vertex of the triangle.
 		*/
-		Vertex getP0();
+		Vertex getP0() const;
 
 		/**@brief Returns the P1 vertex of the triangle.
 		*/
-		Vertex getP1();
+		Vertex getP1() const;
 
 		/**@brief Returns the P2 vertex of the triangle.
 		*/
-		Vertex getP2();
+		Vertex getP2() const;
 
 		/**@brief Returns the index of where P0 is in the vertex list.
 		*/
-		unsigned int getP0Index();
+		unsigned int getP0Index() const;
 
 		/**@brief Returns the index of where P1 is in the vertex list.
 		*/
-		unsigned int getP1Index();
+		unsigned int getP1Index() const;
 
 		/**@brief Returns the index of where P2 is in the vertex list.
 		*/
-		unsigned int getP2Index();
+		unsigned int getP2Index() const;
 
 		/**@brief Returns the normal of the triangle.
 		*/
-		FAMath::Vector3D getNormal();
+		FAMath::Vector3D getNormal() const;
 
 		/**@brief Returns the center of the triangle.
 		*/
-		FAMath::Vector3D getCenter();
+		FAMath::Vector3D getCenter() const;
 
 		/**@brief Sets the pointer to a vertex list to the specified pointers.
 		*/

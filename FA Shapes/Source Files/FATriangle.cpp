@@ -1,4 +1,5 @@
 #include "FATriangle.h"
+#include <stdexcept>
 
 namespace FAShapes
 {
@@ -12,38 +13,38 @@ namespace FAShapes
 		}
 	}
 
-	Vertex Triangle::getP0()
+	Vertex Triangle::getP0() const
 	{
 		return mVertexList[mIndexList[0]];
 	}
 
-	Vertex Triangle::getP1()
+	Vertex Triangle::getP1() const
 	{
 		return mVertexList[mIndexList[1]];
 	}
 
-	Vertex Triangle::getP2()
+	Vertex Triangle::getP2() const
 	{
 		return mVertexList[mIndexList[2]];
 	}
 
-	unsigned int Triangle::getP0Index()
+	unsigned int Triangle::getP0Index() const
 	{
 		return mIndexList[0];
 	}
 
-	unsigned int Triangle::getP1Index()
+	unsigned int Triangle::getP1Index() const
 	{
 		return mIndexList[1];
 	}
 
-	unsigned int Triangle::getP2Index()
+	unsigned int Triangle::getP2Index() const
 	{
 		return mIndexList[2];
 	}
 
 	//Normal of a traingle is (p1 - p0) x (p2 - p0)
-	FAMath::Vector3D Triangle::getNormal()
+	FAMath::Vector3D Triangle::getNormal() const
 	{
 		FAMath::Vector3D p01{ mVertexList[mIndexList[1]].position - mVertexList[mIndexList[0]].position };
 		FAMath::Vector3D p02{ mVertexList[mIndexList[2]].position - mVertexList[mIndexList[0]].position };
@@ -53,7 +54,7 @@ namespace FAShapes
 
 	//Center of a triangle is 
 	//< (x1 + x2 + x3) / 3, (y1 + y2 + y3) / 3, (z1 + z2 + z3) / 3 >
-	FAMath::Vector3D Triangle::getCenter()
+	FAMath::Vector3D Triangle::getCenter() const
 	{
 		FAMath::Vector3D p0{ mVertexList[mIndexList[0]].position };
 		FAMath::Vector3D p1{ mVertexList[mIndexList[1]].position };
@@ -101,7 +102,7 @@ namespace FAShapes
 
 		float area = length(crossProduct(p01, p02)) / 2.0f;
 
-		if (FAMath::compareFloats(area, 0.0f, 1e-6))
+		if (FAMath::compareFloats(area, 0.0f, 1e-6f))
 			return true;
 		
 		return false;

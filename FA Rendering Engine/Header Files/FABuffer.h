@@ -20,10 +20,6 @@ namespace FARender
 		VertexBuffer(const VertexBuffer&) = delete;
 		VertexBuffer& operator=(const VertexBuffer&) = delete;
 
-		/**@brief Returns a constant reference to the vertex buffer view.
-		*/
-		const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView();
-
 		/**@brief Creates the vertex buffer and stores all of the specified vertices in the vertex buffer.
 		*/
 		void createVertexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
@@ -33,10 +29,14 @@ namespace FARender
 		*/
 		void createVertexBufferView(UINT numBytes, UINT stride);
 
+		/**@brief Returns a constant reference to the vertex buffer view.
+		*/
+		const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView();
+
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> mVertexDefaultBuffer;
 		Microsoft::WRL::ComPtr<ID3D12Resource> mVertexUploadBuffer;
-		D3D12_VERTEX_BUFFER_VIEW mVertexBufferView;
+		D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
 	};
 
 	/** @class IndexBuffer ""

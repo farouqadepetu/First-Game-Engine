@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FAVector4D.h"
+#include "FAMathEngine.h"
 
 /** @file FAColor.h
 *	@brief File has class Color under namespace FAColor.
