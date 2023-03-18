@@ -23,10 +23,18 @@ namespace FARender
 	{
 	public:
 
-		RenderScene() = default;
+		RenderScene(unsigned int width, unsigned int height, HWND handle);
 
 		RenderScene(const RenderScene&) = delete;
 		RenderScene& operator=(const RenderScene&) = delete;
+
+		/*@brief Returns a reference to the device resources object.
+		*/
+		DeviceResources& deviceResources();
+
+		/*@brief Returns a constant reference to the device resources object.
+		*/
+		const DeviceResources& deviceResources() const;
 
 		/*@brief Returns a constant reference to the shader with the specified name.
 		* Throws an out_of_range exception if the shader does not exist.
@@ -99,15 +107,14 @@ namespace FARender
 
 		/*@brief Creates a PSO and stores it with the specified name.
 		*/
-		void createPSO(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const std::wstring& psoName,
+		void createPSO(const std::wstring& psoName,
 			const std::wstring& rootSignatureName, const std::wstring& rStateName, 
 			const std::wstring& vsName, const std::wstring& psName, const std::wstring& inputLayoutName,
 			const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsvFormat, UINT sampleCount);
 
 		/*@brief Creates a root signature and stores it with the specified name.
 		*/
-		void createRootSignature(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const std::wstring& name,
-			const D3D12_ROOT_PARAMETER* rootParameters, UINT numParameters);
+		void createRootSignature(const std::wstring& name, const D3D12_ROOT_PARAMETER* rootParameters, UINT numParameters);
 
 		/*@brief Stores a DrawArgument object with the specified name in the specified group.
 		*/
@@ -115,45 +122,33 @@ namespace FARender
 			const FAShapes::DrawArguments& drawArgs);
 
 		/*@brief Creates a vertex buffer with the specified name and stores all of given data in the vertex buffer.
+		* Also creates a view to the vertex buffer.\n
 		* Execute commands and the flush command queue after calling createVertexBuffer() and createIndexBuffer().
 		*/
-		void createVertexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
-			const std::wstring& vbName, const void* data, UINT numBytes);
+		void createVertexBuffer(const std::wstring& vbName, const void* data, UINT numBytes, UINT stride);
 
-		/*@brief Creates a vertex buffer view for the vertex buffer with the specified name.
-		*/
-		void createVertexBufferView(const std::wstring& vbName, UINT numBytes, UINT stride);
-
-		/**@brief Creates an indexbuffer with the specified name and stores all of given data in the index buffer.
+		/**@brief Creates an index buffer with the specified name and stores all of given data in the index buffer.
+		* Also creates a view to the index buffer.\n
 		* Execute commands and flush the command queue after calling createVertexBuffer() and createIndexBuffer().
 		*/
-		void createIndexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
-			const std::wstring& ibName, const void* data, UINT numBytes);
-
-		/*@brief Creates an index buffer view for the index buffer with the specified name.
-		*/
-		void createIndexBufferView(const std::wstring& ibName, UINT numBytes, DXGI_FORMAT format);
+		void createIndexBuffer(const std::wstring& ibName, const void* data, UINT numBytes, DXGI_FORMAT format);
 
 		/**@brief Creates the CBV heap.
 		*/
-		void createCBVHeap(const Microsoft::WRL::ComPtr<ID3D12Device>& device, UINT numDescriptors, UINT shaderRegister);
+		void createCBVHeap(UINT numDescriptors, UINT shaderRegister);
 
 		/**@brief Creates a constant buffer for each frame and stores it with the specified name.
 		*/
-		void createConstantBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const std::wstring& name,
-			const UINT& numOfBytes);
+		void createConstantBuffer(const std::wstring& name, const UINT& numOfBytes);
 
 		/**@brief Creates a constant buffer view for eacg frame and stores it in the CBV heap.
 		*/
-		void createConstantBufferView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			const std::wstring& name, UINT index, UINT numBytes);
+		void createConstantBufferView(const std::wstring& name, UINT index, UINT numBytes);
 
 		/**@brief Puts all of the commands needed in the command list before drawing the objects of the scene.
 		* Call before calling the first drawObjects function.
 		*/
-		void beforeDraw(DeviceResources& deviceResource);
+		void beforeDraw();
 
 		/**@brief Draws all of the objects that are in the same vertex and index buffers and
 		* use the same PSO and primitive.
@@ -168,17 +163,23 @@ namespace FARender
 		* Throws an out_of_range exception if the vertex buffer, index buffer, draw argument group,
 		* PSO, or root signature does not exist.
 		*/
-		void drawObjects(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
-			const std::wstring& drawArgsGroupName, const std::wstring& vbName, const std::wstring& ibName,
+		void drawObjects(const std::wstring& drawArgsGroupName, const std::wstring& vbName, const std::wstring& ibName,
 			const std::wstring& psoName, const std::wstring& rootSignatureName,
 			const D3D_PRIMITIVE_TOPOLOGY& primitive);
 
 		/**@brief Puts all of the commands needed in the command list after drawing the objects of the scene.
 		* Call after calling all the drawObjects functions.
 		*/
-		void afterDraw(DeviceResources& deviceResource, Text* textToRender = nullptr, UINT numText = 0);
+		void afterDraw(Text* textToRender = nullptr, UINT numText = 0);
+
+		/**@brief Executes the commands to fill the vertex and index buffer with data and flushes the queue.
+		*/
+		void executeAndFlush();
+
 
 	private:
+		static DeviceResources dResources;
+
 		//Stores all of the shaders and input element descriptions for this scene.
 		std::unordered_map<std::wstring, Microsoft::WRL::ComPtr<ID3DBlob>> mShaders;
 		std::unordered_map < std::wstring, std::vector<D3D12_INPUT_ELEMENT_DESC>> mInputElementDescriptions;
@@ -205,5 +206,6 @@ namespace FARender
 		//Stores all of the vertex buffers and index buffers for this scene.
 		std::unordered_map<std::wstring, VertexBuffer> mVertexBuffers;
 		std::unordered_map<std::wstring, IndexBuffer> mIndexBuffers;
+
 	};
 }

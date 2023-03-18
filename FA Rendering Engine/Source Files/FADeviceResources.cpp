@@ -7,6 +7,9 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//DEVICE RESOURCES FUNCTION DEFINITIONS
 
+	DeviceResources::DeviceResources()
+	{}
+
 	DeviceResources::DeviceResources(unsigned int width, unsigned int height, HWND windowHandle)
 	{
 		initializeDirect3D(width, height, windowHandle);
@@ -134,12 +137,12 @@ namespace FARender
 	}
 
 
-	const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& DeviceResources::device2DContext()
+	const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& DeviceResources::device2DContext() const
 	{
 		return mDirect2DDeviceContext;
 	}
 
-	const Microsoft::WRL::ComPtr<IDWriteFactory>& DeviceResources::directWriteFactory()
+	const Microsoft::WRL::ComPtr<IDWriteFactory>& DeviceResources::directWriteFactory() const
 	{
 		return mDirectWriteFactory;
 	}
@@ -365,7 +368,7 @@ namespace FARender
 		}
 	}
 
-	void DeviceResources::waitForGPU()
+	void DeviceResources::waitForGPU() const
 	{
 		//if the signal command has not been executed, wait until it is
 		if (mCurrentFrameFenceValue[currentFrame] != 0 &&
@@ -471,7 +474,7 @@ namespace FARender
 		mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr);
 	}
 
-	void DeviceResources::execute()
+	void DeviceResources::execute() const
 	{
 		ThrowIfFailed(mCommandList->Close());
 		ID3D12CommandList* commandLists[] = { mCommandList.Get() };

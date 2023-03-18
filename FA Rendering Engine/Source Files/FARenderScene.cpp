@@ -8,6 +8,23 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//RENDER SCENE FUNCITON DEFINTIONS
 
+	DeviceResources RenderScene::dResources;
+
+	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND handle)
+	{
+		dResources.initializeDirect3D(width, height, handle);
+	}
+
+	DeviceResources& RenderScene::deviceResources()
+	{
+		return dResources;
+	}
+
+	const DeviceResources& RenderScene::deviceResources() const
+	{
+		return dResources;
+	}
+
 	const Microsoft::WRL::ComPtr<ID3DBlob>& RenderScene::shader(const std::wstring& name) const
 	{
 		return mShaders.at(name);
@@ -119,7 +136,7 @@ namespace FARender
 		mRasterizationStates[name] = rDescription;
 	}
 
-	void RenderScene::createPSO(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const std::wstring& psoName,
+	void RenderScene::createPSO(const std::wstring& psoName,
 		const std::wstring& rootSignatureName, const std::wstring& rStateName, 
 		const std::wstring& vsName, const std::wstring& psName, const std::wstring& inputLayoutName,
 		const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsvFormat, UINT sampleCount)
@@ -157,12 +174,11 @@ namespace FARender
 		pState.SampleDesc.Quality = 0;
 
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> tempPSO;
-		ThrowIfFailed(device->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&tempPSO)));
+		ThrowIfFailed(dResources.device()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&tempPSO)));
 		mPSOs[psoName] = tempPSO;
 	}
 
-	void RenderScene::createRootSignature(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const std::wstring& name,
-		const D3D12_ROOT_PARAMETER* rootParameters, UINT numParameters)
+	void RenderScene::createRootSignature(const std::wstring& name, const D3D12_ROOT_PARAMETER* rootParameters, UINT numParameters)
 	{
 		//Describe a root signature to store all our root parameters.
 		D3D12_ROOT_SIGNATURE_DESC rootSignatureDescription{};
@@ -187,7 +203,7 @@ namespace FARender
 		ThrowIfFailed(e);
 
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
-		ThrowIfFailed(device->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
+		ThrowIfFailed(dResources.device()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
 			seralizedRootSignature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
 
 		mRootSignatures[name] = rootSignature;
@@ -205,33 +221,21 @@ namespace FARender
 		mDrawArgs[groupName][objectName] = temp;
 	}
 
-	void RenderScene::createVertexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-		const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
-		const std::wstring& vbName, const void* data, UINT numBytes)
+	void RenderScene::createVertexBuffer(const std::wstring& vbName, const void* data, UINT numBytes, UINT stride)
 	{
-		mVertexBuffers[vbName].createVertexBuffer(device, commandList, data, numBytes);
-	}
-
-	void RenderScene::createVertexBufferView(const std::wstring& vbName, UINT numBytes, UINT stride)
-	{
+		mVertexBuffers[vbName].createVertexBuffer(dResources.device(), dResources.commandList(), data, numBytes);
 		mVertexBuffers[vbName].createVertexBufferView(numBytes, stride);
 	}
 
-	void RenderScene::createIndexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-		const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
-		const std::wstring& ibName, const void* data, UINT numBytes)
+	void RenderScene::createIndexBuffer(const std::wstring& ibName, const void* data, UINT numBytes, DXGI_FORMAT format)
 	{
-		mIndexBuffers[ibName].createIndexBuffer(device, commandList, data, numBytes);
-	}
-
-	void RenderScene::createIndexBufferView(const std::wstring& ibName, UINT numBytes, DXGI_FORMAT format)
-	{
+		mIndexBuffers[ibName].createIndexBuffer(dResources.device(), dResources.commandList(), data, numBytes);
 		mIndexBuffers[ibName].createIndexBufferView(numBytes, format);
 	}
 
-	void RenderScene::createCBVHeap(const Microsoft::WRL::ComPtr<ID3D12Device>& device, UINT numDescriptors, UINT shaderRegister)
+	void RenderScene::createCBVHeap(UINT numDescriptors, UINT shaderRegister)
 	{
-		mCBVSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		mCBVSize = dResources.device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		//Need a CBV for each object for each frame.
 		D3D12_DESCRIPTOR_HEAP_DESC cbvDescriptorHeapDescription{};
@@ -239,7 +243,7 @@ namespace FARender
 		cbvDescriptorHeapDescription.NumDescriptors = numDescriptors * numFrames;
 		cbvDescriptorHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbvDescriptorHeapDescription.NodeMask = 0;
-		ThrowIfFailed(device->CreateDescriptorHeap(&cbvDescriptorHeapDescription, IID_PPV_ARGS(&mCBVHeap)));
+		ThrowIfFailed(dResources.device()->CreateDescriptorHeap(&cbvDescriptorHeapDescription, IID_PPV_ARGS(&mCBVHeap)));
 
 		//Describes the number of CBV's in the CB descriptor heap
 		mCBVHeapDescription.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
@@ -259,52 +263,47 @@ namespace FARender
 		mCBVHeapRootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	}
 
-	void RenderScene::createConstantBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const std::wstring& name,
-		const UINT& numOfBytes)
+	void RenderScene::createConstantBuffer(const std::wstring& name, const UINT& numOfBytes)
 	{
 		for (UINT i = 0; i < numFrames; ++i)
 		{
-			mConstantBuffers[i][name].createConstantBuffer(device, numOfBytes);
+			mConstantBuffers[i][name].createConstantBuffer(dResources.device(), numOfBytes);
 		}
 	}
 
-	void RenderScene::createConstantBufferView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-		const std::wstring& name, UINT index, UINT numBytes)
+	void RenderScene::createConstantBufferView(const std::wstring& name, UINT index, UINT numBytes)
 	{
 		//Create a constant buffer view for each frame.
 		for (UINT i = 0; i < numFrames; ++i)
 		{
-			mConstantBuffers[i][name].createConstantBufferView(device, mCBVHeap, mCBVSize, (index * numFrames) + i,
+			mConstantBuffers[i][name].createConstantBufferView(dResources.device(), mCBVHeap, mCBVSize, (index * numFrames) + i,
 				index, numBytes);
 		}
 	}
 
-	void RenderScene::beforeDraw(DeviceResources& deviceResource)
+	void RenderScene::beforeDraw()
 	{
-		deviceResource.draw();
-
-		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList{ deviceResource.commandList() };
+		dResources.draw();
 
 		//Link the CBV descriptor heaps to the pipeline
 		ID3D12DescriptorHeap* dH[] = { mCBVHeap.Get() };
-		commandList->SetDescriptorHeaps(1, dH);
+		dResources.commandList()->SetDescriptorHeaps(1, dH);
 
 	}
 
-	void RenderScene::drawObjects(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
-		const std::wstring& drawArgsGroupName, const std::wstring& vbName, const std::wstring& ibName,
+	void RenderScene::drawObjects(const std::wstring& drawArgsGroupName, const std::wstring& vbName, const std::wstring& ibName,
 		const std::wstring& psoName, const std::wstring& rootSignatureName,
 		const D3D_PRIMITIVE_TOPOLOGY& primitive)
 	{
-		commandList->IASetVertexBuffers(0, 1, &mVertexBuffers.at(vbName).vertexBufferView());
+		dResources.commandList()->IASetVertexBuffers(0, 1, &mVertexBuffers.at(vbName).vertexBufferView());
 
-		commandList->IASetIndexBuffer(&mIndexBuffers.at(ibName).indexBufferView());
+		dResources.commandList()->IASetIndexBuffer(&mIndexBuffers.at(ibName).indexBufferView());
 
-		commandList->SetPipelineState(mPSOs.at(psoName).Get());
+		dResources.commandList()->SetPipelineState(mPSOs.at(psoName).Get());
 
-		commandList->SetGraphicsRootSignature(mRootSignatures.at(rootSignatureName).Get());
+		dResources.commandList()->SetGraphicsRootSignature(mRootSignatures.at(rootSignatureName).Get());
 
-		commandList->IASetPrimitiveTopology(primitive);
+		dResources.commandList()->IASetPrimitiveTopology(primitive);
 
 		//draw all the objects the share the same PSO, root signature and primitive
 		for (const std::pair<std::wstring, FAShapes::DrawArguments>& i : mDrawArgs.at(drawArgsGroupName))
@@ -315,28 +314,34 @@ namespace FARender
 
 			handle.Offset((i.second.indexOfConstantData * numFrames) + currentFrame, mCBVSize);
 
-			commandList->SetGraphicsRootDescriptorTable(0, handle);
+			dResources.commandList()->SetGraphicsRootDescriptorTable(0, handle);
 
-			commandList->DrawIndexedInstanced(i.second.indexCount, 1,
+			dResources.commandList()->DrawIndexedInstanced(i.second.indexCount, 1,
 				i.second.locationOfFirstIndex, i.second.indexOfFirstVertex, 0);
 		}
 	}
 
-	void RenderScene::afterDraw(DeviceResources& deviceResource, Text* textToRender, UINT numText)
+	void RenderScene::afterDraw(Text* textToRender, UINT numText)
 	{
-		deviceResource.rtBufferTransition(textToRender);
+		dResources.rtBufferTransition(textToRender);
 
-		deviceResource.execute();
+		dResources.execute();
 
-		deviceResource.textDraw(textToRender, numText);
+		dResources.textDraw(textToRender, numText);
 
-		deviceResource.present();
+		dResources.present();
 
 		//Update the current fence value
-		deviceResource.updateCurrentFrameFenceValue();
+		dResources.updateCurrentFrameFenceValue();
 
 		//Add a fence instruction to the command queue.
-		deviceResource.signal();
+		dResources.signal();
+	}
+
+	void RenderScene::executeAndFlush()
+	{
+		dResources.execute();
+		dResources.flushCommandQueue();
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------

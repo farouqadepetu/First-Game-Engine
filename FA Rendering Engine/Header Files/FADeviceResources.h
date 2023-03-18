@@ -19,6 +19,7 @@ namespace FARender
 	class DeviceResources
 	{
 	public:
+		DeviceResources();
 
 		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle);
 
@@ -125,11 +126,11 @@ namespace FARender
 
 		/**@brief Returns a constant reference to the direct 2D device context.
 		*/
-		const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& device2DContext();
+		const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& device2DContext() const;
 
 		/**@brief Returns a constant reference to the direct direct write factory.
 		*/
-		const Microsoft::WRL::ComPtr<IDWriteFactory>& directWriteFactory();
+		const Microsoft::WRL::ComPtr<IDWriteFactory>& directWriteFactory() const;
 
 		/**@brief Updates the current frames fence value.
 		*/
@@ -157,7 +158,7 @@ namespace FARender
 		/**@brief Waits for the GPU to execute all of the commands of the current frame.
 		* Signal should have been called before this function is called.
 		*/
-		void waitForGPU();
+		void waitForGPU() const;
 
 		/**@brief Adds an instruction to the GPU to set the fence value to the current fence value.
 		*/
@@ -190,7 +191,7 @@ namespace FARender
 
 		/**@brief Executes the command list.
 		*/
-		void execute();
+		void execute() const;
 
 		/**@brief Swaps the front and back buffers.
 		*/
