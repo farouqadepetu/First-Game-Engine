@@ -40,24 +40,39 @@ namespace FARender
 		return mRasterizationStates.at(name);
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12PipelineState>& RenderScene::pso(const std::wstring& name) const
+	const Microsoft::WRL::ComPtr<ID3D12PipelineState>& RenderScene::pso(const std::wstring& drawSettingsName) const
 	{
-		return mPSOs.at(name);
+		return mSceneDrawSettings.at(drawSettingsName).pipelineState;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12RootSignature>& RenderScene::rootSignature(const std::wstring& name) const
+	const Microsoft::WRL::ComPtr<ID3D12RootSignature>& RenderScene::rootSignature(const std::wstring& drawSettingsName) const
 	{
-		return mRootSignatures.at(name);
+		return mSceneDrawSettings.at(drawSettingsName).rootSig;
 	}
 
-	ConstantBuffer& RenderScene::cBuffer(const std::wstring& name)
+	const D3D_PRIMITIVE_TOPOLOGY& RenderScene::primitive(const std::wstring& drawSettingsName) const
 	{
-		return mConstantBuffers[currentFrame].at(name);
+		return mSceneDrawSettings.at(drawSettingsName).prim;
 	}
 
-	const ConstantBuffer& RenderScene::cBuffer(const std::wstring& name) const
+	FAShapes::DrawArguments& RenderScene::drawArguments(const std::wstring& drawSettingsName, unsigned int index)
 	{
-		return mConstantBuffers[currentFrame].at(name);
+		return mSceneDrawSettings.at(drawSettingsName).drawArgs.at(index);
+	}
+
+	const FAShapes::DrawArguments& RenderScene::drawArguments(const std::wstring& drawSettingsName, unsigned int index) const
+	{
+		return mSceneDrawSettings.at(drawSettingsName).drawArgs.at(index);
+	}
+
+	ConstantBuffer& RenderScene::cBuffer()
+	{
+		return mConstantBuffer[currentFrame];
+	}
+
+	const ConstantBuffer& RenderScene::cBuffer() const
+	{
+		return mConstantBuffer[currentFrame];
 	}
 
 	const UINT& RenderScene::cbvSize() const
@@ -73,11 +88,6 @@ namespace FARender
 	const D3D12_ROOT_PARAMETER& RenderScene::cbvHeapRootParameter() const
 	{
 		return mCBVHeapRootParameter;
-	}
-	
-	const FAShapes::DrawArguments& RenderScene::drawArgument(const std::wstring& groupName, const std::wstring& objectName) const
-	{
-		return mDrawArgs.at(groupName).at(objectName);
 	}
 
 	void RenderScene::loadShader(const std::wstring& filename, const std::wstring& name)
@@ -136,15 +146,14 @@ namespace FARender
 		mRasterizationStates[name] = rDescription;
 	}
 
-	void RenderScene::createPSO(const std::wstring& psoName,
-		const std::wstring& rootSignatureName, const std::wstring& rStateName, 
+	void RenderScene::createPSO(const std::wstring& drawSettingsName, const std::wstring& rStateName,
 		const std::wstring& vsName, const std::wstring& psName, const std::wstring& inputLayoutName,
-		const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsvFormat, UINT sampleCount)
+		const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, UINT sampleCount)
 	{
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC pState{};
 		ZeroMemory(&pState, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC)); //fills the block of memory with zeros
 
-		pState.pRootSignature = mRootSignatures.at(rootSignatureName).Get();
+		pState.pRootSignature = mSceneDrawSettings.at(drawSettingsName).rootSig.Get();
 
 		pState.VS.pShaderBytecode = (BYTE*)mShaders.at(vsName)->GetBufferPointer();
 		pState.VS.BytecodeLength = mShaders.at(vsName)->GetBufferSize();
@@ -166,19 +175,20 @@ namespace FARender
 		pState.PrimitiveTopologyType = primitiveType;
 
 		pState.NumRenderTargets = 1;
-		pState.RTVFormats[0] = rtvFormat;
+		pState.RTVFormats[0] = dResources.backBufferFormat();
 
-		pState.DSVFormat = dsvFormat;
+		pState.DSVFormat = dResources.depthStencilFormat();
 
 		pState.SampleDesc.Count = sampleCount;
 		pState.SampleDesc.Quality = 0;
 
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> tempPSO;
 		ThrowIfFailed(dResources.device()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&tempPSO)));
-		mPSOs[psoName] = tempPSO;
+		mSceneDrawSettings.at(drawSettingsName).pipelineState = tempPSO;
 	}
 
-	void RenderScene::createRootSignature(const std::wstring& name, const D3D12_ROOT_PARAMETER* rootParameters, UINT numParameters)
+	void RenderScene::createRootSignature(const std::wstring& drawSettingsName, 
+		const D3D12_ROOT_PARAMETER* rootParameters, UINT numParameters)
 	{
 		//Describe a root signature to store all our root parameters.
 		D3D12_ROOT_SIGNATURE_DESC rootSignatureDescription{};
@@ -206,31 +216,19 @@ namespace FARender
 		ThrowIfFailed(dResources.device()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
 			seralizedRootSignature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
 
-		mRootSignatures[name] = rootSignature;
+		mSceneDrawSettings[drawSettingsName].rootSig = rootSignature;
 	}
 
-	void RenderScene::storeDrawArgument(const std::wstring& groupName, const std::wstring& objectName, 
-		const FAShapes::DrawArguments& drawArgs)
+	void RenderScene::createVertexBuffer(const void* data, UINT numBytes, UINT stride)
 	{
-		FAShapes::DrawArguments temp{};
-		temp.indexCount = drawArgs.indexCount;
-		temp.locationOfFirstIndex = drawArgs.locationOfFirstIndex;
-		temp.indexOfFirstVertex = drawArgs.indexOfFirstVertex;
-		temp.indexOfConstantData = drawArgs.indexOfConstantData;
-
-		mDrawArgs[groupName][objectName] = temp;
+		mVertexBuffer.createVertexBuffer(dResources.device(), dResources.commandList(), data, numBytes);
+		mVertexBuffer.createVertexBufferView(numBytes, stride);
 	}
 
-	void RenderScene::createVertexBuffer(const std::wstring& vbName, const void* data, UINT numBytes, UINT stride)
+	void RenderScene::createIndexBuffer(const void* data, UINT numBytes, DXGI_FORMAT format)
 	{
-		mVertexBuffers[vbName].createVertexBuffer(dResources.device(), dResources.commandList(), data, numBytes);
-		mVertexBuffers[vbName].createVertexBufferView(numBytes, stride);
-	}
-
-	void RenderScene::createIndexBuffer(const std::wstring& ibName, const void* data, UINT numBytes, DXGI_FORMAT format)
-	{
-		mIndexBuffers[ibName].createIndexBuffer(dResources.device(), dResources.commandList(), data, numBytes);
-		mIndexBuffers[ibName].createIndexBufferView(numBytes, format);
+		mIndexBuffer.createIndexBuffer(dResources.device(), dResources.commandList(), data, numBytes);
+		mIndexBuffer.createIndexBufferView(numBytes, format);
 	}
 
 	void RenderScene::createCBVHeap(UINT numDescriptors, UINT shaderRegister)
@@ -247,8 +245,13 @@ namespace FARender
 
 		//Describes the number of CBV's in the CB descriptor heap
 		mCBVHeapDescription.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-		mCBVHeapDescription.NumDescriptors = numDescriptors * numFrames; //num of descriptors in my cbv descriptor heap that are type cbv
-		mCBVHeapDescription.BaseShaderRegister = shaderRegister; //which register does your vertex shader expect the buffer to be in
+
+		//num of descriptors in my cbv descriptor heap that are type cbv
+		mCBVHeapDescription.NumDescriptors = numDescriptors * numFrames;
+
+		//which register does your vertex shader expect the buffer to be in
+		mCBVHeapDescription.BaseShaderRegister = shaderRegister;
+
 		mCBVHeapDescription.RegisterSpace = 0;
 		mCBVHeapDescription.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
@@ -263,22 +266,46 @@ namespace FARender
 		mCBVHeapRootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	}
 
-	void RenderScene::createConstantBuffer(const std::wstring& name, const UINT& numOfBytes)
+	void RenderScene::createConstantBuffer(UINT numOfBytes)
 	{
 		for (UINT i = 0; i < numFrames; ++i)
 		{
-			mConstantBuffers[i][name].createConstantBuffer(dResources.device(), numOfBytes);
+			mConstantBuffer[i].createConstantBuffer(dResources.device(), numOfBytes);
 		}
 	}
 
-	void RenderScene::createConstantBufferView(const std::wstring& name, UINT index, UINT numBytes)
+	void RenderScene::createConstantBufferView( UINT index, UINT numBytes)
 	{
 		//Create a constant buffer view for each frame.
 		for (UINT i = 0; i < numFrames; ++i)
 		{
-			mConstantBuffers[i][name].createConstantBufferView(dResources.device(), mCBVHeap, mCBVSize, (index * numFrames) + i,
+			mConstantBuffer[i].createConstantBufferView(dResources.device(), mCBVHeap, mCBVSize, (index * numFrames) + i,
 				index, numBytes);
 		}
+	}
+
+	void RenderScene::setPSO(const std::wstring& drawSettingsName, 
+		const Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso)
+	{
+		mSceneDrawSettings[drawSettingsName].pipelineState = pso;
+	}
+
+	void RenderScene::setRootSignature(const std::wstring& drawSettingsName, 
+		const Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature)
+	{
+		mSceneDrawSettings[drawSettingsName].rootSig = rootSignature;
+	}
+
+	void RenderScene::setPrimitive(const std::wstring& drawSettingsName, 
+		const D3D_PRIMITIVE_TOPOLOGY& primitive)
+	{
+		mSceneDrawSettings[drawSettingsName].prim = primitive;
+	}
+
+	void RenderScene::addDrawArgument(const std::wstring& drawSettingsName,
+		const FAShapes::DrawArguments& drawArg)
+	{
+		mSceneDrawSettings[drawSettingsName].drawArgs.push_back(drawArg);
 	}
 
 	void RenderScene::beforeDraw()
@@ -289,35 +316,33 @@ namespace FARender
 		ID3D12DescriptorHeap* dH[] = { mCBVHeap.Get() };
 		dResources.commandList()->SetDescriptorHeaps(1, dH);
 
+		dResources.commandList()->IASetVertexBuffers(0, 1, &mVertexBuffer.vertexBufferView());
+
+		dResources.commandList()->IASetIndexBuffer(&mIndexBuffer.indexBufferView());
+
 	}
 
-	void RenderScene::drawObjects(const std::wstring& drawArgsGroupName, const std::wstring& vbName, const std::wstring& ibName,
-		const std::wstring& psoName, const std::wstring& rootSignatureName,
-		const D3D_PRIMITIVE_TOPOLOGY& primitive)
+	void RenderScene::drawObjects(const std::wstring& drawSettingsName)
 	{
-		dResources.commandList()->IASetVertexBuffers(0, 1, &mVertexBuffers.at(vbName).vertexBufferView());
+		dResources.commandList()->SetPipelineState(mSceneDrawSettings.at(drawSettingsName).pipelineState.Get());
 
-		dResources.commandList()->IASetIndexBuffer(&mIndexBuffers.at(ibName).indexBufferView());
+		dResources.commandList()->SetGraphicsRootSignature(mSceneDrawSettings.at(drawSettingsName).rootSig.Get());
 
-		dResources.commandList()->SetPipelineState(mPSOs.at(psoName).Get());
-
-		dResources.commandList()->SetGraphicsRootSignature(mRootSignatures.at(rootSignatureName).Get());
-
-		dResources.commandList()->IASetPrimitiveTopology(primitive);
+		dResources.commandList()->IASetPrimitiveTopology(mSceneDrawSettings.at(drawSettingsName).prim);
 
 		//draw all the objects the share the same PSO, root signature and primitive
-		for (const std::pair<std::wstring, FAShapes::DrawArguments>& i : mDrawArgs.at(drawArgsGroupName))
+		for (const FAShapes::DrawArguments& i : mSceneDrawSettings.at(drawSettingsName).drawArgs)
 		{
 			//Get the address of the first view in the constant buffer view heap
 			CD3DX12_GPU_DESCRIPTOR_HANDLE handle =
 				CD3DX12_GPU_DESCRIPTOR_HANDLE(mCBVHeap->GetGPUDescriptorHandleForHeapStart());
 
-			handle.Offset((i.second.indexOfConstantData * numFrames) + currentFrame, mCBVSize);
+			handle.Offset((i.indexOfConstantData * numFrames) + currentFrame, mCBVSize);
 
 			dResources.commandList()->SetGraphicsRootDescriptorTable(0, handle);
 
-			dResources.commandList()->DrawIndexedInstanced(i.second.indexCount, 1,
-				i.second.locationOfFirstIndex, i.second.indexOfFirstVertex, 0);
+			dResources.commandList()->DrawIndexedInstanced(i.indexCount, 1,
+				i.locationOfFirstIndex, i.indexOfFirstVertex, 0);
 		}
 	}
 

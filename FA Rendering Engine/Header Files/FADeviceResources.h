@@ -14,8 +14,8 @@
 namespace FARender
 {
 	/** @class DeviceResources ""
-		*	@brief A wrapper for a Direct3D 12 device, swapchain, depth buffer, MSAA buffers and command objects.
-		*/
+	*	@brief A wrapper for a Direct3D 12 device, swapchain, depth buffer, MSAA buffers and command objects.
+	*/
 	class DeviceResources
 	{
 	public:
