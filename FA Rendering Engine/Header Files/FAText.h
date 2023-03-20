@@ -4,36 +4,42 @@
 *	@brief File has class Text under namespace FARender.
 */
 
-#include <wrl.h>
-#include <d3d11.h>
-#include <d3d11on12.h>
-#include <d2d1_3.h>
-#include <dwrite.h>
 #include <string>
+#include "FADeviceResources.h"
+#include "FAColor.h"
 
 namespace FARender
 {
 	/** @class Text ""
 	*	@brief This class is used to help render text.
-	*	Stores the location of the text, the text string, text size and color of the text.
+	*	Stores the location of the text, the text string, text size and the color of the text.
 	*/
 	class Text
 	{
 	public:
 
-		Text(const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& deviceContext,
-			const Microsoft::WRL::ComPtr<IDWriteFactory>& writeFactory,
-			const D2D1_RECT_F& textLocation, const std::wstring& textString, float textSize, const D2D1_COLOR_F& textColor);
+		/**@brief Default Constructor.
+		*/
+		Text();
+
+		/**@brief Overloaded Constructor.
+		* Initializes the format of the text.\n
+		* For text location the first two values in the vector is the top-left location of the rectangle and
+		* the last two values are the bottom-right location of the rectangle.
+		*/
+		Text(const DeviceResources& deviceResources,
+			const FAMath::Vector4D& textLocation, const std::wstring& textString, float textSize, const FAColor::Color& textColor);
 
 		/**@brief Initializes the format of the text.
+		* For text location the  first two values in the vector is the top-left location of the rectangle and
+		* the last two values are the bottom-right location of the rectangle.
 		*/
-		void initialize(const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& deviceContext,
-			const Microsoft::WRL::ComPtr<IDWriteFactory>& writeFactory,
-			const D2D1_RECT_F& textLocation, const std::wstring& textString, float textSize, const D2D1_COLOR_F& textColor);
+		void initialize(const DeviceResources& deviceResources,
+			const FAMath::Vector4D& textLocation, const std::wstring& textString, float textSize, const FAColor::Color& textColor);
 
 		/**@brief Returns a constant reference to the text location.
 		*/
-		const D2D1_RECT_F& textLocation();
+		const FAMath::Vector4D& textLocation();
 
 		/**@brief Returns a constant reference to the text string.
 		*/
@@ -53,30 +59,30 @@ namespace FARender
 
 		/**@brief Returns a constant reference to the text color.
 		*/
-		const D2D1_COLOR_F textColor();
+		const FAColor::Color& textColor();
 
 		/**@brief Changes the text size to the specified size.
 		*/
-		void changeTextSize(const Microsoft::WRL::ComPtr<IDWriteFactory>& mDirectWriteFactory, float textSize);
+		void setTextSize(const DeviceResources& deviceResources, float textSize);
 
 		/**@brief Changes the text color to the specified color.
 		*/
-		void changeTextColor(const D2D1_COLOR_F& textColor);
+		void setTextColor(const FAColor::Color& textColor);
 
 		/**@brief Changes the text string to the specified string.
 		*/
-		void changeTextString(const std::wstring& textString);
+		void setTextString(const std::wstring& textString);
 
 		/**@brief Changes the text location to the specified location.
 		*/
-		void changeTextLocation(const D2D1_RECT_F& textLocation);
+		void setTextLocation(const FAMath::Vector4D& textLocation);
 
 	private:
 
-		D2D1_RECT_F mTextLocation;
+		FAMath::Vector4D mTextLocation;
 		std::wstring mText;
 		float mTextSize;
-		D2D1_COLOR_F mTextColor;
+		FAColor::Color mTextColor;
 
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mDirect2DBrush;
 		Microsoft::WRL::ComPtr<IDWriteTextFormat> mDirectWriteFormat;

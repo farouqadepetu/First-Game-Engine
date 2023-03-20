@@ -5,16 +5,14 @@
 *	the namespace FARender.
 */
 
-#include <d3d12.h>
-
 /** @namespace FARender
 *	@brief The namespace has utility functions and structs,
 *	VertexBuffer, IndexBuffer, ConstantBuffer, DeviceResources, RenderScene and Text classes.
 */
 namespace FARender
 {
-	static const UINT numFrames{ 3 };
-	static UINT currentFrame{ 0 };
+	static const unsigned int numFrames{ 3 };
+	static unsigned int currentFrame{ 0 };
 
 	/**@brief Update our current frame value to go to the next frame.
 	*/

@@ -7,9 +7,12 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
+#include <d3d11.h>
+#include <d3d11on12.h>
+#include <d2d1_3.h>
+#include <dwrite.h>
 #include <vector>
 #include "FARenderingUtility.h"
-#include "FAText.h"
 
 namespace FARender
 {
@@ -181,13 +184,17 @@ namespace FARender
 		*/
 		void resetCommandAllocator();
 
-		/**@briefTransistions the render target buffer.
+		/**@brief Transistions the render target buffer.
 		*/
-		void rtBufferTransition(Text* text);
+		void rtBufferTransition(bool renderText);
 
-		/*@brief Renders the text.
+		/**@brief Prepares to render text.
 		*/
-		void textDraw(Text* textToRender = nullptr, UINT numText = 0);
+		void beforeTextDraw();
+
+		/**@brief Executes the text commands.
+		*/
+		void afterTextDraw();
 
 		/**@brief Executes the command list.
 		*/

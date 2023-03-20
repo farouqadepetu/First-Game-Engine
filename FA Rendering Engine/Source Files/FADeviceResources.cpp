@@ -559,7 +559,7 @@ namespace FARender
 		}
 	}
 
-	void DeviceResources::rtBufferTransition(Text* text)
+	void DeviceResources::rtBufferTransition(bool renderText)
 	{
 		if (mMSAA4xSupported && mIsMSAAEnabled)
 		{
@@ -574,7 +574,7 @@ namespace FARender
 			mCommandList->ResolveSubresource(mSwapChainBuffers[mCurrentBackBuffer].Get(), 0, mMSAARenderTargetBuffer.Get(),
 				0, mBackBufferFormat);
 
-			if (text != nullptr)
+			if (renderText)
 			{
 				//Transistion the current back buffer to render target state from resolve dest state
 				CD3DX12_RESOURCE_BARRIER currentBackBufferTransitionToRenderTarget =
@@ -595,7 +595,7 @@ namespace FARender
 		}
 		else
 		{
-			if (text == nullptr)
+			if (renderText)
 			{
 				//Transistion the current back buffer to present state from render target state
 				CD3DX12_RESOURCE_BARRIER currentBackBufferTransitionToPresent =
@@ -700,11 +700,9 @@ namespace FARender
 		//-----------------------------------------------------------------------------------------------------------------------------
 	}
 
-	void DeviceResources::textDraw(Text* textToRender, UINT numText)
-	{
-		if (textToRender == nullptr)
-			return;
 
+	void DeviceResources::beforeTextDraw()
+	{
 		//gives direct2D access to our back buffer
 		mDevice11on12->AcquireWrappedResources(mWrappedBuffers[mCurrentBackBuffer].GetAddressOf(), 1);
 
@@ -712,13 +710,10 @@ namespace FARender
 		mDirect2DDeviceContext->SetTarget(mDirect2DBuffers[mCurrentBackBuffer].Get());
 		mDirect2DDeviceContext->BeginDraw();
 		mDirect2DDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	}
 
-		for (UINT i = 0; i < numText; ++i)
-		{
-			mDirect2DDeviceContext->DrawTextW(textToRender[i].textString().c_str(), (UINT32)textToRender[i].textString().size(),
-				textToRender[i].format().Get(), textToRender[i].textLocation(), textToRender[i].brush().Get());
-		}
-
+	void DeviceResources::afterTextDraw()
+	{
 		ThrowIfFailed(mDirect2DDeviceContext->EndDraw());
 
 		//Releasing the wrapped render target resource transitions the back buffer to present state.
@@ -726,7 +721,6 @@ namespace FARender
 
 		//Submit the commands to the shared D3D12 command queue.
 		mDevice11Context->Flush();
-
 	}
 
 	void DeviceResources::checkMSAASupport()

@@ -6,19 +6,22 @@ namespace FARender
 	//----------------------------------------------------------------------------------------------------------------------
 	//TEXT FUNCTION DEFINITIONS
 
-	Text::Text(const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& deviceContext,
-		const Microsoft::WRL::ComPtr<IDWriteFactory>& writeFactory,
-		const D2D1_RECT_F& textLocation, const std::wstring& textString, float textSize, const D2D1_COLOR_F& textColor)
+	Text::Text() : mTextSize{ 0.0f }
+	{}
+
+	Text::Text(const DeviceResources& deviceResources,
+		const FAMath::Vector4D& textLocation, const std::wstring& textString, float textSize, const FAColor::Color& textColor)
 	{
 		mTextLocation = textLocation;
 		mText = textString;
 		mTextSize = textSize;
 		mTextColor = textColor;
 
-		ThrowIfFailed(deviceContext->CreateSolidColorBrush(mTextColor,
+		D2D1_COLOR_F tColor{ textColor.getRed(), textColor.getGreen(), textColor.getBlue(), textColor.getAlpha() };
+		ThrowIfFailed(deviceResources.device2DContext()->CreateSolidColorBrush(tColor,
 			mDirect2DBrush.GetAddressOf()));
 
-		ThrowIfFailed(writeFactory->CreateTextFormat(
+		ThrowIfFailed(deviceResources.directWriteFactory()->CreateTextFormat(
 			L"Verdana",
 			nullptr,
 			DWRITE_FONT_WEIGHT_NORMAL,
@@ -33,19 +36,19 @@ namespace FARender
 	}
 
 
-	void Text::initialize(const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& deviceContext,
-		const Microsoft::WRL::ComPtr<IDWriteFactory>& writeFactory,
-		const D2D1_RECT_F& textLocation, const std::wstring& textString, float textSize, const D2D1_COLOR_F& textColor)
+	void Text::initialize(const DeviceResources& deviceResources,
+		const FAMath::Vector4D& textLocation, const std::wstring& textString, float textSize, const FAColor::Color& textColor)
 	{
 		mTextLocation = textLocation;
 		mText = textString;
 		mTextSize = textSize;
 		mTextColor = textColor;
 
-		ThrowIfFailed(deviceContext->CreateSolidColorBrush(mTextColor,
+		D2D1_COLOR_F tColor{ textColor.getRed(), textColor.getGreen(), textColor.getBlue(), textColor.getAlpha() };
+		ThrowIfFailed(deviceResources.device2DContext()->CreateSolidColorBrush(tColor,
 			mDirect2DBrush.GetAddressOf()));
 
-		ThrowIfFailed(writeFactory->CreateTextFormat(
+		ThrowIfFailed(deviceResources.directWriteFactory()->CreateTextFormat(
 			L"Verdana",
 			nullptr,
 			DWRITE_FONT_WEIGHT_NORMAL,
@@ -59,7 +62,7 @@ namespace FARender
 		ThrowIfFailed(mDirectWriteFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
 	}
 
-	const D2D1_RECT_F& Text::textLocation()
+	const FAMath::Vector4D& Text::textLocation()
 	{
 		return mTextLocation;
 	}
@@ -74,7 +77,7 @@ namespace FARender
 		return mTextSize;
 	}
 
-	const D2D1_COLOR_F Text::textColor()
+	const FAColor::Color& Text::textColor()
 	{
 		return mTextColor;
 	}
@@ -89,11 +92,11 @@ namespace FARender
 		return mDirectWriteFormat;
 	}
 
-	void Text::changeTextSize(const Microsoft::WRL::ComPtr<IDWriteFactory>& writeFactory, float textSize)
+	void Text::setTextSize(const DeviceResources& deviceResources, float textSize)
 	{
 		mTextSize = textSize;
 
-		ThrowIfFailed(writeFactory->CreateTextFormat(
+		ThrowIfFailed(deviceResources.directWriteFactory()->CreateTextFormat(
 			L"Verdana",
 			nullptr,
 			DWRITE_FONT_WEIGHT_NORMAL,
@@ -107,19 +110,19 @@ namespace FARender
 		ThrowIfFailed(mDirectWriteFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
 	}
 
-	void Text::changeTextColor(const D2D1_COLOR_F& textColor)
+	void Text::setTextColor(const FAColor::Color& textColor)
 	{
 		mTextColor = textColor;
-
-		mDirect2DBrush->SetColor(mTextColor);
+		D2D1_COLOR_F tColor{ textColor.getRed(), textColor.getGreen(), textColor.getBlue(), textColor.getAlpha() };
+		mDirect2DBrush->SetColor(tColor);
 	}
 
-	void Text::changeTextString(const std::wstring& textString)
+	void Text::setTextString(const std::wstring& textString)
 	{
 		mText = textString;
 	}
 
-	void Text::changeTextLocation(const D2D1_RECT_F& textLocation)
+	void Text::setTextLocation(const FAMath::Vector4D& textLocation)
 	{
 		mTextLocation = textLocation;
 	}
