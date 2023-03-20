@@ -595,7 +595,7 @@ namespace FARender
 		}
 		else
 		{
-			if (renderText)
+			if (!renderText)
 			{
 				//Transistion the current back buffer to present state from render target state
 				CD3DX12_RESOURCE_BARRIER currentBackBufferTransitionToPresent =

@@ -104,4 +104,14 @@ namespace FAWindow
 	{
 		return mHeight;
 	}
+
+	void Window::setWidth(unsigned int width)
+	{
+		mWidth = width;
+	}
+
+	void Window::setHeight(unsigned int height)
+	{
+		mHeight = height;
+	}
 }

@@ -141,7 +141,7 @@ namespace FARender
 		void removeRasterizationState(const std::wstring& name);
 
 		/*@brief Creates a PSO and stores it in the specified DrawSettings structure.
-		* If the specifed Rasterization State, Vertex Shader, Pixel Shader or Input Layout
+		* If the specifed DrawSettings structure, Rasterization State, Vertex Shader, Pixel Shader or Input Layout
 		* does not exist an out_of_range exception is thrown.
 		*/
 		void createPSO(const std::wstring& drawSettingsName, const std::wstring& rStateName, 
@@ -149,6 +149,7 @@ namespace FARender
 			const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, UINT sampleCount);
 
 		/*@brief Creates a root signature and stores it with the specified name.
+		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
 		*/
 		void createRootSignature(const std::wstring& drawSettingsName, 
 			const D3D12_ROOT_PARAMETER* rootParameters, UINT numParameters);
@@ -178,25 +179,39 @@ namespace FARender
 		void createConstantBufferView(UINT index, UINT numBytes);
 
 		/**@brief Sets the PSO in the specified DrawSettings structure to the specified pso.
+		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
 		*/
 		void setPSO(const std::wstring& drawSettingsName, const Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso);
 
 		/**@brief Sets the root signature in the specified DrawSettings structure to the specified root signature.
+		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
 		*/
 		void setRootSignature(const std::wstring& drawSettingsName, const Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature);
 
 		/**@brief Sets the Primitive in the specified DrawSettings structure to the specified primitive.
+		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
 		*/
 		void setPrimitive(const std::wstring& drawSettingsName, const D3D_PRIMITIVE_TOPOLOGY& primitive);
 
 		/**@brief Adds the specified draw argument structure to the DrawArguments vector of the specified DrawSettings structure.
+		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
 		*/
 		void addDrawArgument(const std::wstring& drawSettingsName, const FAShapes::DrawArguments& drawArg);
+
+		/**@brief Adds the specified draw arguments to the DrawArguments vector of the specified DrawSettings structure.
+		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
+		*/
+		void addDrawArgument(const std::wstring& drawSettingsName,
+			unsigned int indexCount, unsigned int locationOfFirstIndex, int indexOfFirstVertex, int indexOfConstantData);
 
 		/**@brief Removes the draw argument in the specified DrawSettings structure at the specified index.
 		* If the DrawSettings does not exist or if the index is out of bounds an out_of_range exception is thrown.
 		*/
 		void removeDrawArgument(const std::wstring& drawSettingsName, unsigned int index);
+
+		/**@brief Creates a DrawSettings structure with the specified name.
+		*/
+		void createDrawSettings(const std::wstring& drawSettingsName);
 		
 		/**@brief Removes the specified DrawSettings structure.
 		* If the DrawSettings structure does not exist an out_of_range exception is thrown.

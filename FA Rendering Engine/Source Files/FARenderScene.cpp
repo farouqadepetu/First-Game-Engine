@@ -199,7 +199,7 @@ namespace FARender
 
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> tempPSO;
 		ThrowIfFailed(dResources.device()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&tempPSO)));
-		mSceneObjects[drawSettingsName].pipelineState = tempPSO;
+		mSceneObjects.at(drawSettingsName).pipelineState = tempPSO;
 	}
 
 	void RenderScene::createRootSignature(const std::wstring& drawSettingsName, 
@@ -231,7 +231,7 @@ namespace FARender
 		ThrowIfFailed(dResources.device()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
 			seralizedRootSignature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
 
-		mSceneObjects[drawSettingsName].rootSig = rootSignature;
+		mSceneObjects.at(drawSettingsName).rootSig = rootSignature;
 	}
 
 	void RenderScene::createVertexBuffer(const void* data, UINT numBytes, UINT stride)
@@ -302,31 +302,43 @@ namespace FARender
 	void RenderScene::setPSO(const std::wstring& drawSettingsName, 
 		const Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso)
 	{
-		mSceneObjects[drawSettingsName].pipelineState = pso;
+		mSceneObjects.at(drawSettingsName).pipelineState = pso;
 	}
 
 	void RenderScene::setRootSignature(const std::wstring& drawSettingsName, 
 		const Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature)
 	{
-		mSceneObjects[drawSettingsName].rootSig = rootSignature;
+		mSceneObjects.at(drawSettingsName).rootSig = rootSignature;
 	}
 
 	void RenderScene::setPrimitive(const std::wstring& drawSettingsName, 
 		const D3D_PRIMITIVE_TOPOLOGY& primitive)
 	{
-		mSceneObjects[drawSettingsName].prim = primitive;
+		mSceneObjects.at(drawSettingsName).prim = primitive;
 	}
 
 	void RenderScene::addDrawArgument(const std::wstring& drawSettingsName,
 		const FAShapes::DrawArguments& drawArg)
 	{
-		mSceneObjects[drawSettingsName].drawArgs.push_back(drawArg);
+		mSceneObjects.at(drawSettingsName).drawArgs.push_back(drawArg);
 	}
 
-	void  RenderScene::removeDrawArgument(const std::wstring& drawSettingsName, unsigned int index)
+	void RenderScene::addDrawArgument(const std::wstring& drawSettingsName,
+		unsigned int indexCount, unsigned int locationOfFirstIndex, int indexOfFirstVertex, int indexOfConstantData)
+	{
+		FAShapes::DrawArguments drawArgs{ indexCount, locationOfFirstIndex, indexOfFirstVertex, indexOfConstantData };
+		mSceneObjects.at(drawSettingsName).drawArgs.push_back(drawArgs);
+	}
+
+	void RenderScene::removeDrawArgument(const std::wstring& drawSettingsName, unsigned int index)
 	{
 		std::vector<FAShapes::DrawArguments>::iterator it = mSceneObjects.at(drawSettingsName).drawArgs.begin();
 		mSceneObjects.at(drawSettingsName).drawArgs.erase(it + index);
+	}
+
+	void RenderScene::createDrawSettings(const std::wstring& drawSettingsName)
+	{
+		mSceneObjects[drawSettingsName];
 	}
 
 	void RenderScene::removeDrawSettings(const std::wstring& drawSettingsName)

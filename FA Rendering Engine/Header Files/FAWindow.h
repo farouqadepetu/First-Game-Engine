@@ -45,6 +45,14 @@ namespace FAWindow
 		*/
 		unsigned int height() const;
 
+		/**@brief Sets the width of the window to the specified width.
+		*/
+		void setWidth(unsigned int width);
+
+		/**@brief Sets the height of the window o the specified height.
+		*/
+		void setHeight(unsigned int height);
+
 	private:
 		HWND mWindowHandle;
 
