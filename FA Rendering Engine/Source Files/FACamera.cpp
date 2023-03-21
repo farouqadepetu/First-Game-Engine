@@ -136,15 +136,8 @@ namespace FACamera
 	void Camera::updateViewMatrix()
 	{
 		//Orthonormalize the camera space axes
-		
-		//z-axis
-		m_n = FAMath::norm(m_n);
-		
-		//y-axis of the camera is n x u
-		m_v = FAMath::norm(FAMath::crossProduct(m_n, m_u));
 
-		//x-axis of the camera is v x n
-		m_u = FAMath::norm(FAMath::crossProduct(m_v, m_n));
+		orthonormalize(m_u, m_v, m_n);
 
 		//update the camera's view matrix
 		m_viewMatrix.setRow(0, vec4(m_u.x(), m_v.x(), m_n.x(), 0.0f));

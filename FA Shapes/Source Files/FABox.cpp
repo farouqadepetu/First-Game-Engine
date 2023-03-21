@@ -229,6 +229,9 @@ namespace FAShapes
 		mX = FAMath::Vector3D(x.x(), x.y(), x.z());
 		mY = FAMath::Vector3D(y.x(), y.y(), y.z());
 		mZ = FAMath::Vector3D(z.x(), z.y(), z.z());
+
+		//orthonormalize the boxs local axes.
+		orthonormalize(mX, mY, mZ);
 	}
 
 	void Box::rotateAxes(const FAMath::Quaternion& rotQuaternion)
@@ -245,6 +248,9 @@ namespace FAShapes
 		mX = FAMath::Vector3D(x.x(), x.y(), x.z());
 		mY = FAMath::Vector3D(y.x(), y.y(), y.z());
 		mZ = FAMath::Vector3D(z.x(), z.y(), z.z());
+
+		//orthonormalize the boxs local axes.
+		orthonormalize(mX, mY, mZ);
 	}
 
 	void Box::rotateAxes(float angle, const FAMath::Vector3D axis)
@@ -262,6 +268,9 @@ namespace FAShapes
 		mX = FAMath::Vector3D(x.x(), x.y(), x.z());
 		mY = FAMath::Vector3D(y.x(), y.y(), y.z());
 		mZ = FAMath::Vector3D(z.x(), z.y(), z.z());
+
+		//orthonormalize the boxs local axes.
+		orthonormalize(mX, mY, mZ);
 	}
 
 	void Box::rotateCenter(const FAMath::Matrix4x4& rot)

@@ -710,6 +710,16 @@ namespace FAMath
 		return Vector3D(dotProduct(a, normB) * normB);
 	}
 
+	/**@brief Orthonormalizes the specified vectors.
+	* Uses Classical Gram-Schmidt.
+	*/
+	inline void orthonormalize(Vector3D& x, Vector3D& y, Vector3D& z)
+	{
+		x = norm(x);
+		y = norm(crossProduct(z, x));
+		z = norm(crossProduct(x, y));
+	}
+
 
 #if defined(_DEBUG)
 	inline void print(const Vector3D& v)
@@ -1091,13 +1101,23 @@ namespace FAMath
 		*/
 		float& operator()(unsigned int row, unsigned int col);
 
+		/**@brief Returns specified row.
+		*  Row should be between [0,3]. If it is out of range the first row will be returned.
+		*/
+		Vector4D getRow(unsigned int row) const;
+
+		/**@brief Returns specified col.
+		*  Col should be between [0,3]. If it is out of range the first col will be returned.
+		*/
+		Vector4D getCol(unsigned int col) const;
+
 		/**@brief Sets each element in the given row to the components of vector v.
-		* Row should be between [0,3]. If it out of range the first row will be set.
+		* Row should be between [0,3]. If it is out of range the first row will be set.
 		*/
 		void setRow(unsigned int row, Vector4D v);
 
 		/**@brief Sets each element in the given col to the components of vector v.
-		* Col should be between [0,3]. If it out of range the first col will be set.
+		* Col should be between [0,3]. If it is out of range the first col will be set.
 		*/
 		void setCol(unsigned int col, Vector4D v);
 
@@ -1212,6 +1232,23 @@ namespace FAMath
 		{
 			return m_mat[row][col];
 		}
+	}
+
+	inline Vector4D Matrix4x4::getRow(unsigned int row) const
+	{
+		if (row < 0 || row > 3)
+			return Vector4D(m_mat[0][0], m_mat[0][1], m_mat[0][2], m_mat[0][3]);
+		else
+			return Vector4D(m_mat[row][0], m_mat[row][1], m_mat[row][2], m_mat[row][3]);
+		
+	}
+
+	inline Vector4D Matrix4x4::getCol(unsigned int col) const
+	{
+		if (col < 0 || col > 3)
+			return Vector4D(m_mat[0][0], m_mat[1][0], m_mat[2][0], m_mat[3][0]);
+		else
+			return Vector4D(m_mat[0][col], m_mat[1][col], m_mat[2][col], m_mat[3][col]);
 	}
 
 	inline void Matrix4x4::setRow(unsigned int row, Vector4D v)
