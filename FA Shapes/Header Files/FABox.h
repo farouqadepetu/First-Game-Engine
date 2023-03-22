@@ -24,29 +24,23 @@ namespace FAShapes
 		*/
 		static const unsigned int NUM_OF_TRIANGLES{ 12 };
 
-		/**@brief Constructor.
-		* Creates a Box of length 2 centered around the origin.
+		/**@brief Default Constructor.
+		* Creates a Box of with width = height = depth = 1 centered around the origin.\n
+		* In a left-handed coordinate system the front face looks towards +z axis, the top face looks towards the +y axis and the
+		* right face looks towards the +x axis. /n
+		* The Box is made using triangles. The vertices are ordered in clockwise order.
+		* The default color is black.
+		*/
+		Box();
+
+		/**@brief Overloaded Constructor.
+		* Creates a Box of the specified width, height, depth and color centered around the origin.
 		* In a left-handed coordinate system the front face looks towards +z axis, the top face looks towards the +y axis and the
 		* right face looks towards the +x axis. /n
 		* The Box is made using triangles. The vertices are ordered in clockwise order.
 		*/
-		Box(FAColor::Color color = FAColor::Color(0.0f, 0.0f, 0.0f, 1.0f));
-
-		/**@brief Returns the location of the center of the box.
-		*/
-		const FAMath::Vector3D& GetCenter() const;
-
-		/**@brief Returns the x axis of the local coordinate system.
-		*/
-		const FAMath::Vector3D& GetXAxis() const;
-
-		/**@brief Returns the y axis of the local coordinate system.
-		*/
-		const FAMath::Vector3D& GetYAxis() const;
-
-		/**@brief Returns the z axis of the local coordinate system.
-		*/
-		const FAMath::Vector3D& GetZAxis() const;
+		Box(unsigned int width, unsigned int height, unsigned int depth, 
+			FAColor::Color color);
 
 		/**@brief Returns a pointer to the vertex list of the box.
 		*/
@@ -69,13 +63,37 @@ namespace FAShapes
 		*/
 		const Triangle& GetTriangle(unsigned int index) const;
 
+		/**@brief Returns the location of the center of the box.
+		*/
+		const FAMath::Vector3D& GetCenter() const;
+
+		/**@brief Returns the x axis of the local coordinate system.
+		*/
+		const FAMath::Vector3D& GetXAxis() const;
+
+		/**@brief Returns the y axis of the local coordinate system.
+		*/
+		const FAMath::Vector3D& GetYAxis() const;
+
+		/**@brief Returns the z axis of the local coordinate system.
+		*/
+		const FAMath::Vector3D& GetZAxis() const;
+
+		/**@brief Returns the width of the box.
+		*/
+		unsigned int GetWidth() const;
+
+		/**@brief Returns the height of the box.
+		*/
+		unsigned int GetHeight() const;
+
+		/**@brief Returns the depth of the box.
+		*/
+		unsigned int GetDepth() const;
+
 		/**@brief Returns the color of the box.
 		*/
 		const FAColor::Color& GetColor() const;
-
-		/**@brief Returns the scale matrix of the box which is used to set the size of the box.
-		*/
-		const FAMath::Matrix4x4& GetScaleMatrix() const;
 
 		/**@brief Returns the local to world transformation matrix of the box.
 		*/
@@ -85,6 +103,22 @@ namespace FAShapes
 		*/
 		const DrawArguments& GetDrawArguments() const;
 
+		/**@brief Sets the center of the box to the specified center.
+		*/
+		void SetCenter(const FAMath::Vector3D& center);
+
+		/**@brief Sets the width of the box to the specified width.
+		*/
+		void SetWidth(unsigned int width);
+
+		/**@brief Sets the height of the box to the specified height.
+		*/
+		void SetHeight(unsigned int height);
+
+		/**@brief Sets the depth of the box to the specified depth.
+		*/
+		void SetDepth(unsigned int depth);
+
 		/**@brief Sets the color of the box to the specified color.
 		*/
 		void SetColor(const FAColor::Color& color);
@@ -92,22 +126,6 @@ namespace FAShapes
 		/**@brief Sets the color of the box to the specified RBBA values.
 		*/
 		void SetColor(float r, float g, float b, float a);
-
-		/**@brief Sets the color of the box to the specified matrix.
-		*/
-		void SetScaleMatrix(const FAMath::Matrix4x4& scale);
-
-		/**@brief Sets the center of the box to the specified center.
-		*/
-		void SetCenter(const FAMath::Vector3D& center);
-
-		/**@brief Sets the world rotation quaternion to the specified quaternion.
-		*/
-		void SetWorldRotation(const FAMath::Quaternion& rotQuaternion);
-
-		/**@brief Sets the world rotation quaternion to the rotation quaternion with the specified angle and axis.
-		*/
-		void SetWorldRotation(float angle, const FAMath::Vector3D axis);
 
 		/**@brief Sets the draw arguments of the box to the specifed draw arguments.
 		*/
@@ -158,6 +176,12 @@ namespace FAShapes
 
 	private:
 
+		//local cooridnates
+		Vertex mLocalVertices[NUM_OF_VERTICES];
+
+		//the triangles that make up the box
+		Triangle mTriangles[NUM_OF_TRIANGLES];
+
 		//reference point
 		FAMath::Vector3D mCenter;
 
@@ -166,23 +190,22 @@ namespace FAShapes
 		FAMath::Vector3D mY;
 		FAMath::Vector3D mZ;
 
-		//local cooridnates
-		Vertex mLocalVertices[NUM_OF_VERTICES];
+		//Dimensions of the box
+		unsigned int mWidth;
+		unsigned int mHeight;
+		unsigned int mDepth;
 
-		//the triangles that make up the box
-		Triangle mTriangles[NUM_OF_TRIANGLES];
+		//if true update local to world matrix
+		bool mUpdateModelMatrix;
 
 		//color of the box
 		FAColor::Color mColor;
-
-		//scale matrix
-		FAMath::Matrix4x4 mScale;
 
 		//local to world transformation matrix
 		FAMath::Matrix4x4 mLocalToWorld;
 
 		//the draw arguments used to draw the box
-		DrawArguments mBoxDrawArguments;
+		DrawArguments mBoxDrawArguments{};
 
 		//strores the local vertices of box
 		void mCreateVertices();

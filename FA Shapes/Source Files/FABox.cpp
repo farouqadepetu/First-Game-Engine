@@ -5,7 +5,26 @@
 
 namespace FAShapes
 {
-	Box::Box(FAColor::Color color) : mColor{ color }, mX{ 1.0f, 0.0f, 0.0f }, mY{ 0.0f, 1.0f, 0.0f }, mZ{ 0.0f, 0.0f, 1.0f }
+	Box::Box() : mWidth{ 1 }, mHeight{ 1 }, mDepth{ 1 }, mUpdateModelMatrix{ true },
+		mColor{ 0.0f, 0.0f, 0.0f, 1.0f }, mX{ 1.0f, 0.0f, 0.0f }, mY{ 0.0f, 1.0f, 0.0f }, mZ{ 0.0f, 0.0f, 1.0f }
+	{
+		mCreateVertices();
+		mCreateTriangles();
+		mCreateNormals();
+
+		mLocalVertices[0].color = mColor;
+		mLocalVertices[1].color = mColor;
+		mLocalVertices[2].color = mColor;
+		mLocalVertices[3].color = mColor;
+		mLocalVertices[4].color = mColor;
+		mLocalVertices[5].color = mColor;
+		mLocalVertices[6].color = mColor;
+		mLocalVertices[7].color = mColor;
+	}
+
+	Box::Box(unsigned int width, unsigned int height, unsigned int depth, FAColor::Color color) : 
+		mWidth{ width }, mHeight{ height }, mDepth{ depth }, mUpdateModelMatrix{ true },
+		mColor{ color }, mX{ 1.0f, 0.0f, 0.0f }, mY{ 0.0f, 1.0f, 0.0f }, mZ{ 0.0f, 0.0f, 1.0f }
 	{
 		mCreateVertices();
 		mCreateTriangles();
@@ -24,15 +43,14 @@ namespace FAShapes
 	//strores the local vertices of box
 	void Box::mCreateVertices()
 	{
-		//local coordinates for each vertex of the box
-		mLocalVertices[0].position = FAMath::Vector3D(-1.0f, 1.0f, -1.0f);
-		mLocalVertices[1].position = FAMath::Vector3D(1.0f, 1.0f, -1.0f);
-		mLocalVertices[2].position = FAMath::Vector3D(1.0f, -1.0f, -1.0f);
-		mLocalVertices[3].position = FAMath::Vector3D(-1.0f, -1.0f, -1.0f);
-		mLocalVertices[4].position = FAMath::Vector3D(-1.0f, 1.0f, 1.0f);
-		mLocalVertices[5].position = FAMath::Vector3D(1.0f, 1.0f, 1.0f);
-		mLocalVertices[6].position = FAMath::Vector3D(1.0f, -1.0f, 1.0f);
-		mLocalVertices[7].position = FAMath::Vector3D(-1.0f, -1.0f, 1.0f);
+		mLocalVertices[0].position = FAMath::Vector3D(-0.5f, 0.5f, -0.5f);
+		mLocalVertices[1].position = FAMath::Vector3D(0.5f, 0.5f, -0.5f);
+		mLocalVertices[2].position = FAMath::Vector3D(0.5f, -0.5f, -0.5f);
+		mLocalVertices[3].position = FAMath::Vector3D(-0.5f, -0.5f, -0.5f);
+		mLocalVertices[4].position = FAMath::Vector3D(-0.5f, 0.5f, 0.5f);
+		mLocalVertices[5].position = FAMath::Vector3D(0.5f, 0.5f, 0.5f);
+		mLocalVertices[6].position = FAMath::Vector3D(0.5f, -0.5f, 0.5f);
+		mLocalVertices[7].position = FAMath::Vector3D(-0.5f, -0.5f, 0.5f);
 	}
 
 	//creates the triangles from the local vertices
@@ -96,26 +114,6 @@ namespace FAShapes
 		++index;
 	}
 
-	const FAMath::Vector3D& Box::GetCenter() const
-	{
-		return mCenter;
-	}
-
-	const FAMath::Vector3D& Box::GetXAxis() const
-	{
-		return mX;
-	}
-
-	const FAMath::Vector3D& Box::GetYAxis() const
-	{
-		return mY;
-	}
-
-	const FAMath::Vector3D& Box::GetZAxis() const
-	{
-		return mZ;
-	}
-
 	Vertex* Box::GetVertexList()
 	{
 		return mLocalVertices;
@@ -144,14 +142,44 @@ namespace FAShapes
 		return mTriangles[index];
 	}
 
+	const FAMath::Vector3D& Box::GetCenter() const
+	{
+		return mCenter;
+	}
+
+	const FAMath::Vector3D& Box::GetXAxis() const
+	{
+		return mX;
+	}
+
+	const FAMath::Vector3D& Box::GetYAxis() const
+	{
+		return mY;
+	}
+
+	const FAMath::Vector3D& Box::GetZAxis() const
+	{
+		return mZ;
+	}
+
+	unsigned int Box::GetWidth() const
+	{
+		return mWidth;
+	}
+
+	unsigned int Box::GetHeight() const
+	{
+		return mHeight;
+	}
+
+	unsigned int Box::GetDepth() const
+	{
+		return mDepth;
+	}
+
 	const FAColor::Color& Box::GetColor() const
 	{
 		return mColor;
-	}
-
-	const FAMath::Matrix4x4& Box::GetScaleMatrix() const
-	{
-		return mScale;
 	}
 
 	const FAMath::Matrix4x4& Box::GetLocalToWorldMatrix() const
@@ -162,6 +190,30 @@ namespace FAShapes
 	const DrawArguments& Box::GetDrawArguments() const
 	{
 		return mBoxDrawArguments;
+	}
+
+	void Box::SetCenter(const FAMath::Vector3D& center)
+	{
+		mCenter = center;
+		mUpdateModelMatrix = true;
+	}
+
+	void Box::SetWidth(unsigned int width)
+	{
+		mWidth = width;
+		mUpdateModelMatrix = true;
+	}
+
+	void Box::SetHeight(unsigned int height)
+	{
+		mHeight = height;
+		mUpdateModelMatrix = true;
+	}
+
+	void Box::SetDepth(unsigned int depth)
+	{
+		mDepth = depth;
+		mUpdateModelMatrix = true;
 	}
 
 	void Box::SetColor(const FAColor::Color& color)
@@ -195,16 +247,6 @@ namespace FAShapes
 		mLocalVertices[7].color = mColor;
 	}
 
-	void Box::SetScaleMatrix(const FAMath::Matrix4x4& scale)
-	{
-		mScale = scale;
-	}
-
-	void Box::SetCenter(const FAMath::Vector3D& center)
-	{
-		mCenter = center;
-	}
-
 	void Box::SetDrawArguments(const DrawArguments& boxDrawArgs)
 	{
 		mBoxDrawArguments = boxDrawArgs;
@@ -232,6 +274,8 @@ namespace FAShapes
 
 		//orthonormalize the boxs local axes.
 		Orthonormalize(mX, mY, mZ);
+
+		mUpdateModelMatrix = true;
 	}
 
 	void Box::RotateAxes(const FAMath::Quaternion& rotQuaternion)
@@ -251,6 +295,8 @@ namespace FAShapes
 
 		//orthonormalize the boxs local axes.
 		Orthonormalize(mX, mY, mZ);
+
+		mUpdateModelMatrix = true;
 	}
 
 	void Box::RotateAxes(float angle, const FAMath::Vector3D axis)
@@ -271,6 +317,8 @@ namespace FAShapes
 
 		//orthonormalize the boxs local axes.
 		Orthonormalize(mX, mY, mZ);
+
+		mUpdateModelMatrix = true;
 	}
 
 	void Box::RotateCenter(const FAMath::Matrix4x4& rot)
@@ -280,6 +328,8 @@ namespace FAShapes
 		center = center * rot;
 
 		mCenter = FAMath::Vector3D(center.GetX(), center.GetY(), center.GetZ());
+
+		mUpdateModelMatrix = true;
 	}
 
 	void Box::RotateCenter(const FAMath::Quaternion& rotQuaternion)
@@ -290,6 +340,8 @@ namespace FAShapes
 		center = center * rot;
 
 		mCenter = FAMath::Vector3D(center.GetX(), center.GetY(), center.GetZ());
+
+		mUpdateModelMatrix = true;
 	}
 
 	void Box::RotateCenter(float angle, const FAMath::Vector3D axis)
@@ -300,6 +352,8 @@ namespace FAShapes
 		center = center * rot;
 
 		mCenter = FAMath::Vector3D(center.GetX(), center.GetY(), center.GetZ());
+
+		mUpdateModelMatrix = true;
 	}
 
 	void Box::TranslateCenter(float x, float y, float z)
@@ -307,24 +361,35 @@ namespace FAShapes
 		mCenter.SetX(mCenter.GetX() + x);
 		mCenter.SetY(mCenter.GetY() + y);
 		mCenter.SetZ(mCenter.GetZ() + x);
+
+		mUpdateModelMatrix = true;
 	}
 
 	void Box::TranslateCenter(FAMath::Vector3D v)
 	{
 		mCenter += v;
+
+		mUpdateModelMatrix = true;
 	}
 
 	//multiplies the scale, local rotation, and translation in that order.
 	//S * LR * T.
 	void Box::UpdateLocalToWorldMatrix()
 	{
-		FAMath::Matrix4x4 localRotation;
-		localRotation.SetRow(0, FAMath::Vector4D(mX.GetX(), mX.GetY(), mX.GetZ(), 0.0f));
-		localRotation.SetRow(1, FAMath::Vector4D(mY.GetX(), mY.GetY(), mY.GetZ(), 0.0f));
-		localRotation.SetRow(2, FAMath::Vector4D(mZ.GetX(), mZ.GetY(), mZ.GetZ(), 0.0f));
+		if (mUpdateModelMatrix)
+		{
+			FAMath::Matrix4x4 scale{ Scale(FAMath::Matrix4x4(), (float)mWidth, (float)mHeight, (float)mDepth) };
 
-		FAMath::Matrix4x4 translation{ Translate(FAMath::Matrix4x4(), mCenter.GetX(), mCenter.GetY(), mCenter.GetZ()) };
+			FAMath::Matrix4x4 localRotation;
+			localRotation.SetRow(0, FAMath::Vector4D(mX.GetX(), mX.GetY(), mX.GetZ(), 0.0f));
+			localRotation.SetRow(1, FAMath::Vector4D(mY.GetX(), mY.GetY(), mY.GetZ(), 0.0f));
+			localRotation.SetRow(2, FAMath::Vector4D(mZ.GetX(), mZ.GetY(), mZ.GetZ(), 0.0f));
 
-		mLocalToWorld = mScale * localRotation * translation;
+			FAMath::Matrix4x4 translation{ Translate(FAMath::Matrix4x4(), mCenter.GetX(), mCenter.GetY(), mCenter.GetZ()) };
+
+			mLocalToWorld = scale * localRotation * translation;
+
+			mUpdateModelMatrix = false;
+		}
 	}
 }
