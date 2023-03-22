@@ -12,7 +12,6 @@
 #include <d2d1_3.h>
 #include <dwrite.h>
 #include <vector>
-#include "FARenderingUtility.h"
 
 namespace FARender
 {
@@ -22,6 +21,8 @@ namespace FARender
 	class DeviceResources
 	{
 	public:
+		static const unsigned int NUM_OF_FRAMES{ 3 };
+
 		DeviceResources() = default;
 
 		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle);
@@ -37,14 +38,6 @@ namespace FARender
 		*/
 		const Microsoft::WRL::ComPtr<ID3D12Device>& GetDevice() const;
 
-		/**@brief Returns a constant reference to the ID3D12CommandQueue objcet.
-		*/
-		const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& GetCommandQueue() const;
-
-		/**@brief Returns a constant reference to the current ID3D12CommandAllocator objcet.
-		*/
-		const Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& GetCommandAllocator() const;
-
 		/**@brief Returns a constant reference to the ID3D12GraphicsCommandList objcet.
 		*/
 		const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& GetCommandList() const;
@@ -53,55 +46,13 @@ namespace FARender
 		*/
 		const DXGI_FORMAT& GetBackBufferFormat() const;
 
-		/**@brief Returns a constant reference to the number of swap chains.
-		*/
-		const UINT GetNumOfSwapChainBuffers() const;
-
-		/**@brief Returns a constant reference to the IDXGISwapChain1 object.
-		*/
-		const Microsoft::WRL::ComPtr<IDXGISwapChain1>& GetSwapChain() const;
-
-		/**@brief Returns a constant reference to the render target view descriptor size.
-		*/
-		const UINT& GetRTVDescriptorSize() const;
-
-		/**@brief Returns a constant reference to the depth/stencil view descriptor size.
-		*/
-		const UINT& GetDSVDescriptorSize() const;
-
-		/**@brief Returns a constant reference to the render target descriptor heap.
-		*/
-		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& GetRTVDescriptorHeap() const;
-
-		/**@brief Returns a constant reference to the depth/stencil descriptor heap.
-		*/
-		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& GetDSVDescriptorHeap() const;
-
-		/**@brief Returns a constant reference to the current back buffer.
-		*/
-		const UINT& GetCurrentBackBuffer() const;
-
-		/**@brief Returns a pointer to the swap chain buffers.\n
-		* There are two swap chain buffers.\n
-		* To access each buffer do swapChainBuffers()[i], where i is the index of the buffer you want to access.
-		*/
-		const Microsoft::WRL::ComPtr<ID3D12Resource>* GetSwapChainBuffers() const;
-
-		/**@brief Returns a constant reference to the depth stencil buffer.
-		*/
-		const Microsoft::WRL::ComPtr<ID3D12Resource>& GetDepthStencilBuffer() const;
-
 		/**@brief Returns a constant reference to the depth stencil format.
 		*/
 		const DXGI_FORMAT& GetDepthStencilFormat() const;
 
-		/**@brief Returns a constant reference to the D3D12_VIEWPORT objcet.
+		/**@brief Returns the current frame.
 		*/
-		const D3D12_VIEWPORT& GetViewport() const;
-
-		/**@brief Returns a constant reference to the D3D12_RECT scissor objcet.
-		*/
-		const D3D12_RECT& GetScissor() const;
+		unsigned int GetCurrentFrame() const;
 
 		/**@brief Returns true if MSAA is enabled, false otherwise.
 		*/
@@ -114,18 +65,6 @@ namespace FARender
 		/**@brief Enables MSAA.
 		*/
 		void EnableMSAA();
-
-		/**@brief Returns a reference to the sample count.
-		*/
-		UINT& GetSampleCount();
-
-		/**@brief Returns a constant reference to the sample count.
-		*/
-		const UINT& GetSampleCount() const;
-
-		/**@brief Returns a constant reference to the current fence value.
-		*/
-		const UINT64& GetCurrentFenceValue() const;
 
 		/**@brief Returns a constant reference to the direct 2D device context.
 		*/
@@ -172,18 +111,6 @@ namespace FARender
 		*/
 		void Resize(int width, int height, const HWND& handle);
 
-		/**@brief Resets the command list to open it with a current frame command allocator.
-		*/
-		void ResetCommandList();
-
-		/*@brief Resets the command list to open it with the direct command allocator.
-		*/
-		void ResetDirectCommandList();
-
-		/**@brief Resets command allocator to allow reuse of the memory.
-		*/
-		void ResetCommandAllocator();
-
 		/**@brief Transistions the render target buffer.
 		*/
 		void RTBufferTransition(bool renderText);
@@ -208,17 +135,23 @@ namespace FARender
 		*/
 		void Draw();
 
+		/**@brief Update our current frame value to go to the next frame.
+		*/
+		void NextFrame();
+
 	private:
+		unsigned int mCurrentFrame{ 0 };
+
 		Microsoft::WRL::ComPtr<ID3D12Device> mDirect3DDevice;
 
 		Microsoft::WRL::ComPtr<IDXGIFactory4> mDXGIFactory;
 
 		Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
 		UINT64 mFenceValue{ 0 };
-		UINT64 mCurrentFrameFenceValue[numFrames];
+		UINT64 mCurrentFrameFenceValue[NUM_OF_FRAMES];
 
 		Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
-		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCommandAllocator[numFrames];
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCommandAllocator[NUM_OF_FRAMES];
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCommandAllocator;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;
 
@@ -241,7 +174,6 @@ namespace FARender
 
 		bool mMSAA4xSupported = false;
 		bool mIsMSAAEnabled = false;
-		UINT mSampleCount{ 4 };
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mMSAARTVDescriptorHeap;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mMSAADSVDescriptorHeap;
 		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAARenderTargetBuffer;

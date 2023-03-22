@@ -67,12 +67,12 @@ namespace FARender
 
 	ConstantBuffer& RenderScene::GetConstantBuffer()
 	{
-		return mConstantBuffer[currentFrame];
+		return mConstantBuffer[mDeviceResources.GetCurrentFrame()];
 	}
 
 	const ConstantBuffer& RenderScene::GetConstantBuffer() const
 	{
-		return mConstantBuffer[currentFrame];
+		return mConstantBuffer[mDeviceResources.GetCurrentFrame()];
 	}
 
 	const UINT& RenderScene::GetCBVSize() const
@@ -253,7 +253,7 @@ namespace FARender
 		//Need a CBV for each object for each frame.
 		D3D12_DESCRIPTOR_HEAP_DESC cbvDescriptorHeapDescription{};
 		cbvDescriptorHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		cbvDescriptorHeapDescription.NumDescriptors = numDescriptors * numFrames;
+		cbvDescriptorHeapDescription.NumDescriptors = numDescriptors * DeviceResources::NUM_OF_FRAMES;
 		cbvDescriptorHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbvDescriptorHeapDescription.NodeMask = 0;
 		ThrowIfFailed(mDeviceResources.GetDevice()->CreateDescriptorHeap(&cbvDescriptorHeapDescription, IID_PPV_ARGS(&mCBVHeap)));
@@ -262,7 +262,7 @@ namespace FARender
 		mCBVHeapDescription.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 
 		//num of descriptors in my cbv descriptor heap that are type cbv
-		mCBVHeapDescription.NumDescriptors = numDescriptors * numFrames;
+		mCBVHeapDescription.NumDescriptors = numDescriptors * DeviceResources::NUM_OF_FRAMES;
 
 		//which register does your vertex shader expect the buffer to be in
 		mCBVHeapDescription.BaseShaderRegister = shaderRegister;
@@ -283,7 +283,7 @@ namespace FARender
 
 	void RenderScene::CreateConstantBuffer(UINT numOfBytes)
 	{
-		for (UINT i = 0; i < numFrames; ++i)
+		for (UINT i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
 		{
 			mConstantBuffer[i].CreateConstantBuffer(mDeviceResources.GetDevice(), numOfBytes);
 		}
@@ -292,10 +292,10 @@ namespace FARender
 	void RenderScene::CreateConstantBufferView( UINT index, UINT numBytes)
 	{
 		//Create a constant buffer view for each frame.
-		for (UINT i = 0; i < numFrames; ++i)
+		for (UINT i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
 		{
-			mConstantBuffer[i].CreateConstantBufferView(mDeviceResources.GetDevice(), mCBVHeap, mCBVSize, (index * numFrames) + i,
-				index, numBytes);
+			mConstantBuffer[i].CreateConstantBufferView(mDeviceResources.GetDevice(), mCBVHeap, mCBVSize, 
+				(index * DeviceResources::NUM_OF_FRAMES) + i, index, numBytes);
 		}
 	}
 
@@ -405,7 +405,7 @@ namespace FARender
 			CD3DX12_GPU_DESCRIPTOR_HANDLE handle =
 				CD3DX12_GPU_DESCRIPTOR_HANDLE(mCBVHeap->GetGPUDescriptorHandleForHeapStart());
 
-			handle.Offset((i.indexOfConstantData * numFrames) + currentFrame, mCBVSize);
+			handle.Offset((i.indexOfConstantData * DeviceResources::NUM_OF_FRAMES) + mDeviceResources.GetCurrentFrame(), mCBVSize);
 
 			mDeviceResources.GetCommandList()->SetGraphicsRootDescriptorTable(0, handle);
 

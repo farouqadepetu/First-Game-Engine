@@ -7,9 +7,6 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//DEVICE RESOURCES FUNCTION DEFINITIONS
 
-	DeviceResources::DeviceResources()
-	{}
-
 	DeviceResources::DeviceResources(unsigned int width, unsigned int height, HWND windowHandle)
 	{
 		InitializeDirect3D(width, height, windowHandle);
@@ -26,16 +23,6 @@ namespace FARender
 		return mDirect3DDevice;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& DeviceResources::GetCommandQueue() const
-	{
-		return mCommandQueue;
-	}
-
-	const Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& DeviceResources::GetCommandAllocator() const
-	{
-		return mCommandAllocator[currentFrame];
-	}
-
 	const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& DeviceResources::GetCommandList() const
 	{
 		return mCommandList;
@@ -46,64 +33,14 @@ namespace FARender
 		return mBackBufferFormat;
 	}
 
-	const UINT DeviceResources::GetNumOfSwapChainBuffers() const
-	{
-		return mNumOfSwapChainBuffers;
-	}
-
-	const Microsoft::WRL::ComPtr<IDXGISwapChain1>& DeviceResources::GetSwapChain() const
-	{
-		return mSwapChain;
-	}
-
-	const UINT& DeviceResources::GetRTVDescriptorSize() const
-	{
-		return mRTVSize;
-	}
-
-	const UINT& DeviceResources::GetDSVDescriptorSize() const
-	{
-		return mDSVSize;
-	}
-
-	const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& DeviceResources::GetRTVDescriptorHeap() const
-	{
-		return mRTVHeap;
-	}
-
-	const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& DeviceResources::GetDSVDescriptorHeap() const
-	{
-		return mDSVHeap;
-	}
-
-	const D3D12_VIEWPORT& DeviceResources::GetViewport() const
-	{
-		return mViewport;
-	}
-
-	const D3D12_RECT& DeviceResources::GetScissor() const
-	{
-		return mScissor;
-	}
-
-	const Microsoft::WRL::ComPtr<ID3D12Resource>* DeviceResources::GetSwapChainBuffers() const
-	{
-		return mSwapChainBuffers;
-	}
-
-	const UINT& DeviceResources::GetCurrentBackBuffer() const
-	{
-		return mCurrentBackBuffer;
-	}
-
-	const Microsoft::WRL::ComPtr<ID3D12Resource>& DeviceResources::GetDepthStencilBuffer() const
-	{
-		return mDepthStencilBuffer;
-	}
-
 	const DXGI_FORMAT& DeviceResources::GetDepthStencilFormat() const
 	{
 		return mDepthStencilFormat;
+	}
+
+	unsigned int DeviceResources::GetCurrentFrame() const
+	{
+		return mCurrentFrame;
 	}
 
 	bool DeviceResources::IsMSAAEnabled()
@@ -121,22 +58,6 @@ namespace FARender
 		mIsMSAAEnabled = true;
 	}
 
-	UINT& DeviceResources::GetSampleCount()
-	{
-		return mSampleCount;
-	}
-
-	const UINT& DeviceResources::GetSampleCount() const
-	{
-		return mSampleCount;
-	}
-
-	const UINT64& DeviceResources::GetCurrentFenceValue() const
-	{
-		return mFenceValue;
-	}
-
-
 	const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& DeviceResources::GetDevice2DContext() const
 	{
 		return mDirect2DDeviceContext;
@@ -149,7 +70,7 @@ namespace FARender
 
 	void DeviceResources::UpdateCurrentFrameFenceValue()
 	{
-		mCurrentFrameFenceValue[currentFrame] = ++mFenceValue;
+		mCurrentFrameFenceValue[mCurrentFrame] = ++mFenceValue;
 	}
 
 	void  DeviceResources::InitializeDirect3D(unsigned int width, unsigned int height, HWND handle)
@@ -224,7 +145,7 @@ namespace FARender
 		ThrowIfFailed(mDirect3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 			IID_PPV_ARGS(mDirectCommandAllocator.GetAddressOf())));
 
-		for (UINT i = 0; i < numFrames; ++i)
+		for (UINT i = 0; i < NUM_OF_FRAMES; ++i)
 		{
 			ThrowIfFailed(mDirect3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 				IID_PPV_ARGS(mCommandAllocator[i].GetAddressOf())));
@@ -371,8 +292,8 @@ namespace FARender
 	void DeviceResources::WaitForGPU() const
 	{
 		//if the signal command has not been executed, wait until it is
-		if (mCurrentFrameFenceValue[currentFrame] != 0 &&
-			mFence->GetCompletedValue() < mCurrentFrameFenceValue[currentFrame])
+		if (mCurrentFrameFenceValue[mCurrentFrame] != 0 &&
+			mFence->GetCompletedValue() < mCurrentFrameFenceValue[mCurrentFrame])
 		{
 			//create an event object and store an handle to it
 			HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
@@ -380,7 +301,7 @@ namespace FARender
 			if (eventHandle != nullptr)
 			{
 				//This function will fire(raise) an event when the signal command is executed by the GPU
-				ThrowIfFailed(mFence->SetEventOnCompletion(mCurrentFrameFenceValue[currentFrame], eventHandle));
+				ThrowIfFailed(mFence->SetEventOnCompletion(mCurrentFrameFenceValue[mCurrentFrame], eventHandle));
 
 				//Wait until the GPU has executed the signal command
 				WaitForSingleObject(eventHandle, INFINITE);
@@ -459,21 +380,6 @@ namespace FARender
 		mScissor = { 0, 0, width, height };
 	}
 
-	void DeviceResources::ResetCommandList()
-	{
-		mCommandList->Reset(mCommandAllocator[currentFrame].Get(), nullptr);
-	}
-
-	void DeviceResources::ResetCommandAllocator()
-	{
-		mCommandAllocator[currentFrame].Reset();
-	}
-
-	void DeviceResources::ResetDirectCommandList()
-	{
-		mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr);
-	}
-
 	void DeviceResources::Execute() const
 	{
 		ThrowIfFailed(mCommandList->Close());
@@ -493,10 +399,10 @@ namespace FARender
 	{
 		//Reseting command allocator allows us to reuse the memory.
 		//Make sure all the commands in the command list is executed before calling this.
-		ThrowIfFailed(mCommandAllocator[currentFrame]->Reset());
+		ThrowIfFailed(mCommandAllocator[mCurrentFrame]->Reset());
 
 		//Reset command list
-		ThrowIfFailed(mCommandList->Reset(mCommandAllocator[currentFrame].Get(), nullptr));
+		ThrowIfFailed(mCommandList->Reset(mCommandAllocator[mCurrentFrame].Get(), nullptr));
 
 		//Link viewport to the rasterization stage
 		mCommandList->RSSetViewports(1, &mViewport);
@@ -557,6 +463,11 @@ namespace FARender
 			CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHeapHandle(mDSVHeap->GetCPUDescriptorHandleForHeapStart());
 			mCommandList->OMSetRenderTargets(1, &rtvHeapHandle, true, &dsvHeapHandle);
 		}
+	}
+
+	void DeviceResources::NextFrame()
+	{
+		mCurrentFrame = (mCurrentFrame + 1) % NUM_OF_FRAMES;
 	}
 
 	void DeviceResources::RTBufferTransition(bool renderText)
@@ -728,7 +639,7 @@ namespace FARender
 		//Describes the format and sample count we want to check to see if it is supported.
 		D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS levels{};
 		levels.Format = mBackBufferFormat;
-		levels.SampleCount = mSampleCount;
+		levels.SampleCount = 4;
 
 		ThrowIfFailed(mDirect3DDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
 			&levels, sizeof(levels)));
@@ -769,8 +680,6 @@ namespace FARender
 
 	void DeviceResources::CreateMSAARenderTargetBufferAndView(int width, int height)
 	{
-		//mMSAARenderTargetBuffer.Reset();
-
 		D3D12_RESOURCE_DESC mMSAARenderTargetBufferDesc{};
 		mMSAARenderTargetBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		mMSAARenderTargetBufferDesc.Alignment = 0;
@@ -779,7 +688,7 @@ namespace FARender
 		mMSAARenderTargetBufferDesc.DepthOrArraySize = 1;
 		mMSAARenderTargetBufferDesc.MipLevels = 1;
 		mMSAARenderTargetBufferDesc.Format = mBackBufferFormat;
-		mMSAARenderTargetBufferDesc.SampleDesc.Count = mSampleCount;
+		mMSAARenderTargetBufferDesc.SampleDesc.Count = 4;
 		mMSAARenderTargetBufferDesc.SampleDesc.Quality = 0;
 		mMSAARenderTargetBufferDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		mMSAARenderTargetBufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -806,8 +715,6 @@ namespace FARender
 
 	void DeviceResources::CreateMSAADepthStencilBufferAndView(int width, int height)
 	{
-		//mMSAADepthStencilBuffer.Reset();
-
 		D3D12_RESOURCE_DESC mMSAADepthStencilBufferDesc{};
 		mMSAADepthStencilBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		mMSAADepthStencilBufferDesc.Alignment = 0;
@@ -816,7 +723,7 @@ namespace FARender
 		mMSAADepthStencilBufferDesc.DepthOrArraySize = 1;
 		mMSAADepthStencilBufferDesc.MipLevels = 1;
 		mMSAADepthStencilBufferDesc.Format = mDepthStencilFormat;
-		mMSAADepthStencilBufferDesc.SampleDesc.Count = mSampleCount;
+		mMSAADepthStencilBufferDesc.SampleDesc.Count = 4;
 		mMSAADepthStencilBufferDesc.SampleDesc.Quality = 0;
 		mMSAADepthStencilBufferDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		mMSAADepthStencilBufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;

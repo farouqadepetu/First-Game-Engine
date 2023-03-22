@@ -327,7 +327,7 @@ namespace FARender
 
 		//Stores all of the constant buffers this scene uses. We can't update a constant buffer until the GPU
 		//is done executing all the commands that reference it, so each frame needs its own constant buffer.
-		ConstantBuffer mConstantBuffer[numFrames];
+		ConstantBuffer mConstantBuffer[DeviceResources::NUM_OF_FRAMES];
 
 		//The vertex and index buffer for this scene
 		VertexBuffer mVertexBuffer;
