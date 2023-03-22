@@ -44,13 +44,13 @@ namespace FAShapes
 		*/
 		unsigned int GetP2Index() const;
 
-		/**@brief Returns a constant reference to the normal of the triangle.
+		/**@brief Returns the normal of the triangle.
 		*/
-		const FAMath::Vector3D& GetNormal() const;
+		FAMath::Vector3D GetNormal() const;
 
-		/**@brief Returns a constant reference tothe center of the triangle.
+		/**@brief Returns the center of the triangle.
 		*/
-		const FAMath::Vector3D& GetCenter() const;
+		FAMath::Vector3D GetCenter() const;
 
 		/**@brief Sets the pointer to a vertex list to the specified pointers.
 		*/

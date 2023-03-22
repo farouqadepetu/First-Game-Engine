@@ -86,7 +86,7 @@ namespace FATime
 			QueryPerformanceCounter((LARGE_INTEGER*)&startTime);
 
 			//get how much time the game/animation was paused for
-			mPausedTime += (startTime - mStopTime) * mSecondsPerCount;
+			mPausedTime += static_cast<__int64>((startTime - mStopTime) * mSecondsPerCount);
 
 			//reset stop time and mStopped
 			mStopTime = 0;
@@ -106,7 +106,7 @@ namespace FATime
 			//                     |<--paused time-->|
 			// ----*---------------*-----------------*------------*------------*------> time
 			//  mBaseTime       mStopTime        startTime     mStopTime    mCurrTime
-			return (float)((mStopTime - mPausedTime) - mBaseTime) * mSecondsPerCount;
+			return static_cast<float>(((mStopTime - mPausedTime) - mBaseTime) * mSecondsPerCount);
 		}
 		else //not paused
 		{
@@ -114,7 +114,7 @@ namespace FATime
 			//                     |<--paused time-->|
 			// ----*---------------*-----------------*------------*------> time
 			//  mBaseTime       mStopTime        startTime     mCurrTime
-			return (float)((mCurrTime - mPausedTime) - mBaseTime) * mSecondsPerCount;
+			return static_cast<float>(((mCurrTime - mPausedTime) - mBaseTime) * mSecondsPerCount);
 		}
 	}
 }

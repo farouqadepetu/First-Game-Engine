@@ -228,17 +228,17 @@ namespace FARender
 	void RenderScene::CreateVertexBuffer()
 	{
 		mVertexBuffer.CreateVertexBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), mVertexList.data(), 
-			mVertexList.size() * sizeof(FAShapes::Vertex));
+			static_cast<UINT>(mVertexList.size() * sizeof(FAShapes::Vertex)));
 
-		mVertexBuffer.CreateVertexBufferView(mVertexList.size() * sizeof(FAShapes::Vertex), sizeof(FAShapes::Vertex));
+		mVertexBuffer.CreateVertexBufferView(static_cast<UINT>(mVertexList.size() * sizeof(FAShapes::Vertex)), sizeof(FAShapes::Vertex));
 	}
 
 	void RenderScene::CreateIndexBuffer()
 	{
 		mIndexBuffer.CreateIndexBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), mIndexList.data(), 
-			mIndexList.size() * sizeof(unsigned int));
+			static_cast<UINT>(mIndexList.size() * sizeof(unsigned int)));
 
-		mIndexBuffer.CreateIndexBufferView(mIndexList.size() * sizeof(unsigned int), DXGI_FORMAT_R32_UINT);
+		mIndexBuffer.CreateIndexBufferView(static_cast<UINT>(mIndexList.size() * sizeof(unsigned int)), DXGI_FORMAT_R32_UINT);
 	}
 
 	void RenderScene::CreateCBVHeap(UINT numDescriptors, UINT shaderRegister)

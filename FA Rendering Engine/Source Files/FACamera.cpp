@@ -170,15 +170,15 @@ namespace FACamera
 	*/
 	void Camera::UpdatePerspectiveProjectionMatrix()
 	{
-		double angle{ mVerticalFov / 2.0 };
-		angle = angle * PI / 180.0;
+		float angle{ mVerticalFov / 2.0f };
+		angle = angle * PI / 180.0f;
 
-		double t{ tan(angle) };
+		float t{ tan(angle) };
 
-		double fMinusN = mFar - mNear;
+		float fMinusN = mFar - mNear;
 
-		mPerspectiveProjectionMatrix.SetRow(0, vec4(1.0 / (mAspectRatio * t), 0.0f, 0.0f, 0.0f));
-		mPerspectiveProjectionMatrix.SetRow(1, vec4(0.0f, 1.0 / t, 0.0f, 0.0f));
+		mPerspectiveProjectionMatrix.SetRow(0, vec4(1.0f / (mAspectRatio * t), 0.0f, 0.0f, 0.0f));
+		mPerspectiveProjectionMatrix.SetRow(1, vec4(0.0f, 1.0f / t, 0.0f, 0.0f));
 		mPerspectiveProjectionMatrix.SetRow(2, vec4(0.0f, 0.0f, mFar / fMinusN, 1.0f));
 		mPerspectiveProjectionMatrix.SetRow(3, vec4(0.0f, 0.0f, -(mNear * mFar) / fMinusN, 0.0f));
 	}

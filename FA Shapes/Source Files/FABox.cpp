@@ -71,7 +71,7 @@ namespace FAShapes
 		//Take the average to get the normal for that vertex.
 		for (int i = 0; i < NUM_OF_VERTICES; ++i)
 		{
-			mLocalVertices[i].normal = normals[i].second / normals[i].first;
+			mLocalVertices[i].normal = normals[i].second / (float)normals[i].first;
 		}
 	}
 

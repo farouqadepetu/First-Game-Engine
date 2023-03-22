@@ -44,7 +44,7 @@ namespace FAShapes
 	}
 
 	//Normal of a traingle is (p1 - p0) x (p2 - p0)
-	const FAMath::Vector3D& Triangle::GetNormal() const
+	FAMath::Vector3D Triangle::GetNormal() const
 	{
 		FAMath::Vector3D p01{ mVertexList[mIndexList[1]].position - mVertexList[mIndexList[0]].position };
 		FAMath::Vector3D p02{ mVertexList[mIndexList[2]].position - mVertexList[mIndexList[0]].position };
@@ -54,7 +54,7 @@ namespace FAShapes
 
 	//Center of a triangle is 
 	//< (x1 + x2 + x3) / 3, (y1 + y2 + y3) / 3, (z1 + z2 + z3) / 3 >
-	const FAMath::Vector3D &Triangle::GetCenter() const
+	FAMath::Vector3D Triangle::GetCenter() const
 	{
 		FAMath::Vector3D p0{ mVertexList[mIndexList[0]].position };
 		FAMath::Vector3D p1{ mVertexList[mIndexList[1]].position };

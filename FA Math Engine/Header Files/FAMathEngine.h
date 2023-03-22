@@ -8,7 +8,7 @@
 
 
 #define EPSILON 1e-6f
-#define PI 3.14159265
+#define PI 3.14159f
 
 /** @namespace FAMath
 *	@brief Has utility functions, Vector2D, Vector3D, Vector4D, Matrix4x4, and Quaternion classes.
@@ -295,7 +295,7 @@ namespace FAMath
 		//v = (r, theta)
 		//x = rcos((theta)
 		//y = rsin(theta)
-		float angle = v.GetY() * PI / 180.0f;
+		float angle{ v.GetY() * PI / 180.0f };
 
 		return Vector2D(v.GetX() * cos(angle), v.GetX() * sin(angle));
 	}
@@ -316,7 +316,7 @@ namespace FAMath
 			return v;
 		}
 
-		double theta{ atan2(v.GetY(), v.GetX()) * 180.0f / PI };
+		float theta{ atan2(v.GetY(), v.GetX()) * 180.0f / PI };
 		return Vector2D(Length(v), theta);
 	}
 
@@ -629,7 +629,7 @@ namespace FAMath
 		//x = rcos(theta)
 		//y = rsin(theta)
 		//z = z
-		double angle{ v.GetY() * PI / 180.0f };
+		float angle{ v.GetY() * PI / 180.0f };
 
 		return Vector3D(v.GetX() * cos(angle), v.GetX() * sin(angle), v.GetZ());
 	}
@@ -650,7 +650,7 @@ namespace FAMath
 			return v;
 		}
 
-		double theta{ atan2(v.GetY(), v.GetX()) * 180.0 / PI };
+		float theta{ atan2(v.GetY(), v.GetX()) * 180.0f / PI };
 		return Vector3D(Length(v), theta, v.GetZ());
 	}
 
@@ -665,8 +665,8 @@ namespace FAMath
 		//y = pho * sin(phi) * sin(theta)
 		//z = pho * cos(theta);
 
-		double phi{ v.GetY() * PI / 180.0 };
-		double theta{ v.GetZ() * PI / 180.0 };
+		float phi{ v.GetY() * PI / 180.0f };
+		float theta{ v.GetZ() * PI / 180.0f };
 
 		return Vector3D(v.GetX() * sin(phi) * cos(theta), v.GetX() * sin(phi) * sin(theta), v.GetX() * cos(theta));
 	}
@@ -687,9 +687,9 @@ namespace FAMath
 			return v;
 		}
 
-		double pho{ Length(v) };
-		double phi{ acos(v.GetZ() / pho) * 180.0 / PI };
-		double theta{ atan2(v.GetY(), v.GetX()) * 180.0 / PI };
+		float pho{ Length(v) };
+		float phi{ acos(v.GetZ() / pho) * 180.0f / PI };
+		float theta{ atan2(v.GetY(), v.GetX()) * 180.0f / PI };
 
 		return Vector3D(pho, phi, theta);
 	}
@@ -1643,25 +1643,25 @@ namespace FAMath
 		//c = cos(angle)
 		//s = sin(angle)
 
-		double c = cos(angle * PI / 180.0);
-		double s = sin(angle * PI / 180.0);
+		float c = cos(angle * PI / 180.0f);
+		float s = sin(angle * PI / 180.0f);
 
 		Matrix4x4 r;
 
 		//1st row
-		r(0, 0) = c + (1.0 - c) * (x * x);
-		r(0, 1) = (1.0 - c) * (x * y) + (s * z);
-		r(0, 2) = (1.0 - c) * (x * z) - (s * y);
+		r(0, 0) = c + (1.0f - c) * (x * x);
+		r(0, 1) = (1.0f - c) * (x * y) + (s * z);
+		r(0, 2) = (1.0f - c) * (x * z) - (s * y);
 
 		//2nd row
-		r(1, 0) = (1.0 - c) * (x * y) - (s * z);
-		r(1, 1) = c + (1.0 - c) * (y * y);
-		r(1, 2) = (1.0 - c) * (y * z) + (s * x);
+		r(1, 0) = (1.0f - c) * (x * y) - (s * z);
+		r(1, 1) = c + (1.0f - c) * (y * y);
+		r(1, 2) = (1.0f - c) * (y * z) + (s * x);
 
 		//3rd row
-		r(2, 0) = (1.0 - c) * (x * z) + (s * y);
-		r(2, 1) = (1.0 - c) * (y * z) - (s * x);
-		r(2, 2) = c + (1.0 - c) * (z * z);
+		r(2, 0) = (1.0f - c) * (x * z) + (s * y);
+		r(2, 1) = (1.0f - c) * (y * z) - (s * x);
+		r(2, 2) = c + (1.0f - c) * (z * z);
 
 		return cm * r;
 	}
@@ -1756,7 +1756,7 @@ namespace FAMath
 		{
 			for (int j = 0; j < 4; ++j)
 			{
-				cA(i, j) = Cofactor(m, i, j);
+				cA(i, j) = static_cast<float>(Cofactor(m, i, j));
 			}
 		}
 
@@ -1773,7 +1773,7 @@ namespace FAMath
 		if (CompareDoubles(determinant, 0.0, EPSILON))
 			return Matrix4x4();
 
-		return Adjoint(m) * (1.0 / determinant);
+		return Adjoint(m) * (1.0f / static_cast<float>(determinant));
 	}
 
 
@@ -2001,9 +2001,9 @@ namespace FAMath
 		Vector3D thisVector(this->mX, this->mY, this->mZ);
 		Vector3D qVector(q.mX, q.mY, q.mZ);
 
-		double s{ (double)this->mScalar * q.mScalar };
-		double dP{ DotProduct(thisVector, qVector) };
-		double resultScalar{ s - dP };
+		float s{ this->mScalar * q.mScalar };
+		float dP{ DotProduct(thisVector, qVector) };
+		float resultScalar{ s - dP };
 
 		Vector3D a(this->mScalar * qVector);
 		Vector3D b(q.mScalar * thisVector);
@@ -2120,7 +2120,7 @@ namespace FAMath
 		if (IsZeroQuaternion(q))
 			return q;
 
-		double d{ Length(q) };
+		float d{ Length(q) };
 
 		return Quaternion(q.GetScalar() / d, q.GetX() / d, q.GetY() / d, q.GetZ() / d);
 	}
@@ -2137,7 +2137,7 @@ namespace FAMath
 
 		Quaternion conjugateOfQ(Conjugate(q));
 
-		double d{ Length(q) };
+		float d{ Length(q) };
 		d *= d;
 
 		return Quaternion(conjugateOfQ.GetScalar() / d, conjugateOfQ.GetX() / d, 
@@ -2154,9 +2154,9 @@ namespace FAMath
 		//vector part = sin(theta / 2) * axis
 		//the axis needs to be normalized
 
-		double ang{ angle / 2.0 };
-		double c{ cos(ang * PI / 180.0) };
-		double s{ sin(ang * PI / 180.0) };
+		float ang{ angle / 2.0f };
+		float c{ cos(ang * PI / 180.0f) };
+		float s{ sin(ang * PI / 180.0f) };
 
 		Vector3D axis(x, y, z);
 		axis = Norm(axis);
@@ -2174,9 +2174,9 @@ namespace FAMath
 		//vector part = sin(theta / 2) * axis
 		//the axis needs to be normalized
 
-		double ang{ angle / 2.0 };
-		double c{ cos(ang * PI / 180.0) };
-		double s{ sin(ang * PI / 180.0) };
+		float ang{ angle / 2.0f };
+		float c{ cos(ang * PI / 180.0f) };
+		float s{ sin(ang * PI / 180.0f) };
 
 		Vector3D axisN(Norm(axis));
 
@@ -2194,9 +2194,9 @@ namespace FAMath
 		//vector part = sin(theta / 2) * axis
 		//the axis needs to be normalized
 
-		double angle{ angAxis.GetX() / 2.0 };
-		double c{ cos(angle * PI / 180.0) };
-		double s{ sin(angle * PI / 180.0) };
+		float angle{ angAxis.GetX() / 2.0f };
+		float c{ cos(angle * PI / 180.0f) };
+		float s{ sin(angle * PI / 180.0f) };
 
 		Vector3D axis(angAxis.GetY(), angAxis.GetZ(), angAxis.GetW());
 		axis = Norm(axis);
@@ -2220,19 +2220,19 @@ namespace FAMath
 
 		float colMat[4][4] = {};
 
-		colMat[0][0] = 1.0 - 2.0 * q.GetY() * q.GetY() - 2.0 * q.GetZ() * q.GetZ();
-		colMat[0][1] = 2.0 * q.GetX() * q.GetY() - 2.0 * q.GetScalar() * q.GetZ();
-		colMat[0][2] = 2.0 * q.GetX() * q.GetZ() + 2.0 * q.GetScalar() * q.GetY();
+		colMat[0][0] = 1.0f - 2.0f * q.GetY() * q.GetY() - 2.0f * q.GetZ() * q.GetZ();
+		colMat[0][1] = 2.0f * q.GetX() * q.GetY() - 2.0f * q.GetScalar() * q.GetZ();
+		colMat[0][2] = 2.0f * q.GetX() * q.GetZ() + 2.0f * q.GetScalar() * q.GetY();
 		colMat[0][3] = 0.0f;
 
-		colMat[1][0] = 2.0 * q.GetX() * q.GetY() + 2.0 * q.GetScalar() * q.GetZ();
-		colMat[1][1] = 1.0 - 2.0 * q.GetX() * q.GetX() - 2.0 * q.GetZ() * q.GetZ();
-		colMat[1][2] = 2.0 * q.GetY() * q.GetZ() - 2.0 * q.GetScalar() * q.GetX();
+		colMat[1][0] = 2.0f * q.GetX() * q.GetY() + 2.0f * q.GetScalar() * q.GetZ();
+		colMat[1][1] = 1.0f - 2.0f * q.GetX() * q.GetX() - 2.0f * q.GetZ() * q.GetZ();
+		colMat[1][2] = 2.0f * q.GetY() * q.GetZ() - 2.0f * q.GetScalar() * q.GetX();
 		colMat[1][3] = 0.0f;
 
-		colMat[2][0] = 2.0 * q.GetX() * q.GetZ() - 2.0 * q.GetScalar() * q.GetY();
-		colMat[2][1] = 2.0 * q.GetY() * q.GetZ() + 2.0 * q.GetScalar() * q.GetX();
-		colMat[2][2] = 1.0 - 2.0 * q.GetX() * q.GetX() - 2.0 * q.GetY() * q.GetY();
+		colMat[2][0] = 2.0f * q.GetX() * q.GetZ() - 2.0f * q.GetScalar() * q.GetY();
+		colMat[2][1] = 2.0f * q.GetY() * q.GetZ() + 2.0f * q.GetScalar() * q.GetX();
+		colMat[2][2] = 1.0f - 2.0f * q.GetX() * q.GetX() - 2.0f * q.GetY() * q.GetY();
 		colMat[2][3] = 0.0f;
 
 		colMat[3][0] = 0.0f;
@@ -2259,19 +2259,19 @@ namespace FAMath
 
 		float rowMat[4][4] = {};
 
-		rowMat[0][0] = 1.0 - 2.0 * q.GetY() * q.GetY() - 2.0 * q.GetZ() * q.GetZ();
-		rowMat[0][1] = 2.0 * q.GetX() * q.GetY() + 2.0 * q.GetScalar() * q.GetZ();
-		rowMat[0][2] = 2.0 * q.GetX() * q.GetZ() - 2.0 * q.GetScalar() * q.GetY();
+		rowMat[0][0] = 1.0f - 2.0f * q.GetY() * q.GetY() - 2.0f * q.GetZ() * q.GetZ();
+		rowMat[0][1] = 2.0f * q.GetX() * q.GetY() + 2.0f * q.GetScalar() * q.GetZ();
+		rowMat[0][2] = 2.0f * q.GetX() * q.GetZ() - 2.0f * q.GetScalar() * q.GetY();
 		rowMat[0][3] = 0.0f;
 
-		rowMat[1][0] = 2.0 * q.GetX() * q.GetY() - 2.0 * q.GetScalar() * q.GetZ();
-		rowMat[1][1] = 1.0 - 2.0 * q.GetX() * q.GetX() - 2.0 * q.GetZ() * q.GetZ();
-		rowMat[1][2] = 2.0 * q.GetY() * q.GetZ() + 2.0 * q.GetScalar() * q.GetX();
+		rowMat[1][0] = 2.0f * q.GetX() * q.GetY() - 2.0f * q.GetScalar() * q.GetZ();
+		rowMat[1][1] = 1.0f - 2.0f * q.GetX() * q.GetX() - 2.0f * q.GetZ() * q.GetZ();
+		rowMat[1][2] = 2.0f * q.GetY() * q.GetZ() + 2.0f * q.GetScalar() * q.GetX();
 		rowMat[1][3] = 0.0f;
 
-		rowMat[2][0] = 2.0 * q.GetX() * q.GetZ() + 2.0 * q.GetScalar() * q.GetY();
-		rowMat[2][1] = 2.0 * q.GetY() * q.GetZ() - 2.0 * q.GetScalar() * q.GetX();
-		rowMat[2][2] = 1.0 - 2.0 * q.GetX() * q.GetX() - 2.0 * q.GetY() * q.GetY();
+		rowMat[2][0] = 2.0f * q.GetX() * q.GetZ() + 2.0f * q.GetScalar() * q.GetY();
+		rowMat[2][1] = 2.0f * q.GetY() * q.GetZ() - 2.0f * q.GetScalar() * q.GetX();
+		rowMat[2][2] = 1.0f - 2.0f * q.GetX() * q.GetX() - 2.0f * q.GetY() * q.GetY();
 		rowMat[2][3] = 0.0f;
 
 		rowMat[3][0] = 0.0f;

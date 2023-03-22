@@ -27,7 +27,7 @@ namespace FAWindow
 			throw std::runtime_error(errorMsg);
 		}
 
-		RECT desiredClientSize{ 0, 0, mWidth, mHeight };
+		RECT desiredClientSize{ 0, 0, (long)mWidth, (long)mHeight };
 
 		//Calulates the required size of the window to make sure the client window size is (WIDTH, HEIGHT)
 		//When the function returns, the structure contains the coordinates of the top-left and bottom-right corners of the window 
@@ -66,7 +66,7 @@ namespace FAWindow
 			throw std::runtime_error(errorMsg);
 		}
 
-		RECT desiredClientSize{ 0, 0, mWidth, mHeight };
+		RECT desiredClientSize{ 0, 0, (long)mWidth,(long)mHeight };
 
 		//Calulates the required size of the window to make sure the client window size is (WIDTH, HEIGHT)
 		//When the function returns, the structure contains the coordinates of the top-left and bottom-right corners of the window 

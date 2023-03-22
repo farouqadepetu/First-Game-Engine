@@ -174,8 +174,8 @@ namespace FARender
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRTVHeap;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDSVHeap;
 
-		D3D12_VIEWPORT mViewport;
-		D3D12_RECT mScissor;
+		D3D12_VIEWPORT mViewport{};
+		D3D12_RECT mScissor{};
 
 		bool mMSAA4xSupported = false;
 		bool mIsMSAAEnabled = false;

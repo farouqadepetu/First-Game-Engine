@@ -66,7 +66,7 @@ namespace FARender
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> mIndexDefaultBuffer;
 		Microsoft::WRL::ComPtr<ID3D12Resource> mIndexUploadBuffer;
-		D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
+		D3D12_INDEX_BUFFER_VIEW mIndexBufferView{};
 	};
 
 	/** @class ConstantBuffer ""
