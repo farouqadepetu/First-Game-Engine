@@ -22,7 +22,7 @@ namespace FARender
 	class DeviceResources
 	{
 	public:
-		DeviceResources();
+		DeviceResources() = default;
 
 		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle);
 
