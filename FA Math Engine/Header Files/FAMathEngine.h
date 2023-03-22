@@ -15,13 +15,10 @@
 */
 namespace FAMath
 {
-	class Vector2D;
-	class Vector3D;
-	class Vector4D;
 
 	/*@brief Checks if the two specified floats are equal using exact epsilion and adaptive epsilion.
 	*/
-	inline bool compareFloats(float x, float y, float epsilon)
+	inline bool CompareFloats(float x, float y, float epsilon)
 	{
 		float diff = fabs(x - y);
 		//exact epsilon
@@ -36,7 +33,7 @@ namespace FAMath
 
 	/*@brief Checks if the two specified doubles are equal using exact epsilion and adaptive epsilion.
 	*/
-	inline bool compareDoubles(double x, double y, double epsilon)
+	inline bool CompareDoubles(double x, double y, double epsilon)
 	{
 		double diff = fabs(x - y);
 		//exact epsilon
@@ -60,7 +57,6 @@ namespace FAMath
 	{
 	public:
 
-
 		/**@brief Default Constructor.
 		*
 		*	Creates a new 2D vector/point with the components initialized to 0.0.
@@ -73,21 +69,21 @@ namespace FAMath
 		*/
 		Vector2D(float x, float y);
 
-		/**@brief Returns a reference to the x component.
+		/**@brief Returns the x component.
 		*/
-		float& x();
+		float GetX() const;
 
-		/**@brief Returns a reference to the y component.
+		/**@brief Returns y component.
 		*/
-		float& y();
+		float GetY() const;
 
-		/**@brief Returns a constant reference to the x component.
+		/**@brief Sets the x component to the specified value.
 		*/
-		const float& x() const;
+		void SetX(float x);
 
-		/**@brief Returns a constant reference to the y component.
+		/**@brief Sets the y component to the specified value.
 		*/
-		const float& y() const;
+		void SetY(float y);
 
 		/**@brief 2D vector addition through overloading operator +=.
 		*/
@@ -99,27 +95,27 @@ namespace FAMath
 
 		/**@brief 2D vector scalar multiplication through overloading operator *=.
 		*/
-		Vector2D& operator*=(const float& k);
+		Vector2D& operator*=(float k);
 
 		/**@brief 2D vector scalar division through overloading operator /=.
 		*
 		* If k is zero, the vector is unchanged.
 		*/
-		Vector2D& operator/=(const float& k);
+		Vector2D& operator/=(float k);
 
 	private:
-		float m_x;
-		float m_y;
+		float mX;
+		float mY;
 	};
 
 
 	//--------------------------------------------------------------------------------------
 	//Vector2D Constructors
 
-	inline Vector2D::Vector2D() : m_x{ 0.0f }, m_y{ 0.0f }
+	inline Vector2D::Vector2D() : mX{ 0.0f }, mY{ 0.0f }
 	{}
 
-	inline Vector2D::Vector2D(float x, float y) : m_x{ x }, m_y{ y }
+	inline Vector2D::Vector2D(float x, float y) : mX{ x }, mY{ y }
 	{}
 
 	//--------------------------------------------------------------------------------------
@@ -127,24 +123,24 @@ namespace FAMath
 	//--------------------------------------------------------------------------------------
 	//Vector2D Getters and Setters
 
-	inline float& Vector2D::x()
+	inline float Vector2D::GetX() const
 	{
-		return m_x;
+		return mX;
 	}
 
-	inline float& Vector2D::y()
+	inline float Vector2D::GetY() const
 	{
-		return m_y;
+		return mY;
 	}
 
-	inline const float& Vector2D::x() const
+	inline void Vector2D::SetX(float x)
 	{
-		return m_x;
+		mX = x;
 	}
 
-	inline const float& Vector2D::y() const
+	inline void Vector2D::SetY(float y)
 	{
-		return m_y;
+		mY = y;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -155,37 +151,37 @@ namespace FAMath
 
 	inline Vector2D& Vector2D::operator+=(const Vector2D& b)
 	{
-		this->m_x += (double)b.m_x;
-		this->m_y += (double)b.m_y;
+		this->mX += b.mX;
+		this->mY += b.mY;
 
 		return *this;
 	}
 
 	inline Vector2D& Vector2D::operator-=(const Vector2D& b)
 	{
-		this->m_x -= (double)b.m_x;
-		this->m_y -= (double)b.m_y;
+		this->mX -= b.mX;
+		this->mY -= b.mY;
 
 		return *this;
 	}
 
-	inline Vector2D& Vector2D::operator*=(const float& k)
+	inline Vector2D& Vector2D::operator*=(float k)
 	{
-		this->m_x *= (double)k;
-		this->m_y *= (double)k;
+		this->mX *= k;
+		this->mY *= k;
 
 		return *this;
 	}
 
-	inline Vector2D& Vector2D::operator/=(const float& k)
+	inline Vector2D& Vector2D::operator/=(float k)
 	{
-		if (compareFloats(k, 0.0f, EPSILON))
+		if (CompareFloats(k, 0.0f, EPSILON))
 		{
 			return *this;
 		}
 
-		this->m_x /= (double)k;
-		this->m_y /= (double)k;
+		this->mX /= k;
+		this->mY /= k;
 
 		return *this;
 	}
@@ -197,9 +193,9 @@ namespace FAMath
 
 	/**@brief Returns true if a is the zero vector.
 	*/
-	inline bool zeroVector(const Vector2D& a)
+	inline bool ZeroVector(const Vector2D& a)
 	{
-		if (compareFloats(a.x(), 0.0f, EPSILON) && compareFloats(a.y(), 0.0f, EPSILON))
+		if (CompareFloats(a.GetX(), 0.0f, EPSILON) && CompareFloats(a.GetY(), 0.0f, EPSILON))
 		{
 			return true;
 		}
@@ -211,37 +207,37 @@ namespace FAMath
 	*/
 	inline Vector2D operator+(const Vector2D& a, const Vector2D& b)
 	{
-		return Vector2D((double)a.x() + b.x(), (double)a.y() + b.y());
+		return Vector2D(a.GetX() + b.GetX(), a.GetY() + b.GetY());
 	}
 
 	/**@brief 2D vector negation.
 	*/
 	inline Vector2D operator-(const Vector2D& v)
 	{
-		return Vector2D(-v.x(), -v.y());
+		return Vector2D(-v.GetX(), -v.GetY());
 	}
 
 	/**@brief 2D vector subtraction.
 	*/
 	inline Vector2D operator-(const Vector2D& a, const Vector2D& b)
 	{
-		return Vector2D((double)a.x() - b.x(), (double)a.y() - b.y());
+		return Vector2D(a.GetX() - b.GetX(), a.GetY() - b.GetY());
 	}
 
 	/**@brief 2D vector scalar multiplication.
 	* Returns a * k, where a is a vector and k is a scalar(float)
 	*/
-	inline Vector2D operator*(const Vector2D& a, const float& k)
+	inline Vector2D operator*(const Vector2D& a, float k)
 	{
-		return Vector2D((double)a.x() * k, (double)a.y() * k);
+		return Vector2D(a.GetX() * k, a.GetY() * k);
 	}
 
 	/**@brief 2D vector scalar multiplication.
 	* Returns k * a,  where a is a vector and k is a scalar(float)
 	*/
-	inline Vector2D operator*(const float& k, const Vector2D& a)
+	inline Vector2D operator*(float k, const Vector2D& a)
 	{
-		return Vector2D((double)k * a.x(), (double)k * a.y());
+		return Vector2D(k * a.GetX(), k * a.GetY());
 	}
 
 	/**@brief 2D vector scalar division.
@@ -250,44 +246,44 @@ namespace FAMath
 	*/
 	inline Vector2D operator/(const Vector2D& a, const float& k)
 	{
-		if (compareFloats(k, 0.0f, EPSILON))
+		if (CompareFloats(k, 0.0f, EPSILON))
 		{
 			return Vector2D();
 		}
 
-		return Vector2D(a.x() / (double)k, a.y() / (double)k);
+		return Vector2D(a.GetX() / k, a.GetY() / k);
 	}
 
 	/**@brief Returns the dot product between two 2D vectors.
 	*/
-	inline float dotProduct(const Vector2D& a, const Vector2D& b)
+	inline float DotProduct(const Vector2D& a, const Vector2D& b)
 	{
-		return (double)a.x() * b.x() + (double)a.y() * b.y();
+		return a.GetX() * b.GetX() + a.GetY() * b.GetY();
 	}
 
 	/**@brief Returns the length(magnitude) of the 2D vector v.
 	*/
-	inline float length(const Vector2D& v)
+	inline float Length(const Vector2D& v)
 	{
-		return sqrt((double)v.x() * v.x() + (double)v.y() * v.y());
+		return sqrt(v.GetX() * v.GetX() + v.GetY() * v.GetY());
 	}
 
 	/**@brief Normalizes the 2D vector v.
 	* If the 2D vector is the zero vector v is returned.
 	*/
-	inline Vector2D norm(const Vector2D& v)
+	inline Vector2D Norm(const Vector2D& v)
 	{
 		//norm(v) = v / length(v) == (vx / length(v), vy / length(v))
 		
 		//v is the zero vector
-		if (zeroVector(v))
+		if (ZeroVector(v))
 		{
 			return v;
 		}
 
-		double mag = length(v);
+		float mag{ Length(v) };
 
-		return Vector2D(v.x() / mag, v.y() / mag);
+		return Vector2D(v.GetX() / mag, v.GetY() / mag);
 	}
 
 	/**@brief Converts the 2D vector v from polar coordinates to cartesian coordinates.
@@ -299,9 +295,9 @@ namespace FAMath
 		//v = (r, theta)
 		//x = rcos((theta)
 		//y = rsin(theta)
-		float angle = v.y() * PI / 180.0f;
+		float angle = v.GetY() * PI / 180.0f;
 
-		return Vector2D(v.x() * cos(angle), v.x() * sin(angle));
+		return Vector2D(v.GetX() * cos(angle), v.GetX() * sin(angle));
 	}
 
 	/**@brief Converts the 2D vector v from cartesian coordinates to polar coordinates.
@@ -315,13 +311,13 @@ namespace FAMath
 		//r = sqrt(vx^2 + vy^2)
 		//theta = arctan(y / x)
 
-		if (compareFloats(v.x(), 0.0f, EPSILON))
+		if (CompareFloats(v.GetX(), 0.0f, EPSILON))
 		{
 			return v;
 		}
 
-		double theta{ atan2(v.y(), v.x()) * 180.0 / PI };
-		return Vector2D(length(v), theta);
+		double theta{ atan2(v.GetY(), v.GetX()) * 180.0f / PI };
+		return Vector2D(Length(v), theta);
 	}
 
 	/**@brief Returns a 2D vector that is the projection of a onto b.
@@ -332,15 +328,15 @@ namespace FAMath
 		//Projb(a) = (a dot b)b
 		//normalize b before projecting
 
-		Vector2D normB(norm(b));
-		return Vector2D(dotProduct(a, normB) * normB);
+		Vector2D normB(Norm(b));
+		return Vector2D(DotProduct(a, normB) * normB);
 	}
 
 
 #if defined(_DEBUG)
 	inline void print(const Vector2D& v)
 	{
-		std::cout << "(" << v.x() << ", " << v.y() << ")";
+		std::cout << "(" << v.GetX() << ", " << v.GetY() << ")";
 	}
 #endif
 	//-------------------------------------------------------------------------------------
@@ -371,29 +367,29 @@ namespace FAMath
 		*/
 		Vector3D(float x, float y, float z);
 
-		/**@brief Returns a reference to the x component.
+		/**@brief Returns the x component.
 		*/
-		float& x();
+		float GetX() const;
 
-		/**@brief Returns a reference to the y component.
+		/**@brief Returns y component.
 		*/
-		float& y();
+		float GetY() const;
 
-		/**@brief Returns a reference to the z component.
+		/**@brief Returns the z component.
 		*/
-		float& z();
+		float GetZ() const;
 
-		/**@brief Returns a constant reference to the x component.
+		/**@brief Sets the x component to the specified value.
 		*/
-		const float& x() const;
+		void SetX(float x);
 
-		/**@brief Returns a constant reference to the y component.
+		/**@brief Sets the y component to the specified value.
 		*/
-		const float& y() const;
+		void SetY(float y);
 
-		/**@brief Returns a constant reference to the z component.
+		/**@brief Sets the z component to the specified value.
 		*/
-		const float& z() const;
+		void SetZ(float z);
 
 		/**@brief 3D vector addition through overloading operator +=.
 		*/
@@ -405,27 +401,27 @@ namespace FAMath
 
 		/**@brief 3D vector scalar multiplication through overloading operator *=.
 		*/
-		Vector3D& operator*=(const float& k);
+		Vector3D& operator*=(float k);
 
 		/**@brief 3D vector scalar division through overloading operator /=.
 		*
 		* If k is zero, the vector is unchanged.
 		*/
-		Vector3D& operator/=(const float& k);
+		Vector3D& operator/=(float k);
 
 	private:
-		float m_x;
-		float m_y;
-		float m_z;
+		float mX;
+		float mY;
+		float mZ;
 	};
 
 	//--------------------------------------------------------------------------------------
 	//Vector3D Constructors
 
-	inline Vector3D::Vector3D() : m_x{ 0.0f }, m_y{ 0.0f }, m_z{ 0.0f }
+	inline Vector3D::Vector3D() : mX{ 0.0f }, mY{ 0.0f }, mZ{ 0.0f }
 	{}
 
-	inline Vector3D::Vector3D(float x, float y, float z) : m_x{ x }, m_y{ y }, m_z{ z }
+	inline Vector3D::Vector3D(float x, float y, float z) : mX{ x }, mY{ y }, mZ{ z }
 	{}
 
 	//--------------------------------------------------------------------------------------
@@ -433,34 +429,34 @@ namespace FAMath
 	//--------------------------------------------------------------------------------------
 	//Vector3D Getters and Setters
 
-	inline float& Vector3D::x()
+	inline float Vector3D::GetX() const
 	{
-		return m_x;
+		return mX;
 	}
 
-	inline float& Vector3D::y()
+	inline float Vector3D::GetY() const
 	{
-		return m_y;
+		return mY;
 	}
 
-	inline float& Vector3D::z()
+	inline float Vector3D::GetZ() const
 	{
-		return m_z;
+		return mZ;
 	}
 
-	inline const float& Vector3D::x() const
+	inline void Vector3D::SetX(float x)
 	{
-		return m_x;
+		mX = x;
 	}
 
-	inline const float& Vector3D::y() const
+	inline void Vector3D::SetY(float y)
 	{
-		return m_y;
+		mY = y;
 	}
 
-	inline const float& Vector3D::z() const
+	inline void Vector3D::SetZ(float z)
 	{
-		return m_z;
+		mZ = z;
 	}
 	//--------------------------------------------------------------------------------------
 
@@ -470,41 +466,41 @@ namespace FAMath
 
 	inline Vector3D& Vector3D::operator+=(const Vector3D& b)
 	{
-		this->m_x += (double)b.m_x;
-		this->m_y += (double)b.m_y;
-		this->m_z += (double)b.m_z;
+		this->mX += b.mX;
+		this->mY += b.mY;
+		this->mZ += b.mZ;
 
 		return *this;
 	}
 
 	inline Vector3D& Vector3D::operator-=(const Vector3D& b)
 	{
-		this->m_x -= (double)b.m_x;
-		this->m_y -= (double)b.m_y;
-		this->m_z -= (double)b.m_z;
+		this->mX -= b.mX;
+		this->mY -= b.mY;
+		this->mZ -= b.mZ;
 
 		return *this;
 	}
 
-	inline Vector3D& Vector3D::operator*=(const float& k)
+	inline Vector3D& Vector3D::operator*=(float k)
 	{
-		this->m_x *= (double)k;
-		this->m_y *= (double)k;
-		this->m_z *= (double)k;
+		this->mX *= k;
+		this->mY *= k;
+		this->mZ *= k;
 
 		return *this;
 	}
 
-	inline Vector3D& Vector3D::operator/=(const float& k)
+	inline Vector3D& Vector3D::operator/=(float k)
 	{
-		if (compareFloats(k, 0.0f, EPSILON))
+		if (CompareFloats(k, 0.0f, EPSILON))
 		{
 			return *this;
 		}
 
-		this->m_x /= (double)k;
-		this->m_y /= (double)k;
-		this->m_z /= (double)k;
+		this->mX /= k;
+		this->mY /= k;
+		this->mZ /= k;
 
 		return *this;
 	}
@@ -516,10 +512,10 @@ namespace FAMath
 
 	/**@brief Returns true if a is the zero vector.
 	*/
-	inline bool zeroVector(const Vector3D& a)
+	inline bool ZeroVector(const Vector3D& a)
 	{
-		if (compareFloats(a.x(), 0.0f, EPSILON) && compareFloats(a.y(), 0.0f, EPSILON) &&
-			compareFloats(a.z(), 0.0f, EPSILON))
+		if (CompareFloats(a.GetX(), 0.0f, EPSILON) && CompareFloats(a.GetY(), 0.0f, EPSILON) &&
+			CompareFloats(a.GetZ(), 0.0f, EPSILON))
 		{
 			return true;
 		}
@@ -531,96 +527,96 @@ namespace FAMath
 	*/
 	inline Vector3D operator+(const Vector3D& a, const Vector3D& b)
 	{
-		return Vector3D((double)a.x() + b.x(), (double)a.y() + b.y(), (double)a.z() + b.z());
+		return Vector3D(a.GetX() + b.GetX(), a.GetY() + b.GetY(), a.GetZ() + b.GetZ());
 	}
 
 	/**@brief 3D vector negeation.
 	*/
 	inline Vector3D operator-(const Vector3D& v)
 	{
-		return Vector3D(-v.x(), -v.y(), -v.z());
+		return Vector3D(-v.GetX(), -v.GetY(), -v.GetZ());
 	}
 
 	/**@brief 3D vector subtraction.
 	*/
 	inline Vector3D operator-(const Vector3D& a, const Vector3D& b)
 	{
-		return Vector3D(a.x() - b.x(), a.y() - b.y(), a.z() - b.z());
+		return Vector3D(a.GetX() - b.GetX(), a.GetY() - b.GetY(), a.GetZ() - b.GetZ());
 	}
 
 	/**@brief 3D vector scalar multiplication.
 	* Returns a * k, where a is a vector and k is a scalar(float)
 	*/
-	inline Vector3D operator*(const Vector3D& a, const float& k)
+	inline Vector3D operator*(const Vector3D& a, float k)
 	{
-		return Vector3D(a.x() * (double)k, a.y() * (double)k, a.z() * (double)k);
+		return Vector3D(a.GetX() * k, a.GetY() * k, a.GetZ() * k);
 	}
 
 	/**@brief 3D vector scalar multiplication.
 	* Returns k * a,  where a is a vector and k is a scalar(float)
 	*/
-	inline Vector3D operator*(const float& k, const Vector3D& a)
+	inline Vector3D operator*(float k, const Vector3D& a)
 	{
-		return Vector3D((double)k * a.x(), (double)k * a.y(), (double)k * a.z());
+		return Vector3D(k * a.GetX(), k * a.GetY(), k * a.GetZ());
 	}
 
 	/**@brief 3D vector scalar division.
 	* Returns a / k,  where a is a vector and k is a scalar(float)
 	* If k = 0 the returned vector is the zero vector.
 	*/
-	inline Vector3D operator/(const Vector3D& a, const float& k)
+	inline Vector3D operator/(const Vector3D& a, float k)
 	{
-		if (compareFloats(k, 0.0f, EPSILON))
+		if (CompareFloats(k, 0.0f, EPSILON))
 		{
 			return Vector3D();
 		}
 
-		return Vector3D(a.x() / (double)k, a.y() / (double)k, a.z() / (double)k);
+		return Vector3D(a.GetX() / k, a.GetY() / k, a.GetZ() / k);
 	}
 
 	/**@brief Returns the dot product between two 3D vectors.
 	*/
-	inline float dotProduct(const Vector3D& a, const Vector3D& b)
+	inline float DotProduct(const Vector3D& a, const Vector3D& b)
 	{
 		//a dot b = axbx + ayby + azbz
-		return (double)a.x() * b.x() + (double)a.y() * b.y() + (double)a.z() * b.z();
+		return a.GetX() * b.GetX() + a.GetY() * b.GetY() + a.GetZ() * b.GetZ();
 	}
 
 	/**@brief Returns the cross product between two 3D vectors.
 	*/
-	inline Vector3D crossProduct(const Vector3D& a, const Vector3D& b)
+	inline Vector3D CrossProduct(const Vector3D& a, const Vector3D& b)
 	{
 		//a x b = (aybz - azby, azbx - axbz, axby - aybx)
 
-		return Vector3D((double)a.y() * b.z() - (double)a.z() * b.y(),
-			(double)a.z() * b.x() - (double)a.x() * b.z(),
-			(double)a.x() * b.y() - (double)a.y() * b.x());
+		return Vector3D(a.GetY() * b.GetZ() - a.GetZ() * b.GetY(),
+			a.GetZ() * b.GetX() - a.GetX() * b.GetZ(),
+			a.GetX() * b.GetY() - a.GetY() * b.GetX());
 	}
 
 	/**@brief Returns the length(magnitude) of the 3D vector v.
 	*/
-	inline float length(const Vector3D& v)
+	inline float Length(const Vector3D& v)
 	{
 		//length(v) = sqrt(vx^2 + vy^2 + vz^2)
 
-		return sqrt((double)v.x() * v.x() + (double)v.y() * v.y() + (double)v.z() * v.z());
+		return sqrt(v.GetX() * v.GetX() + v.GetY() * v.GetY() + v.GetZ() * v.GetZ());
 	}
 
 	/**@brief Normalizes the 3D vector v.
 	* If the 3D vector is the zero vector v is returned.
 	*/
-	inline Vector3D norm(const Vector3D& v)
+	inline Vector3D Norm(const Vector3D& v)
 	{
 		//norm(v) = v / length(v) == (vx / length(v), vy / length(v))
 		//v is the zero vector
-		if (zeroVector(v))
+		if (ZeroVector(v))
 		{
 			return v;
 		}
 
-		double mag = length(v);
+		float mag{ Length(v) };
 
-		return Vector3D(v.x() / mag, v.y() / mag, v.z() / mag);
+		return Vector3D(v.GetX() / mag, v.GetY() / mag, v.GetZ() / mag);
 	}
 
 	/**@brief Converts the 3D vector v from cylindrical coordinates to cartesian coordinates.
@@ -633,9 +629,9 @@ namespace FAMath
 		//x = rcos(theta)
 		//y = rsin(theta)
 		//z = z
-		double angle = v.y() * PI / 180.0;
+		double angle{ v.GetY() * PI / 180.0f };
 
-		return Vector3D(v.x() * cos(angle), v.x() * sin(angle), v.z());
+		return Vector3D(v.GetX() * cos(angle), v.GetX() * sin(angle), v.GetZ());
 	}
 
 	/**@brief Converts the 3D vector v from cartesian coordinates to cylindrical coordinates.
@@ -649,13 +645,13 @@ namespace FAMath
 		//r = sqrt(vx^2 + vy^2 + vz^2)
 		//theta = arctan(y / x)
 		//z = z
-		if (compareFloats(v.x(), 0.0f, EPSILON))
+		if (CompareFloats(v.GetX(), 0.0f, EPSILON))
 		{
 			return v;
 		}
 
-		double theta{ atan2(v.y(), v.x()) * 180.0 / PI };
-		return Vector3D(length(v), theta, v.z());
+		double theta{ atan2(v.GetY(), v.GetX()) * 180.0 / PI };
+		return Vector3D(Length(v), theta, v.GetZ());
 	}
 
 	/**@brief Converts the 3D vector v from spherical coordinates to cartesian coordinates.
@@ -669,10 +665,10 @@ namespace FAMath
 		//y = pho * sin(phi) * sin(theta)
 		//z = pho * cos(theta);
 
-		double phi{ v.y() * PI / 180.0 };
-		double theta{ v.z() * PI / 180.0 };
+		double phi{ v.GetY() * PI / 180.0 };
+		double theta{ v.GetZ() * PI / 180.0 };
 
-		return Vector3D(v.x() * sin(phi) * cos(theta), v.x() * sin(phi) * sin(theta), v.x() * cos(theta));
+		return Vector3D(v.GetX() * sin(phi) * cos(theta), v.GetX() * sin(phi) * sin(theta), v.GetX() * cos(theta));
 	}
 
 	/**@brief Converts the 3D vector v from cartesian coordinates to spherical coordinates.
@@ -686,14 +682,14 @@ namespace FAMath
 		//phi = arcos(z / pho)
 		//theta = arctan(y / x)
 
-		if (compareFloats(v.x(), 0.0f, EPSILON) || zeroVector(v))
+		if (CompareFloats(v.GetX(), 0.0f, EPSILON) || ZeroVector(v))
 		{
 			return v;
 		}
 
-		double pho{ length(v) };
-		double phi{ acos(v.z() / pho) * 180.0 / PI };
-		double theta{ atan2(v.y(), v.x()) * 180.0 / PI };
+		double pho{ Length(v) };
+		double phi{ acos(v.GetZ() / pho) * 180.0 / PI };
+		double theta{ atan2(v.GetY(), v.GetX()) * 180.0 / PI };
 
 		return Vector3D(pho, phi, theta);
 	}
@@ -706,25 +702,25 @@ namespace FAMath
 		//Projb(a) = (a dot b)b
 		//normalize b before projecting
 
-		Vector3D normB(norm(b));
-		return Vector3D(dotProduct(a, normB) * normB);
+		Vector3D normB(Norm(b));
+		return Vector3D(DotProduct(a, normB) * normB);
 	}
 
 	/**@brief Orthonormalizes the specified vectors.
 	* Uses Classical Gram-Schmidt.
 	*/
-	inline void orthonormalize(Vector3D& x, Vector3D& y, Vector3D& z)
+	inline void Orthonormalize(Vector3D& x, Vector3D& y, Vector3D& z)
 	{
-		x = norm(x);
-		y = norm(crossProduct(z, x));
-		z = norm(crossProduct(x, y));
+		x = Norm(x);
+		y = Norm(CrossProduct(z, x));
+		z = Norm(CrossProduct(x, y));
 	}
 
 
 #if defined(_DEBUG)
 	inline void print(const Vector3D& v)
 	{
-		std::cout << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")";
+		std::cout << "(" << v.GetX() << ", " << v.GetY() << ", " << v.GetZ() << ")";
 	}
 #endif
 	//-------------------------------------------------------------------------------------
@@ -754,49 +750,37 @@ namespace FAMath
 		*/
 		Vector4D(float x, float y, float z, float w);
 
-		/**@brief Overloaded Constructor.
-		*
-		*	Creates a new 4D vector/point with the components initialized to the arguments.
+		/**@brief Returns the x component.
 		*/
-		Vector4D(Vector2D v, float z = 0.0f, float w = 0.0f);
+		float GetX() const;
 
-		/**@brief Overloaded Constructor.
-		*
-		*	Creates a new 4D vector/point with the components initialized to the arguments.
+		/**@brief Returns the y component.
 		*/
-		Vector4D(Vector3D v, float w = 0.0f);
+		float GetY() const;
 
-		/**@brief Returns a reference to the x component.
+		/**@brief Returns the z component.
 		*/
-		float& x();
+		float GetZ() const;
 
-		/**@brief Returns a reference to the y component.
+		/**@brief Returns the w component.
 		*/
-		float& y();
+		float GetW() const;
 
-		/**@brief Returns a reference to the z component.
+		/**@brief Sets the x component to the specified value.
 		*/
-		float& z();
+		void SetX(float x);
 
-		/**@brief Returns a reference to the w component.
+		/**@brief Sets the y component to the specified value.
 		*/
-		float& w();
+		void SetY(float y);
 
-		/**@brief Returns a constant reference to the x component.
+		/**@brief Sets the z component to the specified value.
 		*/
-		const float& x() const;
+		void SetZ(float z);
 
-		/**@brief Returns a constant reference to the y component.
+		/**@brief Sets the w component to the specified value.
 		*/
-		const float& y() const;
-
-		/**@brief Returns a constant reference to the z component.
-		*/
-		const float& z() const;
-
-		/**@brief Returns a constant reference to the w component.
-		*/
-		const float& w() const;
+		void SetW(float w);
 
 		/**@brief 4D vector addition through overloading operator +=.
 		*/
@@ -808,34 +792,28 @@ namespace FAMath
 
 		/**@brief 4D vector scalar multiplication through overloading operator *=.
 		*/
-		Vector4D& operator*=(const float& k);
+		Vector4D& operator*=(float k);
 
 		/**@brief 4D vector scalar division through overloading operator /=.
 		*
 		* If k is zero, the vector is unchanged.
 		*/
-		Vector4D& operator/=(const float& k);
+		Vector4D& operator/=(float k);
 
 	private:
-		float m_x;
-		float m_y;
-		float m_z;
-		float m_w;
+		float mX;
+		float mY;
+		float mZ;
+		float mW;
 	};
 
 	//--------------------------------------------------------------------------------------
 	//Vector4D Constructors
 
-	inline Vector4D::Vector4D() : m_x{ 0.0f }, m_y{ 0.0f }, m_z{ 0.0f }, m_w{ 0.0f }
+	inline Vector4D::Vector4D() : mX{ 0.0f }, mY{ 0.0f }, mZ{ 0.0f }, mW{ 0.0f }
 	{}
 
-	inline Vector4D::Vector4D(float x, float y, float z, float w) : m_x{ x }, m_y{ y }, m_z{ z }, m_w{ w }
-	{}
-
-	inline Vector4D::Vector4D(Vector2D v, float z, float w) : m_x{ v.x() }, m_y{ v.y() }, m_z{ z }, m_w{ w }
-	{}
-
-	inline Vector4D::Vector4D(Vector3D v, float w) : m_x{ v.x() }, m_y{ v.y() }, m_z{ v.z() }, m_w{ w }
+	inline Vector4D::Vector4D(float x, float y, float z, float w) : mX{ x }, mY{ y }, mZ{ z }, mW{ w }
 	{}
 
 	//--------------------------------------------------------------------------------------
@@ -843,44 +821,44 @@ namespace FAMath
 	//--------------------------------------------------------------------------------------
 	//Vector4D Getters and Setters
 
-	inline float& Vector4D::x()
+	inline float Vector4D::GetX() const
 	{
-		return m_x;
+		return mX;
 	}
 
-	inline float& Vector4D::y()
+	inline float Vector4D::GetY() const
 	{
-		return m_y;
+		return mY;
 	}
 
-	inline float& Vector4D::z()
+	inline float Vector4D::GetZ() const
 	{
-		return m_z;
+		return mZ;
 	}
 
-	inline float& Vector4D::w()
+	inline float Vector4D::GetW() const
 	{
-		return m_w;
+		return mW;
 	}
 
-	inline const float& Vector4D::x() const
+	inline void Vector4D::SetX(float x)
 	{
-		return m_x;
+		mX = x;
 	}
 
-	inline const float& Vector4D::y() const
+	inline void Vector4D::SetY(float y)
 	{
-		return m_y;
+		mY = y;
 	}
 
-	inline const float& Vector4D::z() const
+	inline void Vector4D::SetZ(float z)
 	{
-		return m_z;
+		mZ = z;
 	}
 
-	inline const float& Vector4D::w() const
+	inline void Vector4D::SetW(float w)
 	{
-		return m_w;
+		mW = w;
 	}
 	//--------------------------------------------------------------------------------------
 
@@ -890,45 +868,45 @@ namespace FAMath
 
 	inline Vector4D& Vector4D::operator+=(const Vector4D& b)
 	{
-		this->m_x += (double)b.m_x;
-		this->m_y += (double)b.m_y;
-		this->m_z += (double)b.m_z;
-		this->m_w += (double)b.m_w;
+		this->mX += b.mX;
+		this->mY += b.mY;
+		this->mZ += b.mZ;
+		this->mW += b.mW;
 
 		return *this;
 	}
 
 	inline Vector4D& Vector4D::operator-=(const Vector4D& b)
 	{
-		this->m_x -= (double)b.m_x;
-		this->m_y -= (double)b.m_y;
-		this->m_z -= (double)b.m_z;
-		this->m_w -= (double)b.m_w;
+		this->mX -= b.mX;
+		this->mY -= b.mY;
+		this->mZ -= b.mZ;
+		this->mW -= b.mW;
 
 		return *this;
 	}
 
-	inline Vector4D& Vector4D::operator*=(const float& k)
+	inline Vector4D& Vector4D::operator*=(float k)
 	{
-		this->m_x *= (double)k;
-		this->m_y *= (double)k;
-		this->m_z *= (double)k;
-		this->m_w *= (double)k;
+		this->mX *= k;
+		this->mY *= k;
+		this->mZ *= k;
+		this->mW *= k;
 
 		return *this;
 	}
 
-	inline Vector4D& Vector4D::operator/=(const float& k)
+	inline Vector4D& Vector4D::operator/=(float k)
 	{
-		if (compareFloats(k, 0.0f, EPSILON))
+		if (CompareFloats(k, 0.0f, EPSILON))
 		{
 			return *this;
 		}
 
-		this->m_x /= (double)k;
-		this->m_y /= (double)k;
-		this->m_z /= (double)k;
-		this->m_w /= (double)k;
+		this->mX /= k;
+		this->mY /= k;
+		this->mZ /= k;
+		this->mW /= k;
 
 		return *this;
 	}
@@ -940,10 +918,10 @@ namespace FAMath
 
 	/**@brief Returns true if a is the zero vector.
 	*/
-	inline bool zeroVector(const Vector4D& a)
+	inline bool ZeroVector(const Vector4D& a)
 	{
-		if (compareFloats(a.x(), 0.0f, EPSILON) && compareFloats(a.y(), 0.0f, EPSILON) &&
-			compareFloats(a.z(), 0.0f, EPSILON) && compareFloats(a.w(), 0.0f, EPSILON))
+		if (CompareFloats(a.GetX(), 0.0f, EPSILON) && CompareFloats(a.GetY(), 0.0f, EPSILON) &&
+			CompareFloats(a.GetZ(), 0.0f, EPSILON) && CompareFloats(a.GetW(), 0.0f, EPSILON))
 		{
 			return true;
 		}
@@ -955,84 +933,84 @@ namespace FAMath
 	*/
 	inline Vector4D operator+(const Vector4D& a, const Vector4D& b)
 	{
-		return Vector4D((double)a.x() + b.x(), (double)a.y() + b.y(), (double)a.z() + b.z(), (double)a.w() + b.w());
+		return Vector4D(a.GetX() + b.GetX(), a.GetY() + b.GetY(), a.GetZ() + b.GetZ(), a.GetW() + b.GetW());
 	}
 
 	/**@brief 4D vector negation.
 	*/
 	inline Vector4D operator-(const Vector4D& v)
 	{
-		return Vector4D(-v.x(), -v.y(), -v.z(), -v.w());
+		return Vector4D(-v.GetX(), -v.GetY(), -v.GetZ(), -v.GetW());
 	}
 
 	/**@brief 4D vector subtraction.
 	*/
 	inline Vector4D operator-(const Vector4D& a, const Vector4D& b)
 	{
-		return Vector4D((double)a.x() - b.x(), (double)a.y() - b.y(), (double)a.z() - b.z(), (double)a.w() - b.w());
+		return Vector4D(a.GetX() - b.GetX(), a.GetY() - b.GetY(), a.GetZ() - b.GetZ(), a.GetW() - b.GetW());
 	}
 
 	/**@brief 4D vector scalar multiplication.
 	* Returns a * k, where a is a vector and k is a scalar(float)
 	*/
-	inline Vector4D operator*(const Vector4D& a, const float& k)
+	inline Vector4D operator*(const Vector4D& a, float k)
 	{
-		return Vector4D(a.x() * (double)k, a.y() * (double)k, a.z() * (double)k, a.w() * (double)k);
+		return Vector4D(a.GetX() * k, a.GetY() * k, a.GetZ() * k, a.GetW() * k);
 	}
 
 	/**@brief 4D vector scalar multiplication.
 	* Returns k * a,  where a is a vector and k is a scalar(float)
 	*/
-	inline Vector4D operator*(const float& k, const Vector4D& a)
+	inline Vector4D operator*(float k, const Vector4D& a)
 	{
-		return Vector4D((double)k * a.x(), (double)k * a.y(), (double)k * a.z(), (double)k * a.w());
+		return Vector4D(k * a.GetX(), k * a.GetY(), k * a.GetZ(), k * a.GetW());
 	}
 
 	/**@brief 4D vector scalar division.
 	* Returns a / k,  where a is a vector and k is a scalar(float)
 	* If k = 0 the returned vector is the zero vector.
 	*/
-	inline Vector4D operator/(const Vector4D& a, const float& k)
+	inline Vector4D operator/(const Vector4D& a, float k)
 	{
-		if (compareFloats(k, 0.0f, EPSILON))
+		if (CompareFloats(k, 0.0f, EPSILON))
 		{
 			return Vector4D();
 		}
 
-		return Vector4D(a.x() / (double)k, a.y() / (double)k, a.z() / (double)k, a.w() / (double)k);
+		return Vector4D(a.GetX() / k, a.GetY() / k, a.GetZ() / k, a.GetW() / k);
 	}
 
 	/**@brief Returns the dot product between two 4D vectors.
 	*/
-	inline float dotProduct(const Vector4D& a, const Vector4D& b)
+	inline float DotProduct(const Vector4D& a, const Vector4D& b)
 	{
 		//a dot b = axbx + ayby + azbz + awbw
-		return (double)a.x() * b.x() + (double)a.y() * b.y() + (double)a.z() * b.z() + (double)a.w() * b.w();
+		return a.GetX() * b.GetX() + a.GetY() * b.GetY() + a.GetZ() * b.GetZ() + a.GetW() * b.GetW();
 	}
 
 	/**@brief Returns the length(magnitude) of the 4D vector v.
 	*/
-	inline float length(const Vector4D& v)
+	inline float Length(const Vector4D& v)
 	{
 		//length(v) = sqrt(vx^2 + vy^2 + vz^2 + vw^2)
-		return sqrt((double)v.x() * v.x() + (double)v.y() * v.y() + (double)v.z() * v.z() + (double)v.w() * v.w());
+		return sqrt(v.GetX() * v.GetX() + v.GetY() * v.GetY() + v.GetZ() * v.GetZ() + v.GetW() * v.GetW());
 	}
 
 	/**@brief Normalizes the 4D vector v.
 	* If the 4D vector is the zero vector v is returned.
 	*/
-	inline Vector4D norm(const Vector4D& v)
+	inline Vector4D Norm(const Vector4D& v)
 	{
 		//norm(v) = v / length(v) == (vx / length(v), vy / length(v))
 		//v is the zero vector
-		if (zeroVector(v))
+		if (ZeroVector(v))
 		{
 			return v;
 		}
 
-		double mag = length(v);
+		float mag{ Length(v) };
 
-		return Vector4D(v.x() / mag, v.y() / mag, v.z() / mag, v.w() / mag);
+		return Vector4D(v.GetX() / mag, v.GetY() / mag, v.GetZ() / mag, v.GetW() / mag);
 	}
 
 	/**@brief Returns a 4D vector that is the projection of a onto b.
@@ -1042,15 +1020,15 @@ namespace FAMath
 	{
 		//Projb(a) = (a dot b)b
 		//normalize b before projecting
-		Vector4D normB(norm(b));
-		return Vector4D(dotProduct(a, normB) * normB);
+		Vector4D normB(Norm(b));
+		return Vector4D(DotProduct(a, normB) * normB);
 	}
 
 
 #if defined(_DEBUG)
 	inline void print(const Vector4D& v)
 	{
-		std::cout << "(" << v.x() << ", " << v.y() << ", " << v.z() << ", " << v.w() << ")";
+		std::cout << "(" << v.GetX() << ", " << v.GetY() << ", " << v.GetZ() << ", " << v.GetW() << ")";
 	}
 #endif
 	//-------------------------------------------------------------------------------------
@@ -1083,13 +1061,18 @@ namespace FAMath
 		*/
 		Matrix4x4(float a[][4]);
 
+		/**@brief Overloaded Constructor.
+		*	Creates a new 4x4 matrix with each row being set to the specified rows.
+		*/
+		Matrix4x4(const Vector4D& r1, const Vector4D& r2, const Vector4D& r3, const Vector4D& r4);
+
 		/**@brief Returns a pointer to the first element in the matrix.
 		*/
-		float* data();
+		float* Data();
 
 		/**@brief Returns a constant pointer to the first element in the matrix.
 		*/
-		const float* data() const;
+		const float* Data() const;
 
 		/**@brief Returns a constant reference to the element at the given (row, col).
 		* The row and col values should be between [0,3]. If any of them are out of that range, the first element will be returned.
@@ -1104,22 +1087,22 @@ namespace FAMath
 		/**@brief Returns specified row.
 		*  Row should be between [0,3]. If it is out of range the first row will be returned.
 		*/
-		Vector4D getRow(unsigned int row) const;
+		Vector4D GetRow(unsigned int row) const;
 
 		/**@brief Returns specified col.
 		*  Col should be between [0,3]. If it is out of range the first col will be returned.
 		*/
-		Vector4D getCol(unsigned int col) const;
+		Vector4D GetCol(unsigned int col) const;
 
 		/**@brief Sets each element in the given row to the components of vector v.
 		* Row should be between [0,3]. If it is out of range the first row will be set.
 		*/
-		void setRow(unsigned int row, Vector4D v);
+		void SetRow(unsigned int row, Vector4D v);
 
 		/**@brief Sets each element in the given col to the components of vector v.
 		* Col should be between [0,3]. If it is out of range the first col will be set.
 		*/
-		void setCol(unsigned int col, Vector4D v);
+		void SetCol(unsigned int col, Vector4D v);
 
 		/**@brief Adds this 4x4 matrix with given matrix m and stores the result in this 4x4 matrix.
 		*/
@@ -1131,8 +1114,7 @@ namespace FAMath
 
 		/**@brief Multiplies this 4x4 matrix with given scalar k and stores the result in this 4x4 matrix.
 		*/
-		Matrix4x4& operator*=(const float& k);
-
+		Matrix4x4& operator*=(float k);
 
 		/**@brief Multiplies this 4x4 matrix with given matrix m and stores the result in this 4x4 matrix.
 		*/
@@ -1140,35 +1122,35 @@ namespace FAMath
 
 	private:
 
-		float m_mat[4][4];
+		float mMat[4][4];
 	};
 
 	//-------------------------------------------------------------------------------------
 	inline Matrix4x4::Matrix4x4()
 	{
 		//1st row
-		m_mat[0][0] = 1.0f;
-		m_mat[0][1] = 0.0f;
-		m_mat[0][2] = 0.0f;
-		m_mat[0][3] = 0.0f;
+		mMat[0][0] = 1.0f;
+		mMat[0][1] = 0.0f;
+		mMat[0][2] = 0.0f;
+		mMat[0][3] = 0.0f;
 
 		//2nd
-		m_mat[1][0] = 0.0f;
-		m_mat[1][1] = 1.0f;
-		m_mat[1][2] = 0.0f;
-		m_mat[1][3] = 0.0f;
+		mMat[1][0] = 0.0f;
+		mMat[1][1] = 1.0f;
+		mMat[1][2] = 0.0f;
+		mMat[1][3] = 0.0f;
 
 		//3rd row
-		m_mat[2][0] = 0.0f;
-		m_mat[2][1] = 0.0f;
-		m_mat[2][2] = 1.0f;
-		m_mat[2][3] = 0.0f;
+		mMat[2][0] = 0.0f;
+		mMat[2][1] = 0.0f;
+		mMat[2][2] = 1.0f;
+		mMat[2][3] = 0.0f;
 
 		//4th row
-		m_mat[3][0] = 0.0f;
-		m_mat[3][1] = 0.0f;
-		m_mat[3][2] = 0.0f;
-		m_mat[3][3] = 1.0f;
+		mMat[3][0] = 0.0f;
+		mMat[3][1] = 0.0f;
+		mMat[3][2] = 0.0f;
+		mMat[3][3] = 1.0f;
 	}
 
 
@@ -1176,49 +1158,57 @@ namespace FAMath
 	inline Matrix4x4::Matrix4x4(float a[][4])
 	{
 		//1st row
-		m_mat[0][0] = a[0][0];
-		m_mat[0][1] = a[0][1];
-		m_mat[0][2] = a[0][2];
-		m_mat[0][3] = a[0][3];
+		mMat[0][0] = a[0][0];
+		mMat[0][1] = a[0][1];
+		mMat[0][2] = a[0][2];
+		mMat[0][3] = a[0][3];
 
 		//2nd
-		m_mat[1][0] = a[1][0];
-		m_mat[1][1] = a[1][1];
-		m_mat[1][2] = a[1][2];
-		m_mat[1][3] = a[1][3];
+		mMat[1][0] = a[1][0];
+		mMat[1][1] = a[1][1];
+		mMat[1][2] = a[1][2];
+		mMat[1][3] = a[1][3];
 
 		//3rd row
-		m_mat[2][0] = a[2][0];
-		m_mat[2][1] = a[2][1];
-		m_mat[2][2] = a[2][2];
-		m_mat[2][3] = a[2][3];
+		mMat[2][0] = a[2][0];
+		mMat[2][1] = a[2][1];
+		mMat[2][2] = a[2][2];
+		mMat[2][3] = a[2][3];
 
 		//4th row
-		m_mat[3][0] = a[3][0];
-		m_mat[3][1] = a[3][1];
-		m_mat[3][2] = a[3][2];
-		m_mat[3][3] = a[3][3];
+		mMat[3][0] = a[3][0];
+		mMat[3][1] = a[3][1];
+		mMat[3][2] = a[3][2];
+		mMat[3][3] = a[3][3];
 	}
 
-	inline float* Matrix4x4::data()
+	inline Matrix4x4::Matrix4x4(const Vector4D& r1, const Vector4D& r2, const Vector4D& r3, const Vector4D& r4)
 	{
-		return m_mat[0];
+		SetRow(0, r1);
+		SetRow(1, r2);
+		SetRow(2, r3);
+		SetRow(3, r4);
 	}
 
-	inline const float* Matrix4x4::data() const
+	inline float* Matrix4x4::Data()
 	{
-		return m_mat[0];
+		return mMat[0];
+	}
+
+	inline const float* Matrix4x4::Data() const
+	{
+		return mMat[0];
 	}
 
 	inline const float& Matrix4x4::operator()(unsigned int row, unsigned int col) const
 	{
 		if (row > 3 || col > 3)
 		{
-			return m_mat[0][0];
+			return mMat[0][0];
 		}
 		else
 		{
-			return m_mat[row][col];
+			return mMat[row][col];
 		}
 	}
 
@@ -1226,64 +1216,64 @@ namespace FAMath
 	{
 		if (row > 3 || col > 3)
 		{
-			return m_mat[0][0];
+			return mMat[0][0];
 		}
 		else
 		{
-			return m_mat[row][col];
+			return mMat[row][col];
 		}
 	}
 
-	inline Vector4D Matrix4x4::getRow(unsigned int row) const
+	inline Vector4D Matrix4x4::GetRow(unsigned int row) const
 	{
 		if (row < 0 || row > 3)
-			return Vector4D(m_mat[0][0], m_mat[0][1], m_mat[0][2], m_mat[0][3]);
+			return Vector4D(mMat[0][0], mMat[0][1], mMat[0][2], mMat[0][3]);
 		else
-			return Vector4D(m_mat[row][0], m_mat[row][1], m_mat[row][2], m_mat[row][3]);
+			return Vector4D(mMat[row][0], mMat[row][1], mMat[row][2], mMat[row][3]);
 		
 	}
 
-	inline Vector4D Matrix4x4::getCol(unsigned int col) const
+	inline Vector4D Matrix4x4::GetCol(unsigned int col) const
 	{
 		if (col < 0 || col > 3)
-			return Vector4D(m_mat[0][0], m_mat[1][0], m_mat[2][0], m_mat[3][0]);
+			return Vector4D(mMat[0][0], mMat[1][0], mMat[2][0], mMat[3][0]);
 		else
-			return Vector4D(m_mat[0][col], m_mat[1][col], m_mat[2][col], m_mat[3][col]);
+			return Vector4D(mMat[0][col], mMat[1][col], mMat[2][col], mMat[3][col]);
 	}
 
-	inline void Matrix4x4::setRow(unsigned int row, Vector4D v)
+	inline void Matrix4x4::SetRow(unsigned int row, Vector4D v)
 	{
 		if (row < 0 || row > 3)
 		{
-			m_mat[0][0] = v.x();
-			m_mat[0][1] = v.y();
-			m_mat[0][2] = v.z();
-			m_mat[0][3] = v.w();
+			mMat[0][0] = v.GetX();
+			mMat[0][1] = v.GetY();
+			mMat[0][2] = v.GetZ();
+			mMat[0][3] = v.GetW();
 		}
 		else
 		{
-			m_mat[row][0] = v.x();
-			m_mat[row][1] = v.y();
-			m_mat[row][2] = v.z();
-			m_mat[row][3] = v.w();
+			mMat[row][0] = v.GetX();
+			mMat[row][1] = v.GetY();
+			mMat[row][2] = v.GetZ();
+			mMat[row][3] = v.GetW();
 		}
 	}
 
-	inline void Matrix4x4::setCol(unsigned int col, Vector4D v)
+	inline void Matrix4x4::SetCol(unsigned int col, Vector4D v)
 	{
 		if (col < 0 || col > 3)
 		{
-			m_mat[0][0] = v.x();
-			m_mat[1][0] = v.y();
-			m_mat[2][0] = v.z();
-			m_mat[3][0] = v.w();
+			mMat[0][0] = v.GetX();
+			mMat[1][0] = v.GetY();
+			mMat[2][0] = v.GetZ();
+			mMat[3][0] = v.GetW();
 		}
 		else
 		{
-			m_mat[0][col] = v.x();
-			m_mat[1][col] = v.y();
-			m_mat[2][col] = v.z();
-			m_mat[3][col] = v.w();
+			mMat[0][col] = v.GetX();
+			mMat[1][col] = v.GetY();
+			mMat[2][col] = v.GetZ();
+			mMat[3][col] = v.GetW();
 		}
 	}
 
@@ -1293,7 +1283,7 @@ namespace FAMath
 		{
 			for (int j = 0; j < 4; ++j)
 			{
-				this->m_mat[i][j] += (double)m.m_mat[i][j];
+				this->mMat[i][j] += m.mMat[i][j];
 			}
 		}
 
@@ -1306,20 +1296,20 @@ namespace FAMath
 		{
 			for (int j = 0; j < 4; ++j)
 			{
-				this->m_mat[i][j] -= (double)m.m_mat[i][j];
+				this->mMat[i][j] -= m.mMat[i][j];
 			}
 		}
 
 		return *this;
 	}
 
-	inline Matrix4x4& Matrix4x4::operator*=(const float& k)
+	inline Matrix4x4& Matrix4x4::operator*=(float k)
 	{
 		for (int i = 0; i < 4; ++i)
 		{
 			for (int j = 0; j < 4; ++j)
 			{
-				this->m_mat[i][j] *= (double)k;
+				this->mMat[i][j] *= k;
 			}
 		}
 
@@ -1332,32 +1322,32 @@ namespace FAMath
 
 		for (int i = 0; i < 4; ++i)
 		{
-			res.m_mat[i][0] = ((double)m_mat[i][0] * m.m_mat[0][0]) +
-				((double)m_mat[i][1] * m.m_mat[1][0]) +
-				((double)m_mat[i][2] * m.m_mat[2][0]) +
-				((double)m_mat[i][3] * m.m_mat[3][0]);
+			res.mMat[i][0] = (mMat[i][0] * m.mMat[0][0]) +
+				(mMat[i][1] * m.mMat[1][0]) +
+				(mMat[i][2] * m.mMat[2][0]) +
+				(mMat[i][3] * m.mMat[3][0]);
 
-			res.m_mat[i][1] = ((double)m_mat[i][0] * m.m_mat[0][1]) +
-				((double)m_mat[i][1] * m.m_mat[1][1]) +
-				((double)m_mat[i][2] * m.m_mat[2][1]) +
-				((double)m_mat[i][3] * m.m_mat[3][1]);
+			res.mMat[i][1] = (mMat[i][0] * m.mMat[0][1]) +
+				(mMat[i][1] * m.mMat[1][1]) +
+				(mMat[i][2] * m.mMat[2][1]) +
+				(mMat[i][3] * m.mMat[3][1]);
 
-			res.m_mat[i][2] = ((double)m_mat[i][0] * m.m_mat[0][2]) +
-				((double)m_mat[i][1] * m.m_mat[1][2]) +
-				((double)m_mat[i][2] * m.m_mat[2][2]) +
-				((double)m_mat[i][3] * m.m_mat[3][2]);
+			res.mMat[i][2] = (mMat[i][0] * m.mMat[0][2]) +
+				(mMat[i][1] * m.mMat[1][2]) +
+				(mMat[i][2] * m.mMat[2][2]) +
+				(mMat[i][3] * m.mMat[3][2]);
 
-			res.m_mat[i][3] = ((double)m_mat[i][0] * m.m_mat[0][3]) +
-				((double)m_mat[i][1] * m.m_mat[1][3]) +
-				((double)m_mat[i][2] * m.m_mat[2][3]) +
-				((double)m_mat[i][3] * m.m_mat[3][3]);
+			res.mMat[i][3] = (mMat[i][0] * m.mMat[0][3]) +
+				(mMat[i][1] * m.mMat[1][3]) +
+				(mMat[i][2] * m.mMat[2][3]) +
+				(mMat[i][3] * m.mMat[3][3]);
 		}
 
 		for (int i = 0; i < 4; ++i)
 		{
 			for (int j = 0; j < 4; ++j)
 			{
-				m_mat[i][j] = res.m_mat[i][j];
+				mMat[i][j] = res.mMat[i][j];
 			}
 		}
 
@@ -1373,7 +1363,7 @@ namespace FAMath
 		{
 			for (int j = 0; j < 4; ++j)
 			{
-				res(i, j) = (double)m1(i, j) + m2(i, j);
+				res(i, j) = m1(i, j) + m2(i, j);
 			}
 		}
 
@@ -1405,7 +1395,7 @@ namespace FAMath
 		{
 			for (int j = 0; j < 4; ++j)
 			{
-				res(i, j) = (double)m1(i, j) - m2(i, j);
+				res(i, j) = m1(i, j) - m2(i, j);
 			}
 		}
 
@@ -1421,7 +1411,7 @@ namespace FAMath
 		{
 			for (int j = 0; j < 4; ++j)
 			{
-				res(i, j) = (double)m(i, j) * k;
+				res(i, j) = m(i, j) * k;
 			}
 		}
 
@@ -1437,7 +1427,7 @@ namespace FAMath
 		{
 			for (int j = 0; j < 4; ++j)
 			{
-				res(i, j) = k * (double)m(i, j);
+				res(i, j) = k * m(i, j);
 			}
 		}
 
@@ -1452,25 +1442,25 @@ namespace FAMath
 
 		for (int i = 0; i < 4; ++i)
 		{
-			res(i, 0) = ((double)m1(i, 0) * m2(0, 0)) +
-				((double)m1(i, 1) * m2(1, 0)) +
-				((double)m1(i, 2) * m2(2, 0)) +
-				((double)m1(i, 3) * m2(3, 0));
+			res(i, 0) = (m1(i, 0) * m2(0, 0)) +
+				(m1(i, 1) * m2(1, 0)) +
+				(m1(i, 2) * m2(2, 0)) +
+				(m1(i, 3) * m2(3, 0));
 
-			res(i, 1) = ((double)m1(i, 0) * m2(0, 1)) +
-				((double)m1(i, 1) * m2(1, 1)) +
-				((double)m1(i, 2) * m2(2, 1)) +
-				((double)m1(i, 3) * m2(3, 1));
+			res(i, 1) = (m1(i, 0) * m2(0, 1)) +
+				(m1(i, 1) * m2(1, 1)) +
+				(m1(i, 2) * m2(2, 1)) +
+				(m1(i, 3) * m2(3, 1));
 
-			res(i, 2) = ((double)m1(i, 0) * m2(0, 2)) +
-				((double)m1(i, 1) * m2(1, 2)) +
-				((double)m1(i, 2) * m2(2, 2)) +
-				((double)m1(i, 3) * m2(3, 2));
+			res(i, 2) = (m1(i, 0) * m2(0, 2)) +
+				(m1(i, 1) * m2(1, 2)) +
+				(m1(i, 2) * m2(2, 2)) +
+				(m1(i, 3) * m2(3, 2));
 
-			res(i, 3) = ((double)m1(i, 0) * m2(0, 3)) +
-				((double)m1(i, 1) * m2(1, 3)) +
-				((double)m1(i, 2) * m2(2, 3)) +
-				((double)m1(i, 3) * m2(3, 3));
+			res(i, 3) = (m1(i, 0) * m2(0, 3)) +
+				(m1(i, 1) * m2(1, 3)) +
+				(m1(i, 2) * m2(2, 3)) +
+				(m1(i, 3) * m2(3, 3));
 		}
 
 		return res;
@@ -1483,10 +1473,13 @@ namespace FAMath
 	{
 		Vector4D res;
 
-		res.x() = ((double)m(0, 0) * v.x() + (double)m(0, 1) * v.y() + (double)m(0, 2) * v.z() + (double)m(0, 3) * v.w());
-		res.y() = ((double)m(1, 0) * v.x() + (double)m(1, 1) * v.y() + (double)m(1, 2) * v.z() + (double)m(1, 3) * v.w());
-		res.z() = ((double)m(2, 0) * v.x() + (double)m(2, 1) * v.y() + (double)m(2, 2) * v.z() + (double)m(2, 3) * v.w());
-		res.w() = ((double)m(3, 0) * v.x() + (double)m(3, 1) * v.y() + (double)m(3, 2) * v.z() + (double)m(3, 3) * v.w());
+		res.SetX(m(0, 0) * v.GetX() + m(0, 1) * v.GetY() + m(0, 2) * v.GetZ() + m(0, 3) * v.GetW());
+
+		res.SetY(m(1, 0) * v.GetX() + m(1, 1) * v.GetY() + m(1, 2) * v.GetZ() + m(1, 3) * v.GetW());
+
+		res.SetZ(m(2, 0) * v.GetX() + m(2, 1) * v.GetY() + m(2, 2) * v.GetZ() + m(2, 3) * v.GetW());
+
+		res.SetW(m(3, 0) * v.GetX() + m(3, 1) * v.GetY() + m(3, 2) * v.GetZ() + m(3, 3) * v.GetW());
 
 		return res;
 	}
@@ -1498,17 +1491,20 @@ namespace FAMath
 	{
 		Vector4D res;
 
-		res.x() = ((double)v.x() * m(0, 0) + (double)v.y() * m(1, 0) + (double)v.z() * m(2, 0) + (double)v.w() * m(3, 0));
-		res.y() = ((double)v.x() * m(0, 1) + (double)v.y() * m(1, 1) + (double)v.z() * m(2, 1) + (double)v.w() * m(3, 1));
-		res.z() = ((double)v.x() * m(0, 2) + (double)v.y() * m(1, 2) + (double)v.z() * m(2, 2) + (double)v.w() * m(3, 2));
-		res.w() = ((double)v.x() * m(0, 3) + (double)v.y() * m(1, 3) + (double)v.z() * m(2, 3) + (double)v.w() * m(3, 3));
+		res.SetX(v.GetX() * m(0, 0) + v.GetY() * m(1, 0) + v.GetZ() * m(2, 0) + v.GetW() * m(3, 0));
+
+		res.SetY(v.GetX() * m(0, 1) + v.GetY() * m(1, 1) + v.GetZ() * m(2, 1) + v.GetW() * m(3, 1));
+
+		res.SetZ(v.GetX() * m(0, 2) + v.GetY() * m(1, 2) + v.GetZ() * m(2, 2) + v.GetW() * m(3, 2));
+
+		res.SetW(v.GetX() * m(0, 3) + v.GetY() * m(1, 3) + v.GetZ() * m(2, 3) + v.GetW() * m(3, 3));
 
 		return res;
 	}
 
 	/**@brief Sets the given matrix to the identity matrix.
 	*/
-	inline void setToIdentity(Matrix4x4& m)
+	inline void SetToIdentity(Matrix4x4& m)
 	{
 		//set to identity matrix by setting the diagonals to 1.0f and all other elements to 0.0f
 		
@@ -1539,7 +1535,7 @@ namespace FAMath
 
 	/**@brief Returns true if the given matrix is the identity matrix, false otherwise.
 	*/
-	inline bool isIdentity(const Matrix4x4& m)
+	inline bool IsIdentity(const Matrix4x4& m)
 	{
 		//Is the identity matrix if the diagonals are equal to 1.0f and all other elements equals to 0.0f
 
@@ -1549,17 +1545,15 @@ namespace FAMath
 			{
 				if (i == j)
 				{
-					if (!compareFloats(m(i, j), 1.0f, EPSILON))
-					{
+					if (!CompareFloats(m(i, j), 1.0f, EPSILON))
 						return false;
-					}
+					
 				}
 				else
 				{
-					if (!compareFloats(m(i, j), 0.0f, EPSILON))
-					{
+					if (!CompareFloats(m(i, j), 0.0f, EPSILON))
 						return false;
-					}
+					
 				}
 			}
 		}
@@ -1567,7 +1561,7 @@ namespace FAMath
 
 	/**@brief Returns the tranpose of the given matrix m.
 	*/
-	inline Matrix4x4 transpose(const Matrix4x4& m)
+	inline Matrix4x4 Transpose(const Matrix4x4& m)
 	{
 		//make the rows into cols
 
@@ -1603,7 +1597,7 @@ namespace FAMath
 	/**@brief Construct a 4x4 translation matrix with the given floats and post-multiply's it by the given matrix.
 	* cm = cm * translate
 	*/
-	inline Matrix4x4 translate(const Matrix4x4& cm, float x, float y, float z)
+	inline Matrix4x4 Translate(const Matrix4x4& cm, float x, float y, float z)
 	{
 		//1 0 0 0
 		//0 1 0 0
@@ -1621,7 +1615,7 @@ namespace FAMath
 	/**@brief Construct a 4x4 scaling matrix with the given floats and post-multiply's it by the given matrix.
 	* cm = cm * scale
 	*/
-	inline Matrix4x4 scale(const Matrix4x4& cm, float x, float y, float z)
+	inline Matrix4x4 Scale(const Matrix4x4& cm, float x, float y, float z)
 	{
 		//x 0 0 0
 		//0 y 0 0
@@ -1639,7 +1633,7 @@ namespace FAMath
 	/**@brief Construct a 4x4 rotation matrix with the given angle (in degrees) and axis (x, y, z) and post-multiply's it by the given matrix.
 	* cm = cm * rotate.\n
 	*/
-	inline Matrix4x4 rotate(const Matrix4x4& cm, float angle, float x, float y, float z)
+	inline Matrix4x4 Rotate(const Matrix4x4& cm, float angle, float x, float y, float z)
 	{
 
 		//c + (1 - c)x^2	(1 - c)xy + sz	(1 - c)xz - sy	0
@@ -1655,26 +1649,26 @@ namespace FAMath
 		Matrix4x4 r;
 
 		//1st row
-		r(0, 0) = c + (1.0 - c) * ((double)x * x);
-		r(0, 1) = (1.0 - c) * ((double)x * y) + (s * z);
-		r(0, 2) = (1.0 - c) * ((double)x * z) - (s * y);
+		r(0, 0) = c + (1.0 - c) * (x * x);
+		r(0, 1) = (1.0 - c) * (x * y) + (s * z);
+		r(0, 2) = (1.0 - c) * (x * z) - (s * y);
 
 		//2nd row
-		r(1, 0) = (1.0 - c) * ((double)x * y) - (s * z);
-		r(1, 1) = c + (1.0 - c) * ((double)y * y);
-		r(1, 2) = (1.0 - c) * ((double)y * z) + (s * x);
+		r(1, 0) = (1.0 - c) * (x * y) - (s * z);
+		r(1, 1) = c + (1.0 - c) * (y * y);
+		r(1, 2) = (1.0 - c) * (y * z) + (s * x);
 
 		//3rd row
-		r(2, 0) = (1.0 - c) * ((double)x * z) + (s * y);
-		r(2, 1) = (1.0 - c) * ((double)y * z) - (s * x);
-		r(2, 2) = c + (1.0 - c) * ((double)z * z);
+		r(2, 0) = (1.0 - c) * (x * z) + (s * y);
+		r(2, 1) = (1.0 - c) * (y * z) - (s * x);
+		r(2, 2) = c + (1.0 - c) * (z * z);
 
 		return cm * r;
 	}
 
 	/**@brief Returns the determinant of the given matrix.
 	*/
-	inline double det(const Matrix4x4& m)
+	inline double Det(const Matrix4x4& m)
 	{
 		//m00m11(m22m33 - m23m32)
 		double c1 = (double)m(0, 0) * m(1, 1) * m(2, 2) * m(3, 3) - (double)m(0, 0) * m(1, 1) * m(2, 3) * m(3, 2);
@@ -1717,10 +1711,10 @@ namespace FAMath
 
 	/**@brief Returns the cofactor of the given row and col using the given matrix.
 	*/
-	inline double cofactor(const Matrix4x4& m, unsigned int row, unsigned int col)
+	inline double Cofactor(const Matrix4x4& m, unsigned int row, unsigned int col)
 	{
 		//cij = (-1)^i + j * det of minor(i, j);
-		double tempMat[3][3];
+		double tempMat[3][3]{};
 		int tr{ 0 };
 		int tc{ 0 };
 
@@ -1753,7 +1747,7 @@ namespace FAMath
 
 	/**@brief Returns the adjoint of the given matrix.
 	*/
-	inline Matrix4x4 adjoint(const Matrix4x4& m)
+	inline Matrix4x4 Adjoint(const Matrix4x4& m)
 	{
 		//Cofactor of each ijth position put into matrix cA.
 		//Adjoint is the tranposed matrix of cA.
@@ -1762,24 +1756,24 @@ namespace FAMath
 		{
 			for (int j = 0; j < 4; ++j)
 			{
-				cA(i, j) = cofactor(m, i, j);
+				cA(i, j) = Cofactor(m, i, j);
 			}
 		}
 
-		return transpose(cA);
+		return Transpose(cA);
 	}
 
 	/**@brief Returns the inverse of the given matrix.
 	* If the matrix is noninvertible/singular, the identity matrix is returned.
 	*/
-	inline Matrix4x4 inverse(const Matrix4x4& m)
+	inline Matrix4x4 Inverse(const Matrix4x4& m)
 	{
 		//Inverse of m = adjoint of m / det of m
-		double determinant = det(m);
-		if (compareDoubles(determinant, 0.0, EPSILON))
+		double determinant = Det(m);
+		if (CompareDoubles(determinant, 0.0, EPSILON))
 			return Matrix4x4();
 
-		return adjoint(m) * (1.0 / determinant);
+		return Adjoint(m) * (1.0 / determinant);
 	}
 
 
@@ -1837,41 +1831,45 @@ namespace FAMath
 		*/
 		Quaternion(const Vector4D& v);
 
-		/**@brief Returns a reference to the scalar component of the quaternion.
+		/**@brief Returns the scalar component of the quaternion.
 		*/
-		float& scalar();
+		float GetScalar() const;
 
-		/**@brief Returns a const reference to the scalar component of the quaternion.
+		/**@brief Returns the x value of the vector component in the quaternion.
 		*/
-		const float& scalar() const;
+		float GetX() const;
 
-		/**@brief Returns a reference to the x value of the vector component in the quaternion.
+		/**@brief Returns the y value of the vector component in the quaternion.
 		*/
-		float& x();
+		float GetY() const;
 
-		/**@brief Returns a const reference to the x value of the vector component in the quaternion.
+		/**@brief Returns the z value of the vector component in the quaternion.
 		*/
-		const float& x() const;
-
-		/**@brief Returns a reference to the y value of the vector component in the quaternion.
-		*/
-		float& y();
-
-		/**@brief Returns a const reference to the y value of the vector component in the quaternion.
-		*/
-		const float& y() const;
-
-		/**@brief Returns a reference to the z value of the vector component in the quaternion.
-		*/
-		float& z();
-
-		/**@brief Returns a const reference to the z value of the vector component in the quaternion.
-		*/
-		const float& z() const;
+		float GetZ() const;
 
 		/**@brief Returns the vector component of the quaternion.
 		*/
-		Vector3D vector();
+		const Vector3D& GetVector() const;
+
+		/**@brief Sets the scalar component to the specified value.
+		*/
+		void SetScalar(float scalar);
+
+		/**@brief Sets the x component to the specified value.
+		*/
+		void SetX(float x);
+
+		/**@brief Sets the y component to the specified value.
+		*/
+		void SetY(float y);
+
+		/**@brief Sets the z component to the specified value.
+		*/
+		void SetZ(float z);
+
+		/**@brief Sets the vector to the specified vector.
+		*/
+		void SetVector(const Vector3D& v);
 
 		/**@brief Adds this quaternion to quaterion q and stores the result in this quaternion.
 		*/
@@ -1889,125 +1887,133 @@ namespace FAMath
 		*/
 		Quaternion& operator*=(const Quaternion& q);
 
-
 	private:
-
-		float m_scalar;
-		float m_x;
-		float m_y;
-		float m_z;
+		float mScalar;
+		float mX;
+		float mY;
+		float mZ;
 	};
 
 	//-------------------------------------------------------------------------------------
-	inline Quaternion::Quaternion() : m_scalar{ 1.0f }, m_x{ 0.0f }, m_y{ 0.0f }, m_z{ 0.0f }
+	inline Quaternion::Quaternion() : mScalar{ 1.0f }, mX{ 0.0f }, mY{ 0.0f }, mZ{ 0.0f }
 	{
 	}
 
-	inline Quaternion::Quaternion(float scalar, float x, float y, float z) : m_scalar{ scalar }, m_x{ x }, m_y{ y }, m_z{ z }
+	inline Quaternion::Quaternion(float scalar, float x, float y, float z) : 
+		mScalar{ scalar }, mX{ x }, mY{ y }, mZ{ z }
 	{
 	}
 
-	inline Quaternion::Quaternion(float scalar, const Vector3D& v) : m_scalar{ scalar }, m_x{ v.x() }, m_y{ v.y() }, m_z{ v.z() }
+	inline Quaternion::Quaternion(float scalar, const Vector3D& v) : 
+		mScalar{ scalar }, mX{ v.GetX() }, mY{ v.GetY() }, mZ{ v.GetZ() }
 	{
 	}
 
-	inline Quaternion::Quaternion(const Vector4D& v) : m_scalar{ v.x() }, m_x{ v.y() }, m_y{ v.z() }, m_z{ v.w() }
+	inline Quaternion::Quaternion(const Vector4D& v) : 
+		mScalar{ v.GetX() }, mX{ v.GetY() }, mY{ v.GetZ() }, mZ{ v.GetW() }
 	{
 	}
 
-	inline float& Quaternion::scalar()
+	inline float Quaternion::GetScalar() const
 	{
-		return m_scalar;
+		return mScalar;
 	}
 
-	inline const float& Quaternion::scalar() const
+	inline float Quaternion::GetX() const
 	{
-		return m_scalar;
+		return mX;
 	}
 
-	inline float& Quaternion::x()
+	inline float Quaternion::GetY() const
 	{
-		return m_x;
+		return mY;
 	}
 
-	inline const float& Quaternion::x() const
+	inline float Quaternion::GetZ() const
 	{
-		return m_x;
+		return mZ;
 	}
 
-	inline float& Quaternion::y()
+	inline const Vector3D& Quaternion::GetVector() const
 	{
-		return m_y;
+		return Vector3D(mX, mY, mZ);
 	}
 
-	inline const float& Quaternion::y() const
+	inline void Quaternion::SetScalar(float scalar)
 	{
-		return m_y;
+		mScalar = scalar;
 	}
 
-	inline float& Quaternion::z()
+	inline void Quaternion::SetX(float x)
 	{
-		return m_z;
+		mX = x;
 	}
 
-	inline const float& Quaternion::z() const
+	inline void Quaternion::SetY(float y)
 	{
-		return m_z;
+		mY = y;
 	}
 
-	inline Vector3D Quaternion::vector()
+	inline void  Quaternion::SetZ(float z)
 	{
-		return Vector3D(m_x, m_y, m_z);
+		mZ = z;
+	}
+
+	inline void Quaternion::SetVector(const Vector3D& v)
+	{
+		mX = v.GetX();
+		mY = v.GetY();
+		mZ = v.GetZ();
 	}
 
 	inline Quaternion& Quaternion::operator+=(const Quaternion& q)
 	{
-		this->m_scalar += (double)q.m_scalar;
-		this->m_x += (double)q.m_x;
-		this->m_y += (double)q.m_y;
-		this->m_z += (double)q.m_z;
+		this->mScalar += q.mScalar;
+		this->mX += q.mX;
+		this->mY += q.mY;
+		this->mZ += q.mZ;
 
 		return *this;
 	}
 
 	inline Quaternion& Quaternion::operator-=(const Quaternion& q)
 	{
-		this->m_scalar -= (double)q.m_scalar;
-		this->m_x -= (double)q.m_x;
-		this->m_y -= (double)q.m_y;
-		this->m_z -= (double)q.m_z;
+		this->mScalar -= q.mScalar;
+		this->mX -= q.mX;
+		this->mY -= q.mY;
+		this->mZ -= q.mZ;
 
 		return *this;
 	}
 
 	inline Quaternion& Quaternion::operator*=(float k)
 	{
-		this->m_scalar *= (double)k;
-		this->m_x *= (double)k;
-		this->m_y *= (double)k;
-		this->m_z *= (double)k;
+		this->mScalar *= k;
+		this->mX *= k;
+		this->mY *= k;
+		this->mZ *= k;
 
 		return *this;
 	}
 
 	inline Quaternion& Quaternion::operator*=(const Quaternion& q)
 	{
-		Vector3D thisVector(this->m_x, this->m_y, this->m_z);
-		Vector3D qVector(q.m_x, q.m_y, q.m_z);
+		Vector3D thisVector(this->mX, this->mY, this->mZ);
+		Vector3D qVector(q.mX, q.mY, q.mZ);
 
-		double s{ (double)this->m_scalar * q.m_scalar };
-		double dP{ dotProduct(thisVector, qVector) };
+		double s{ (double)this->mScalar * q.mScalar };
+		double dP{ DotProduct(thisVector, qVector) };
 		double resultScalar{ s - dP };
 
-		Vector3D a(this->m_scalar * qVector);
-		Vector3D b(q.m_scalar * thisVector);
-		Vector3D cP(crossProduct(thisVector, qVector));
+		Vector3D a(this->mScalar * qVector);
+		Vector3D b(q.mScalar * thisVector);
+		Vector3D cP(CrossProduct(thisVector, qVector));
 		Vector3D resultVector(a + b + cP);
 
-		this->m_scalar = resultScalar;
-		this->m_x = resultVector.x();
-		this->m_y = resultVector.y();
-		this->m_z = resultVector.z();
+		this->mScalar = resultScalar;
+		this->mX = resultVector.GetX();
+		this->mY = resultVector.GetY();
+		this->mZ = resultVector.GetZ();
 
 		return *this;
 	}
@@ -2016,35 +2022,36 @@ namespace FAMath
 	*/
 	inline Quaternion operator+(const Quaternion& q1, const Quaternion& q2)
 	{
-		return Quaternion((double)q1.scalar() + q2.scalar(), (double)q1.x() + q2.x(), (double)q1.y() + q2.y(), (double)q1.z() + q2.z());
+		return Quaternion(q1.GetScalar() + q2.GetScalar(), q1.GetX() + q2.GetX(), q1.GetY() + q2.GetY(), q1.GetZ() + q2.GetZ());
 	}
 
 	/**@brief Returns a quaternion that has the result of -q.
 	*/
 	inline Quaternion operator-(const Quaternion& q)
 	{
-		return Quaternion(-q.scalar(), -q.x(), -q.y(), -q.z());
+		return Quaternion(-q.GetScalar(), -q.GetX(), -q.GetY(), -q.GetZ());
 	}
 
 	/**@brief Returns a quaternion that has the result of q1 - q2.
 	*/
 	inline Quaternion operator-(const Quaternion& q1, const Quaternion& q2)
 	{
-		return Quaternion((double)q1.scalar() - q2.scalar(), (double)q1.x() - q2.x(), (double)q1.y() - q2.y(), (double)q1.z() - q2.z());
+		return Quaternion(q1.GetScalar() - q2.GetScalar(), 
+			q1.GetX() - q2.GetX(), q1.GetY() - q2.GetY(), q1.GetZ() - q2.GetZ());
 	}
 
 	/**@brief Returns a quaternion that has the result of k * q.
 	*/
 	inline Quaternion operator*(float k, const Quaternion& q)
 	{
-		return Quaternion((double)k * q.scalar(), (double)k * q.x(), (double)k * q.y(), (double)k * q.z());
+		return Quaternion(k * q.GetScalar(), k * q.GetX(), k * q.GetY(), k * q.GetZ());
 	}
 
 	/**@brief Returns a quaternion that has the result of q * k.
 	*/
 	inline Quaternion operator*(const Quaternion& q, float k)
 	{
-		return Quaternion(q.scalar() * (double)k, q.x() * (double)k, q.y() * (double)k, q.z() * (double)k);
+		return Quaternion(q.GetScalar() * k, q.GetX() * k, q.GetY() * k, q.GetZ() * k);
 	}
 
 	/**@brief Returns a quaternion that has the result of q1 * q2.
@@ -2054,16 +2061,16 @@ namespace FAMath
 		//scalar part = q1scalar * q2scalar - q1Vector dot q2Vector
 		//vector part = q1Scalar * q2Vector + q2Scalar * q1Vector + q1Vector cross q2Vector
 
-		Vector3D q1Vector(q1.x(), q1.y(), q1.z());
-		Vector3D q2Vector(q2.x(), q2.y(), q2.z());
+		Vector3D q1Vector(q1.GetX(), q1.GetY(), q1.GetZ());
+		Vector3D q2Vector(q2.GetX(), q2.GetY(), q2.GetZ());
 
-		double s{ (double)q1.scalar() * q2.scalar() };
-		double dP{ dotProduct(q1Vector, q2Vector) };
-		double resultScalar{ s - dP };
+		float s{ q1.GetScalar() * q2.GetScalar() };
+		float dP{ DotProduct(q1Vector, q2Vector) };
+		float resultScalar{ s - dP };
 
-		Vector3D a(q1.scalar() * q2Vector);
-		Vector3D b(q2.scalar() * q1Vector);
-		Vector3D cP(crossProduct(q1Vector, q2Vector));
+		Vector3D a(q1.GetScalar() * q2Vector);
+		Vector3D b(q2.GetScalar() * q1Vector);
+		Vector3D cP(CrossProduct(q1Vector, q2Vector));
 		Vector3D resultVector(a + b + cP);
 
 		return Quaternion(resultScalar, resultVector);
@@ -2071,75 +2078,76 @@ namespace FAMath
 
 	/**@brief Returns true if quaternion q is a zero quaternion, false otherwise.
 	*/
-	inline bool isZeroQuaternion(const Quaternion& q)
+	inline bool IsZeroQuaternion(const Quaternion& q)
 	{
 		//zero quaternion = (0, 0, 0, 0)
-		return compareFloats(q.scalar(), 0.0f, EPSILON) && compareFloats(q.x(), 0.0f, EPSILON) &&
-			compareFloats(q.y(), 0.0f, EPSILON) && compareFloats(q.z(), 0.0f, EPSILON);
+		return CompareFloats(q.GetScalar(), 0.0f, EPSILON) && CompareFloats(q.GetX(), 0.0f, EPSILON) &&
+			CompareFloats(q.GetY(), 0.0f, EPSILON) && CompareFloats(q.GetZ(), 0.0f, EPSILON);
 	}
 
 	/**@brief Returns true if quaternion q is an identity quaternion, false otherwise.
 	*/
-	inline bool isIdentity(const Quaternion& q)
+	inline bool IsIdentity(const Quaternion& q)
 	{
 		//identity quaternion = (1, 0, 0, 0)
-		return compareFloats(q.scalar(), 1.0f, EPSILON) && compareFloats(q.x(), 0.0f, EPSILON) &&
-			compareFloats(q.y(), 0.0f, EPSILON) && compareFloats(q.z(), 0.0f, EPSILON);
+		return CompareFloats(q.GetScalar(), 1.0f, EPSILON) && CompareFloats(q.GetX(), 0.0f, EPSILON) &&
+			CompareFloats(q.GetY(), 0.0f, EPSILON) && CompareFloats(q.GetZ(), 0.0f, EPSILON);
 	}
 
 	/**@brief Returns the conjugate of quaternion q.
 	*/
-	inline Quaternion conjugate(const Quaternion& q)
+	inline Quaternion Conjugate(const Quaternion& q)
 	{
 		//conjugate of a quaternion is the quaternion with its vector part negated
-		return Quaternion(q.scalar(), -q.x(), -q.y(), -q.z());
+		return Quaternion(q.GetScalar(), -q.GetX(), -q.GetY(), -q.GetZ());
 	}
 
 	/**@brief Returns the length of quaternion q.
 	*/
-	inline float length(const Quaternion& q)
+	inline float Length(const Quaternion& q)
 	{
 		//length of a quaternion = sqrt(scalar^2 + x^2 + y^2 + z^2)
-		return sqrt((double)q.scalar() * q.scalar() + (double)q.x() * q.x() + (double)q.y() * q.y() + (double)q.z() * q.z());
+		return sqrt(q.GetScalar() * q.GetScalar() + q.GetX() * q.GetX() + q.GetY() * q.GetY() + q.GetZ() * q.GetZ());
 	}
 
 	/**@brief Normalizes quaternion q and returns the normalized quaternion.
 	* If q is the zero quaternion then q is returned.
 	*/
-	inline Quaternion normalize(const Quaternion& q)
+	inline Quaternion Normalize(const Quaternion& q)
 	{
 		//to normalize a quaternion you do q / |q|
 
-		if (isZeroQuaternion(q))
+		if (IsZeroQuaternion(q))
 			return q;
 
-		double d{ length(q) };
+		double d{ Length(q) };
 
-		return Quaternion(q.scalar() / d, q.x() / d, q.y() / d, q.z() / d);
+		return Quaternion(q.GetScalar() / d, q.GetX() / d, q.GetY() / d, q.GetZ() / d);
 	}
 
 	/**@brief Returns the invese of quaternion q.
 	*  If q is the zero quaternion then q is returned.
 	*/
-	inline Quaternion inverse(const Quaternion& q)
+	inline Quaternion Inverse(const Quaternion& q)
 	{
 		//inverse = conjugate of q / |q|^2
 
-		if (isZeroQuaternion(q))
+		if (IsZeroQuaternion(q))
 			return q;
 
-		Quaternion conjugateOfQ(conjugate(q));
+		Quaternion conjugateOfQ(Conjugate(q));
 
-		double d{ length(q) };
+		double d{ Length(q) };
 		d *= d;
 
-		return Quaternion(conjugateOfQ.scalar() / d, conjugateOfQ.x() / d, conjugateOfQ.y() / d, conjugateOfQ.z() / d);
+		return Quaternion(conjugateOfQ.GetScalar() / d, conjugateOfQ.GetX() / d, 
+			conjugateOfQ.GetY() / d, conjugateOfQ.GetZ() / d);
 	}
 
 	/**@brief Returns a quaternion from the axis-angle rotation representation.
 	*  The angle should be given in degrees.
 	*/
-	inline Quaternion rotationQuaternion(float angle, float x, float y, float z)
+	inline Quaternion RotationQuaternion(float angle, float x, float y, float z)
 	{
 		//A roatation quaternion is a quaternion where the
 		//scalar part = cos(theta / 2)
@@ -2151,15 +2159,15 @@ namespace FAMath
 		double s{ sin(ang * PI / 180.0) };
 
 		Vector3D axis(x, y, z);
-		axis = norm(axis);
+		axis = Norm(axis);
 
-		return Quaternion(c, s * axis.x(), s * axis.y(), s * axis.z());
+		return Quaternion(c, s * axis.GetX(), s * axis.GetY(), s * axis.GetZ());
 	}
 
 	/**@brief Returns a quaternion from the axis-angle rotation representation.
 	* The angle should be given in degrees.
 	*/
-	inline Quaternion rotationQuaternion(float angle, const Vector3D& axis)
+	inline Quaternion RotationQuaternion(float angle, const Vector3D& axis)
 	{
 		//A roatation quaternion is a quaternion where the
 		//scalar part = cos(theta / 2)
@@ -2170,36 +2178,36 @@ namespace FAMath
 		double c{ cos(ang * PI / 180.0) };
 		double s{ sin(ang * PI / 180.0) };
 
-		Vector3D axisN(norm(axis));
+		Vector3D axisN(Norm(axis));
 
-		return Quaternion(c, s * axisN.x(), s * axisN.y(), s * axisN.z());
+		return Quaternion(c, s * axisN.GetX(), s * axisN.GetY(), s * axisN.GetZ());
 	}
 
 	/**@brief Returns a quaternion from the axis-angle rotation representation.
 	* The x value in the 4D vector should be the angle(in degrees).\n
 	* The y, z and w value in the 4D vector should be the axis.
 	*/
-	inline Quaternion rotationQuaternion(const Vector4D& angAxis)
+	inline Quaternion RotationQuaternion(const Vector4D& angAxis)
 	{
 		//A roatation quaternion is a quaternion where the
 		//scalar part = cos(theta / 2)
 		//vector part = sin(theta / 2) * axis
 		//the axis needs to be normalized
 
-		double angle{ angAxis.x() / 2.0 };
+		double angle{ angAxis.GetX() / 2.0 };
 		double c{ cos(angle * PI / 180.0) };
 		double s{ sin(angle * PI / 180.0) };
 
-		Vector3D axis(angAxis.y(), angAxis.z(), angAxis.w());
-		axis = norm(axis);
+		Vector3D axis(angAxis.GetY(), angAxis.GetZ(), angAxis.GetW());
+		axis = Norm(axis);
 
-		return Quaternion(c, s * axis.x(), s * axis.y(), s * axis.z());
+		return Quaternion(c, s * axis.GetX(), s * axis.GetY(), s * axis.GetZ());
 	}
 
 	/**@brief Returns a matrix from the given quaterion for column vector-matrix multiplication.
 	* Quaternion q should be a unit quaternion.
 	*/
-	inline Matrix4x4 quaternionRotationMatrixCol(const Quaternion& q)
+	inline Matrix4x4 QuaternionToRotationMatrixCol(const Quaternion& q)
 	{
 		//1 - 2q3^2 - 2q4^2		2q2q3 - 2q1q4		2q2q4 + 2q1q3		0
 		//2q2q3 + 2q1q4			1 - 2q2^2 - 2q4^2	2q3q4 - 2q1q2		0
@@ -2212,19 +2220,19 @@ namespace FAMath
 
 		float colMat[4][4] = {};
 
-		colMat[0][0] = 1.0 - 2.0 * q.y() * q.y() - 2.0 * q.z() * q.z();
-		colMat[0][1] = 2.0 * q.x() * q.y() - 2.0 * q.scalar() * q.z();
-		colMat[0][2] = 2.0 * q.x() * q.z() + 2.0 * q.scalar() * q.y();
+		colMat[0][0] = 1.0 - 2.0 * q.GetY() * q.GetY() - 2.0 * q.GetZ() * q.GetZ();
+		colMat[0][1] = 2.0 * q.GetX() * q.GetY() - 2.0 * q.GetScalar() * q.GetZ();
+		colMat[0][2] = 2.0 * q.GetX() * q.GetZ() + 2.0 * q.GetScalar() * q.GetY();
 		colMat[0][3] = 0.0f;
 
-		colMat[1][0] = 2.0 * q.x() * q.y() + 2.0 * q.scalar() * q.z();
-		colMat[1][1] = 1.0 - 2.0 * q.x() * q.x() - 2.0 * q.z() * q.z();
-		colMat[1][2] = 2.0 * q.y() * q.z() - 2.0 * q.scalar() * q.x();
+		colMat[1][0] = 2.0 * q.GetX() * q.GetY() + 2.0 * q.GetScalar() * q.GetZ();
+		colMat[1][1] = 1.0 - 2.0 * q.GetX() * q.GetX() - 2.0 * q.GetZ() * q.GetZ();
+		colMat[1][2] = 2.0 * q.GetY() * q.GetZ() - 2.0 * q.GetScalar() * q.GetX();
 		colMat[1][3] = 0.0f;
 
-		colMat[2][0] = 2.0 * q.x() * q.z() - 2.0 * q.scalar() * q.y();
-		colMat[2][1] = 2.0 * q.y() * q.z() + 2.0 * q.scalar() * q.x();
-		colMat[2][2] = 1.0 - 2.0 * q.x() * q.x() - 2.0 * q.y() * q.y();
+		colMat[2][0] = 2.0 * q.GetX() * q.GetZ() - 2.0 * q.GetScalar() * q.GetY();
+		colMat[2][1] = 2.0 * q.GetY() * q.GetZ() + 2.0 * q.GetScalar() * q.GetX();
+		colMat[2][2] = 1.0 - 2.0 * q.GetX() * q.GetX() - 2.0 * q.GetY() * q.GetY();
 		colMat[2][3] = 0.0f;
 
 		colMat[3][0] = 0.0f;
@@ -2238,7 +2246,7 @@ namespace FAMath
 	/**@brief Returns a matrix from the given quaterion for row vector-matrix multiplication.
 	* Quaternion q should be a unit quaternion.
 	*/
-	inline Matrix4x4 quaternionRotationMatrixRow(const Quaternion& q)
+	inline Matrix4x4 QuaternionToRotationMatrixRow(const Quaternion& q)
 	{
 		//1 - 2q3^2 - 2q4^2		2q2q3 + 2q1q4		2q2q4 - 2q1q3		0
 		//2q2q3 - 2q1q4			1 - 2q2^2 - 2q4^2	2q3q4 + 2q1q2		0
@@ -2251,19 +2259,19 @@ namespace FAMath
 
 		float rowMat[4][4] = {};
 
-		rowMat[0][0] = 1.0 - 2.0 * q.y() * q.y() - 2.0 * q.z() * q.z();
-		rowMat[0][1] = 2.0 * q.x() * q.y() + 2.0 * q.scalar() * q.z();
-		rowMat[0][2] = 2.0 * q.x() * q.z() - 2.0 * q.scalar() * q.y();
+		rowMat[0][0] = 1.0 - 2.0 * q.GetY() * q.GetY() - 2.0 * q.GetZ() * q.GetZ();
+		rowMat[0][1] = 2.0 * q.GetX() * q.GetY() + 2.0 * q.GetScalar() * q.GetZ();
+		rowMat[0][2] = 2.0 * q.GetX() * q.GetZ() - 2.0 * q.GetScalar() * q.GetY();
 		rowMat[0][3] = 0.0f;
 
-		rowMat[1][0] = 2.0 * q.x() * q.y() - 2.0 * q.scalar() * q.z();
-		rowMat[1][1] = 1.0 - 2.0 * q.x() * q.x() - 2.0 * q.z() * q.z();
-		rowMat[1][2] = 2.0 * q.y() * q.z() + 2.0 * q.scalar() * q.x();
+		rowMat[1][0] = 2.0 * q.GetX() * q.GetY() - 2.0 * q.GetScalar() * q.GetZ();
+		rowMat[1][1] = 1.0 - 2.0 * q.GetX() * q.GetX() - 2.0 * q.GetZ() * q.GetZ();
+		rowMat[1][2] = 2.0 * q.GetY() * q.GetZ() + 2.0 * q.GetScalar() * q.GetX();
 		rowMat[1][3] = 0.0f;
 
-		rowMat[2][0] = 2.0 * q.x() * q.z() + 2.0 * q.scalar() * q.y();
-		rowMat[2][1] = 2.0 * q.y() * q.z() - 2.0 * q.scalar() * q.x();
-		rowMat[2][2] = 1.0 - 2.0 * q.x() * q.x() - 2.0 * q.y() * q.y();
+		rowMat[2][0] = 2.0 * q.GetX() * q.GetZ() + 2.0 * q.GetScalar() * q.GetY();
+		rowMat[2][1] = 2.0 * q.GetY() * q.GetZ() - 2.0 * q.GetScalar() * q.GetX();
+		rowMat[2][2] = 1.0 - 2.0 * q.GetX() * q.GetX() - 2.0 * q.GetY() * q.GetY();
 		rowMat[2][3] = 0.0f;
 
 		rowMat[3][0] = 0.0f;
@@ -2277,7 +2285,7 @@ namespace FAMath
 #if defined(_DEBUG)
 	inline void print(const Quaternion& q)
 	{
-		std::cout << "(" << q.scalar() << ", " << q.x() << ", " << q.y() << ", " << q.z();
+		std::cout << "(" << q.GetScalar() << ", " << q.GetX() << ", " << q.GetY() << ", " << q.GetZ();
 	}
 #endif
 	//-------------------------------------------------------------------------------------
