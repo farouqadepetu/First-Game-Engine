@@ -35,109 +35,109 @@ namespace FARender
 
 		/**@brief Returns a constant reference to the ID3D12Device objcet.
 		*/
-		const Microsoft::WRL::ComPtr<ID3D12Device>& device() const;
+		const Microsoft::WRL::ComPtr<ID3D12Device>& GetDevice() const;
 
 		/**@brief Returns a constant reference to the ID3D12CommandQueue objcet.
 		*/
-		const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& commandQueue() const;
+		const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& GetCommandQueue() const;
 
 		/**@brief Returns a constant reference to the current ID3D12CommandAllocator objcet.
 		*/
-		const Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& commandAllocator() const;
+		const Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& GetCommandAllocator() const;
 
 		/**@brief Returns a constant reference to the ID3D12GraphicsCommandList objcet.
 		*/
-		const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList() const;
+		const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& GetCommandList() const;
 
 		/**@brief Returns a constant reference to the back buffer format.
 		*/
-		const DXGI_FORMAT& backBufferFormat() const;
+		const DXGI_FORMAT& GetBackBufferFormat() const;
 
 		/**@brief Returns a constant reference to the number of swap chains.
 		*/
-		const UINT numOfSwapChainBuffers() const;
+		const UINT GetNumOfSwapChainBuffers() const;
 
 		/**@brief Returns a constant reference to the IDXGISwapChain1 object.
 		*/
-		const Microsoft::WRL::ComPtr<IDXGISwapChain1>& swapChain() const;
+		const Microsoft::WRL::ComPtr<IDXGISwapChain1>& GetSwapChain() const;
 
 		/**@brief Returns a constant reference to the render target view descriptor size.
 		*/
-		const UINT& rtvDescriptorSize() const;
+		const UINT& GetRTVDescriptorSize() const;
 
 		/**@brief Returns a constant reference to the depth/stencil view descriptor size.
 		*/
-		const UINT& dsvDescriptorSize() const;
+		const UINT& GetDSVDescriptorSize() const;
 
 		/**@brief Returns a constant reference to the render target descriptor heap.
 		*/
-		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvDescriptorHeap() const;
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& GetRTVDescriptorHeap() const;
 
 		/**@brief Returns a constant reference to the depth/stencil descriptor heap.
 		*/
-		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvDescriptorHeap() const;
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& GetDSVDescriptorHeap() const;
 
 		/**@brief Returns a constant reference to the current back buffer.
 		*/
-		const UINT& currentBackBuffer() const;
+		const UINT& GetCurrentBackBuffer() const;
 
 		/**@brief Returns a pointer to the swap chain buffers.\n
 		* There are two swap chain buffers.\n
 		* To access each buffer do swapChainBuffers()[i], where i is the index of the buffer you want to access.
 		*/
-		const Microsoft::WRL::ComPtr<ID3D12Resource>* swapChainBuffers() const;
+		const Microsoft::WRL::ComPtr<ID3D12Resource>* GetSwapChainBuffers() const;
 
 		/**@brief Returns a constant reference to the depth stencil buffer.
 		*/
-		const Microsoft::WRL::ComPtr<ID3D12Resource>& depthStencilBuffer() const;
+		const Microsoft::WRL::ComPtr<ID3D12Resource>& GetDepthStencilBuffer() const;
 
 		/**@brief Returns a constant reference to the depth stencil format.
 		*/
-		const DXGI_FORMAT& depthStencilFormat() const;
+		const DXGI_FORMAT& GetDepthStencilFormat() const;
 
 		/**@brief Returns a constant reference to the D3D12_VIEWPORT objcet.
 		*/
-		const D3D12_VIEWPORT& viewport() const;
+		const D3D12_VIEWPORT& GetViewport() const;
 
 		/**@brief Returns a constant reference to the D3D12_RECT scissor objcet.
 		*/
-		const D3D12_RECT& scissor() const;
+		const D3D12_RECT& GetScissor() const;
 
-		/**@brief Returns a reference to check if MSAA is enabled or not.
+		/**@brief Returns true if MSAA is enabled, false otherwise.
 		*/
-		bool& isMSAAEnabled();
+		bool IsMSAAEnabled();
 
-		/**@brief Returns a constant reference to check if MSAA is enabled or not.
+		/**@brief Disables MSAA.
 		*/
-		const bool& isMSAAEnabled() const;
+		void DisableMSAA();
+
+		/**@brief Enables MSAA.
+		*/
+		void EnableMSAA();
 
 		/**@brief Returns a reference to the sample count.
 		*/
-		UINT& sampleCount();
+		UINT& GetSampleCount();
 
 		/**@brief Returns a constant reference to the sample count.
 		*/
-		const UINT& sampleCount() const;
-
-		/**@brief Returns a reference to the current fence value.
-		*/
-		UINT64& currentFenceValue();
+		const UINT& GetSampleCount() const;
 
 		/**@brief Returns a constant reference to the current fence value.
 		*/
-		const UINT64& currentFenceValue() const;
+		const UINT64& GetCurrentFenceValue() const;
 
 		/**@brief Returns a constant reference to the direct 2D device context.
 		*/
-		const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& device2DContext() const;
+		const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& GetDevice2DContext() const;
 
 		/**@brief Returns a constant reference to the direct direct write factory.
 		*/
-		const Microsoft::WRL::ComPtr<IDWriteFactory>& directWriteFactory() const;
+		const Microsoft::WRL::ComPtr<IDWriteFactory>& GetDirectWriteFactory() const;
 
 		/**@brief Updates the current frames fence value.
 		*/
-		void updateCurrentFrameFenceValue();
+		void UpdateCurrentFrameFenceValue();
 
 		/**@brief Initializes Direct3D.
 		* Enables the debug layer if in debug mode.\n
@@ -150,63 +150,63 @@ namespace FARender
 		* Creates a render target view and a depth/stencil view heap.
 		* Creates the initial render target buffers, depth stencil buffer, MSAA buffers and text buffers.
 		*/
-		void initializeDirect3D(unsigned int width, unsigned int height, HWND handle);
+		void InitializeDirect3D(unsigned int width, unsigned int height, HWND handle);
 
 		/**@brief Synchronizes the CPU and GPU.
 		*	Use this function to make sure all of the commands in command list are executed by the GPU
 		*	before the CPU writes in new commands.
 		*/
-		void flushCommandQueue();
+		void FlushCommandQueue();
 
 		/**@brief Waits for the GPU to execute all of the commands of the current frame.
 		* Signal should have been called before this function is called.
 		*/
-		void waitForGPU() const;
+		void WaitForGPU() const;
 
 		/**@brief Adds an instruction to the GPU to set the fence value to the current fence value.
 		*/
-		void signal();
+		void Signal();
 
 		/**@brief Call when the window gets resized.
 		*	Call when you initialize your program.
 		*/
-		void resize(int width, int height, const HWND& handle);
+		void Resize(int width, int height, const HWND& handle);
 
 		/**@brief Resets the command list to open it with a current frame command allocator.
 		*/
-		void resetCommandList();
+		void ResetCommandList();
 
 		/*@brief Resets the command list to open it with the direct command allocator.
 		*/
-		void resetDirectCommandList();
+		void ResetDirectCommandList();
 
 		/**@brief Resets command allocator to allow reuse of the memory.
 		*/
-		void resetCommandAllocator();
+		void ResetCommandAllocator();
 
 		/**@brief Transistions the render target buffer.
 		*/
-		void rtBufferTransition(bool renderText);
+		void RTBufferTransition(bool renderText);
 
 		/**@brief Prepares to render text.
 		*/
-		void beforeTextDraw();
+		void BeforeTextDraw();
 
 		/**@brief Executes the text commands.
 		*/
-		void afterTextDraw();
+		void AfterTextDraw();
 
 		/**@brief Executes the command list.
 		*/
-		void execute() const;
+		void Execute() const;
 
 		/**@brief Swaps the front and back buffers.
 		*/
-		void present();
+		void Present();
 
 		/*@brief Calls the necessary functions to let the user draw their objects.
 		*/
-		void draw();
+		void Draw();
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Device> mDirect3DDevice;
@@ -229,7 +229,7 @@ namespace FARender
 		Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffers[mNumOfSwapChainBuffers];
 
 		Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer;
-		DXGI_FORMAT mDepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		DXGI_FORMAT mDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
 
 		UINT mRTVSize;
 		UINT mDSVSize;
@@ -262,43 +262,43 @@ namespace FARender
 		std::vector<Microsoft::WRL::ComPtr<IDXGISurface>> mSurfaces;
 
 		//Call all of these functions to initialize Direct3D
-		void enableDebugLayer();
-		void createDirect3DDevice();
-		void createDXGIFactory();
-		void createFence();
-		void queryDescriptorSizes();
-		void createCommandObjects();
-		void createSwapChain(HWND handle);
-		void createRTVHeap();
-		void createDSVHeap();
+		void EnableDebugLayer();
+		void CreateDirect3DDevice();
+		void CreateDXGIFactory();
+		void CreateFence();
+		void QueryDescriptorSizes();
+		void CreateCommandObjects();
+		void CreateSwapChain(HWND handle);
+		void CreateRTVHeap();
+		void CreateDSVHeap();
 
 		//if MSAA is supported, creates a MSAA RTV and DSV heap.
-		void checkMSAASupport();
-		void createMSAARTVHeap();
-		void createMSAADSVHeap();
+		void CheckMSAASupport();
+		void CreateMSAARTVHeap();
+		void CreateMSAADSVHeap();
 
 		//Creates and initializes everything needed to render text.
-		void initializeText();
+		void InitializeText();
 
 		//These functions are for creating swap chain buffers, depth/stencil buffer, render target views and depth/stencil view.
 		//They are called in the resize function.
-		void createRenderTargetBufferAndView();
-		void createDepthStencilBufferAndView(int width, int height);
+		void CreateRenderTargetBufferAndView();
+		void CreateDepthStencilBufferAndView(int width, int height);
 
 		//These functions are for creating a MSAA render target buffer, MSAA depth/stencil buffer, 
 		//MSAA render target view, and a MSAA depth/stencil view.
 		//They are called in the resize function.
-		void createMSAARenderTargetBufferAndView(int width, int height);
-		void createMSAADepthStencilBufferAndView(int width, int height);
+		void CreateMSAARenderTargetBufferAndView(int width, int height);
+		void CreateMSAADepthStencilBufferAndView(int width, int height);
 
 		/* Resets the text buffers.
 		* Gets called in the resize function.
 		*/
-		void resetTextBuffers();
+		void ResetTextBuffers();
 
 		/*Resizes the necessary text buffers.
 		* Gets called in the resize function.
 		*/
-		void textResize(const HWND& handle);
+		void TextResize(const HWND& handle);
 	};
 }

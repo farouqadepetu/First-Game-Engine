@@ -19,7 +19,7 @@ class DirectXException
 public:
 	DirectXException(HRESULT hr, const std::wstring& functionName, const std::wstring& fileName, int lineNumber);
 
-	std::wstring errorMsg() const;
+	std::wstring ErrorMsg() const;
 
 private:
 	HRESULT errorCode;

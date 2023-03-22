@@ -4,10 +4,6 @@
 *	@brief File has a Box class under the namespace FAShapes.
 */
 
-//#include "FAVector3D.h"
-//#include "FAMatrix4x4.h"
-//#include "FAQuaternion.h"
-//#include "FAShapesUtility.h"
 #include "FATriangle.h"
 
 
@@ -38,127 +34,127 @@ namespace FAShapes
 
 		/**@brief Returns the location of the center of the box.
 		*/
-		FAMath::Vector3D getCenter() const;
+		const FAMath::Vector3D& GetCenter() const;
 
 		/**@brief Returns the x axis of the local coordinate system.
 		*/
-		FAMath::Vector3D getXAxis() const;
+		const FAMath::Vector3D& GetXAxis() const;
 
 		/**@brief Returns the y axis of the local coordinate system.
 		*/
-		FAMath::Vector3D getYAxis() const;
+		const FAMath::Vector3D& GetYAxis() const;
 
 		/**@brief Returns the z axis of the local coordinate system.
 		*/
-		FAMath::Vector3D getZAxis() const;
+		const FAMath::Vector3D& GetZAxis() const;
 
 		/**@brief Returns a pointer to the vertex list of the box.
 		*/
-		Vertex* getVertexList();
+		Vertex* GetVertexList();
 
 		/**@brief Returns a pointer to the triangle list of the box.
 		*/
-		Triangle* getTriangleList();
+		Triangle* GetTriangleList();
 
 		/**@brief Returns a pointer to a const vertex list of the box.
 		*/
-		const Vertex* getVertexList() const;
+		const Vertex* GetVertexList() const;
 
 		/**@brief Returns a pointer to a const triangle list of the box.
 		*/
-		const Triangle* getTriangleList() const;
+		const Triangle* GetTriangleList() const;
 
 		/**@brief Returns a constant reference to the triangle at the specified index.
 		* Throws an out_of_range exception if index >= NUMOFTRIANGLES.
 		*/
-		const Triangle& getTriangle(unsigned int index) const;
+		const Triangle& GetTriangle(unsigned int index) const;
 
 		/**@brief Returns the color of the box.
 		*/
-		FAColor::Color getColor() const;
+		const FAColor::Color& GetColor() const;
 
 		/**@brief Returns the scale matrix of the box which is used to set the size of the box.
 		*/
-		FAMath::Matrix4x4 getScaleMatrix() const;
+		const FAMath::Matrix4x4& GetScaleMatrix() const;
 
 		/**@brief Returns the local to world transformation matrix of the box.
 		*/
-		FAMath::Matrix4x4 getLocalToWorldMatrix() const;
+		const FAMath::Matrix4x4& GetLocalToWorldMatrix() const;
 
 		/**@brief Returns the draw arguments of the box.
 		*/
-		DrawArguments getDrawArguments() const;
+		const DrawArguments& GetDrawArguments() const;
 
 		/**@brief Sets the color of the box to the specified color.
 		*/
-		void setColor(const FAColor::Color& color);
+		void SetColor(const FAColor::Color& color);
 
 		/**@brief Sets the color of the box to the specified RBBA values.
 		*/
-		void setColor(float r, float g, float b, float a);
+		void SetColor(float r, float g, float b, float a);
 
 		/**@brief Sets the color of the box to the specified matrix.
 		*/
-		void setScaleMatrix(const FAMath::Matrix4x4& scale);
+		void SetScaleMatrix(const FAMath::Matrix4x4& scale);
 
 		/**@brief Sets the center of the box to the specified center.
 		*/
-		void setCenter(const FAMath::Vector3D& center);
+		void SetCenter(const FAMath::Vector3D& center);
 
 		/**@brief Sets the world rotation quaternion to the specified quaternion.
 		*/
-		void setWorldRotation(const FAMath::Quaternion& rotQuaternion);
+		void SetWorldRotation(const FAMath::Quaternion& rotQuaternion);
 
 		/**@brief Sets the world rotation quaternion to the rotation quaternion with the specified angle and axis.
 		*/
-		void setWorldRotation(float angle, const FAMath::Vector3D axis);
+		void SetWorldRotation(float angle, const FAMath::Vector3D axis);
 
 		/**@brief Sets the draw arguments of the box to the specifed draw arguments.
 		*/
-		void setDrawArguments(const DrawArguments& boxDrawArgs);
+		void SetDrawArguments(const DrawArguments& boxDrawArgs);
 
 		/**@brief Sets the draw arguments of the box to the specifed draw arguments.
 		*/
-		void setDrawArguments(unsigned int indexCount, unsigned int locationOfFirstIndex, 
+		void SetDrawArguments(unsigned int indexCount, unsigned int locationOfFirstIndex, 
 			int indexOfFirstVertex, int indexOfConstantData);
 
 		/**@brief Rotates the local axis of the box by the specified rotation matrix.
 		*/
-		void rotateAxes(const FAMath::Matrix4x4& rot);
+		void RotateAxes(const FAMath::Matrix4x4& rot);
 
 		/**@brief Rotates the local axis of the box by the specified rotation quaternion.
 		*/
-		void rotateAxes(const FAMath::Quaternion& rotQuaternion);
+		void RotateAxes(const FAMath::Quaternion& rotQuaternion);
 
 		/**@brief Rotates the local axis of the box by the specified angle around the specified axis.
 		* Uses a quaternion to rotate.
 		*/
-		void rotateAxes(float angle, const FAMath::Vector3D axis);
+		void RotateAxes(float angle, const FAMath::Vector3D axis);
 
 		/**@brief Rotates the center of the box by the specified rotation matrix.
 		*/
-		void rotateCenter(const FAMath::Matrix4x4& rot);
+		void RotateCenter(const FAMath::Matrix4x4& rot);
 
 		/**@brief Rotates the center of the box by the specified rotation quaternion.
 		*/
-		void rotateCenter(const FAMath::Quaternion& rotQuaternion);
+		void RotateCenter(const FAMath::Quaternion& rotQuaternion);
 
 		/**@brief Rotates the center of the box by the specified angle around the specified axis.
 		* Uses a quaternion to rotate.
 		*/
-		void rotateCenter(float angle, const FAMath::Vector3D axis);
+		void RotateCenter(float angle, const FAMath::Vector3D axis);
 
 		/**@brief Translates the center by the specified values.
 		*/
-		void translateCenter(float x, float y, float z);
+		void TranslateCenter(float x, float y, float z);
 
 		/**@brief Translates the center by the specified vector.
 		*/
-		void translateCenter(FAMath::Vector3D v);
+		void TranslateCenter(FAMath::Vector3D v);
 
 		/**@brief Updates the boxs' local to world transformation matrix.
 		*/
-		void updateLocalToWorldMatrix();
+		void UpdateLocalToWorldMatrix();
 
 	private:
 
@@ -189,15 +185,15 @@ namespace FAShapes
 		DrawArguments mBoxDrawArguments;
 
 		//strores the local vertices of box
-		void createVertices();
+		void mCreateVertices();
 
 		//creates the triangles from the local vertices
-		void createTriangles();
+		void mCreateTriangles();
 
 		//creates the normals from the triangles
-		void createNormals();
+		void mCreateNormals();
 
 		//stores the indices of the vertices that make up each triangle.
-		void quad(unsigned int& index, unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+		void mQuad(unsigned int& index, unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 	};
 }

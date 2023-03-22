@@ -7,12 +7,12 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//VERTEX BUFFER FUNCTION DEFINITIONS
 
-	const D3D12_VERTEX_BUFFER_VIEW& VertexBuffer::vertexBufferView()
+	const D3D12_VERTEX_BUFFER_VIEW& VertexBuffer::GetVertexBufferView()
 	{
 		return mVertexBufferView;
 	}
 
-	void VertexBuffer::createVertexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+	void VertexBuffer::CreateVertexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 		const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data, UINT numBytes)
 	{
 		D3D12_RESOURCE_DESC vertexBufferDescription{};
@@ -67,7 +67,7 @@ namespace FARender
 		commandList->ResourceBarrier(1, &vertexDefaultBufferTransitionToReadState);
 	}
 
-	void VertexBuffer::createVertexBufferView(UINT numBytes, UINT stride)
+	void VertexBuffer::CreateVertexBufferView(UINT numBytes, UINT stride)
 	{
 		mVertexBufferView.BufferLocation = mVertexDefaultBuffer->GetGPUVirtualAddress();
 		mVertexBufferView.SizeInBytes = numBytes;
@@ -78,12 +78,12 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//Index BUFFER FUNCTION DEFINITIONS
 
-	const D3D12_INDEX_BUFFER_VIEW& IndexBuffer::indexBufferView()
+	const D3D12_INDEX_BUFFER_VIEW& IndexBuffer::GetIndexBufferView()
 	{
 		return mIndexBufferView;
 	}
 
-	void IndexBuffer::createIndexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+	void IndexBuffer::CreateIndexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 		const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data, UINT numBytes)
 	{
 		D3D12_RESOURCE_DESC indexBufferDescription{};
@@ -138,7 +138,7 @@ namespace FARender
 		commandList->ResourceBarrier(1, &indexDefaultBufferTransitionToReadState);
 	}
 
-	void IndexBuffer::createIndexBufferView(UINT numBytes, DXGI_FORMAT format)
+	void IndexBuffer::CreateIndexBufferView(UINT numBytes, DXGI_FORMAT format)
 	{
 		mIndexBufferView.BufferLocation = mIndexDefaultBuffer->GetGPUVirtualAddress();
 		mIndexBufferView.SizeInBytes = numBytes;
@@ -158,22 +158,17 @@ namespace FARender
 		mMappedData = nullptr;
 	}
 
-	Microsoft::WRL::ComPtr<ID3D12Resource>& ConstantBuffer::constantBuffer()
+	Microsoft::WRL::ComPtr<ID3D12Resource>& ConstantBuffer::GetConstantBuffer()
 	{
 		return mConstantBuffer;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12Resource>& ConstantBuffer::constantBuffer() const
+	const Microsoft::WRL::ComPtr<ID3D12Resource>& ConstantBuffer::GetConstantBuffer() const
 	{
 		return mConstantBuffer;
 	}
 
-	BYTE*& ConstantBuffer::mappedData()
-	{
-		return mMappedData;
-	}
-
-	void ConstantBuffer::createConstantBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const UINT& numOfBytes)
+	void ConstantBuffer::CreateConstantBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const UINT& numOfBytes)
 	{
 		//describe the constant buffer
 		D3D12_RESOURCE_DESC constantBufferDescription{};
@@ -201,7 +196,7 @@ namespace FARender
 		ThrowIfFailed(mConstantBuffer->Map(0, nullptr, (void**)&mMappedData));
 	}
 
-	void ConstantBuffer::createConstantBufferView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+	void ConstantBuffer::CreateConstantBufferView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& cbvHeap, UINT cbvSize, UINT cbvHeapIndex,
 		UINT cBufferIndex, UINT numBytes)
 	{
@@ -225,7 +220,7 @@ namespace FARender
 		device->CreateConstantBufferView(&constBufferViewDescription, handle);
 	}
 
-	void ConstantBuffer::copyData(UINT index, UINT byteSize, const void* data, const UINT64& numOfBytes)
+	void ConstantBuffer::CopyData(UINT index, UINT byteSize, const void* data, const UINT64& numOfBytes)
 	{
 		memcpy(&mMappedData[index * byteSize], data, numOfBytes);
 	}

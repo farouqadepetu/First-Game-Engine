@@ -30,24 +30,7 @@ namespace FACamera
 	class Camera
 	{
 	public:
-
-		/**@brief Default Constructor.
-		*
-		*	Creates a new camera.\n
-		*	The origin of the camera space is (0.0f, 0.0f, 0.0f).\n
-		*	The x, y and z axes of the camera space is the same as the x, y and z axes as world space.\n
-		*	Sets the frustrum properties for perspective projection \n
-		*	to the values:\n
-		*	znear = 1.0f\n
-		*	zfar = 1000.0f\n
-		*	aspect ratio = 1.0f\n
-		*	fov = 45 degrees\n
-		*	The constant velocity of the camera when moved is 10.0f.
-		*	The rotate velocity is 0.5f.
-		*/
-		Camera();
-
-		/**@brief Overloaded Constructor.
+		/**@brief Constructor.
 		*
 		*	Creates a new camera.\n
 		*	Sets the origin of the camera space to the given cameraPosition.\n
@@ -56,179 +39,193 @@ namespace FACamera
 		*	Sets the frustum properties for perspective projection to the given znear, zar, aspectRatio and fov values.\n
 		*	vFov should be in degrees.\n
 		*	The constant velocity of the camera when moved is set to the given cameraVelocity;
-		*	The rotate velocity of the camera is set the to specified rotateVelocity.
+		*	The angular velocity of the camera is set the to specified angularVelocity.
 		*/
-		Camera(vec3 cameraPosition, vec3 x, vec3 y, vec3 z,
-			float znear, float zfar, float aspectRatio, float vFov, float cameraVelocity, float rotateVelocity);
-
-		/**@brief Returns a reference to the position of the camera in world coordinates.
-		*/
-		vec3& cameraPosition();
+		Camera(vec3 cameraPosition = vec3(0.0f, 0.0f, 0.0f), 
+			vec3 x = vec3(1.0f, 0.0f, 0.0f), vec3 y = vec3(0.0f, 1.0f, 0.0f), vec3 z = vec3(0.0f, 0.0f, 1.0f),
+			float znear = 1.0f, float zfar = 100.f, float aspectRatio = 1.0f, float vFov = 45.0f, 
+			float cameraVelocity = 10.0f, float angularVelocity = 0.25f);
 
 		/**@brief Returns a constant reference to the position of the camera in world coordinates.
 		*/
-		const vec3& cameraPosition() const;
+		const vec3& GetCameraPosition() const;
 
-		/**@brief Returns the x-axis of the camera.
+		/**@brief Returns a constant reference to the x-axis of the camera.
 		*/
-		vec3 x() const;
+		const vec3& GetX() const;
 		
-		/**@brief Returns the y-axis of the camera.
+		/**@brief Returnsa constant reference to the y-axis of the camera.
 		*/
-		vec3 y() const;
+		const vec3& GetY() const;
 
-		/**@brief Returns the z-axis of the camera.
+		/**@brief Returns a constant reference to the z-axis of the camera.
 		*/
-		vec3 z() const;
+		const vec3& GetZ() const;
 
-		/**@brief Returns the view transformation matrix of this camera.
+		/**@brief Returns a constant reference to the view transformation matrix of this camera.
 		*/
-		mat4 viewTransformationMatrix() const;
+		const mat4& GetViewTransformationMatrix() const;
 
-		/**@brief Returns a reference to the camera's velocity.
+		/**@brief Returns the camera's velocity.
 		*/
-		float& cameraVelocity();
+		float GetCameraVelocity() const;
 
-		/**@brief Returns a constant reference to the camera's velocity.
+		/**@brief Returns the camera's angular velocity.
 		*/
-		const float& cameraVelocity() const;
-
-		/**@brief Returns a reference to the camera's rotate velocity.
-		*/
-		float& rotateVelocity();
-
-		/**@brief Returns a constant reference to the camera's rotate velocity.
-		*/
-		const float& rotateVelocity() const;
+		float GetAngularVelocity() const;
 		
 		/**@brief Defines the camera space using UVN.
 		*/
-		void lookAt(vec3 cameraPosition, vec3 target, vec3 up);
+		void LookAt(vec3 cameraPosition, vec3 target, vec3 up);
 
-		/**@brief Returns a reference to the near value of the frustrum.
+		/**@brief Returns the near value of the frustrum.
 		*/
-		float& znear();
+		float GetZNear() const;
 
-		/**@brief Returns a constant reference to the near value of the frustrum.
+		/**@brief Returns the far value of the frustrum.
 		*/
-		const float& znear() const;
+		float GetZFar() const;
 
-		/**@brief Returns a reference to the far value of the frustrum.
+		/**@brief Returns the vertical field of view of the frustrum in degrees.
 		*/
-		float& zfar();
+		float GetVerticalFov() const;
 
-		/**@brief Returns a constant reference to the far value of the frustrum.
+		/**@brief Returns the aspect ratio of the frustrum.
 		*/
-		const float& zfar() const;
+		float GetAspectRatio() const;
 
-		/**@brief Returns a reference to the vertical field of view of the frustrum in degrees.
+		/**@brief Sets the camera's position to the specified position.
 		*/
-		float& vFov();
+		void SetCameraPosition(const vec3& position);
 
-		/**@brief Returns a constant reference to the vertical field of view of the frustrum in degrees.
+		/**@brief Sets the camera's x-axis to the specified vector.
 		*/
-		const float& vFov() const;
+		void SetX(const vec3& x);
 
-		/**@brief Returns a reference to the aspect ratio of the frustrum.
+		/**@brief Sets the camera's y-axis to the specified vector.
 		*/
-		float& aspect();
+		void SetY(const vec3& y);
 
-		/**@brief Returns a constant reference to the aspect ratio of the frustrum.
+		/**@brief Sets the camera's z-axis to the specified vector.
 		*/
-		const float& aspect() const;
+		void SetZ(const vec3& z);
 
-		/**@brief Returns the perspective projection transformation matrix of this camera.
+		/**@brief Sets the camera's velocity to the specified velocity.
 		*/
-		mat4 perspectiveProjectionMatrix();
+		void SetCameraVelocity(float velocity);
 
-		/**@brief Returns the view perspective projection transformation matrix of this camera.
+		/**@brief Sets the camera's angular velocity to the specified angular velocity.
 		*/
-		mat4 viewPerspectiveProjectionMatrix();
+		void SetAngularVelocity(float velcoity);
+
+		/**@brief Sets the camera's near plane z value to the specified value.
+		*/
+		void SetZNear(float znear);
+
+		/**@brief Sets the camera's far plane z value to the specified value.
+		*/
+		void SetZFar(float zfar);
+
+		/**@brief Sets the camera's vertical field of view to the specified vertical field of view .
+		*/
+		void SetVerticalFov(float fov);
+
+		/**@brief Sets the camera's aspect ratio to the specified aspect ratio.
+		*/
+		void SetAspectRatio(float ar);
+
+		/**@brief Returns a constant reference to the perspective projection transformation matrix of this camera.
+		*/
+		const mat4& GetPerspectiveProjectionMatrix() const;
+
+		/**@brief Returns a constant reference to the view perspective projection transformation matrix of this camera.
+		*/
+		const mat4& GetViewPerspectiveProjectionMatrix() const;
 
 		/**@brief After modifying the camera position and/or orientation, call this to rebuild the view transformation matrix.
 		*/
-		void updateViewMatrix();
+		void UpdateViewMatrix();
 
 		/**@brief After modifying any of the frustrum properties, call this to rebuild the perspective projection transformation matrix.
 		*/
-		void updatePerspectiveProjectionMatrix();
+		void UpdatePerspectiveProjectionMatrix();
 
 		/**@brief After modifying view and/or perspective projection transformation matrix, 
 		*	call this to rebuild the view perspective projection transformation matrix.
 		*/
-		void updateViewPerspectiveProjectionMatrix();
+		void UpdateViewPerspectiveProjectionMatrix();
 
 		/**@brief Moves the camera left along the camera's x-axis
 		*/
-		void left(float dt);
+		void Left(float dt);
 
 		/**@brief Moves the camera right along the camera's x-axis
 		*/
-		void right(float dt);
+		void Right(float dt);
 
 		/**@brief Moves the camera foward along the camera's z-axis
 		*/
-		void foward(float dt);
+		void Foward(float dt);
 
 		/**@brief Moves the camera backward along the camera's z-axis
 		*/
-		void backward(float dt);
+		void Backward(float dt);
 
 		/**@brief Moves the camera up along the camera's y-axis
 		*/
-		void up(float dt);
+		void Up(float dt);
 
 		/**@brief Moves the camera down along the camera's y-axis
 		*/
-		void down(float dt);
+		void Down(float dt);
 
 		/**@brief Rotates the camera to look left and right.
 		*/
-		void rotateCameraLeftRight(float xDiff);
+		void RotateCameraLeftRight(float xDiff);
 
 		/**@brief Rotates the camera to look up and down.
 		*/
-		void rotateCameraUpDown(float yDiff);
+		void RotateCameraUpDown(float yDiff);
 
 		/**@brief Polls keyboard input and moves the camera.
 		* Moves the camera foward/backward if w/s or up/down arrow was pressed.
 		* Moves the camera left/right if a/d or left/right arrow was pressed.
 		* Moves the camera up/down if space/crtl was pressed.
 		*/
-		void keyboardInput(float dt);
+		void KeyboardInput(float dt);
 
 		/**@brief Rotates camera on mouse movement.
 		*/
-		void mouseInput();
+		void MouseInput();
 
 	private:
 		//camera position in world coordinates
-		vec3 m_cameraPosition;
+		vec3 mCameraPosition;
 
 		//z-axis of the camera coordinate system
-		vec3 m_n;
+		vec3 mN;
 
 		//y-axis of the camera coordinate system
-		vec3 m_v;
+		vec3 mV;
 
 		//x-axis of the camera coordinate system
-		vec3 m_u;
+		vec3 mU;
 
 		//stores the world to camera transform
-		mat4 m_viewMatrix;
+		mat4 mViewMatrix;
 
 		//frustrum properties
-		float m_near;
-		float m_far;
-		float m_verticalFov;
-		float m_aspectRatio;
-		mat4 m_perspectiveProjectionMatrix;
+		float mNear;
+		float mFar;
+		float mVerticalFov;
+		float mAspectRatio;
+		mat4 mPerspectiveProjectionMatrix;
 
-		mat4 m_viewPerspectiveProjectionMatrix;
+		mat4 mViewPerspectiveProjectionMatrix;
 
-		float m_cameraVelocity;
-		float m_rotateVelocity;
+		float mCameraVelocity;
+		float mAngularVelocity;
 
-		vec2 lastMousePosition;
+		vec2 mLastMousePosition;
 	};
 }

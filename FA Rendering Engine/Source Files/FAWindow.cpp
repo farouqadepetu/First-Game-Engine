@@ -90,27 +90,27 @@ namespace FAWindow
 		ShowWindow(mWindowHandle, SW_SHOW);
 	}
 
-	HWND Window::windowHandle() const
+	HWND Window::GetWindowHandle() const
 	{
 		return mWindowHandle;
 	}
 
-	unsigned int Window::width() const
+	unsigned int Window::GetWidth() const
 	{
 		return mWidth;
 	}
 
-	unsigned int Window::height() const
+	unsigned int Window::GetHeight() const
 	{
 		return mHeight;
 	}
 
-	void Window::setWidth(unsigned int width)
+	void Window::SetWidth(unsigned int width)
 	{
 		mWidth = width;
 	}
 
-	void Window::setHeight(unsigned int height)
+	void Window::SetHeight(unsigned int height)
 	{
 		mHeight = height;
 	}

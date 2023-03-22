@@ -34,48 +34,48 @@ namespace FARender
 		* For text location the  first two values in the vector is the top-left location of the rectangle and
 		* the last two values are the bottom-right location of the rectangle.
 		*/
-		void initialize(const DeviceResources& deviceResources,
+		void Initialize(const DeviceResources& deviceResources,
 			const FAMath::Vector4D& textLocation, const std::wstring& textString, float textSize, const FAColor::Color& textColor);
 
 		/**@brief Returns a constant reference to the text location.
 		*/
-		const FAMath::Vector4D& textLocation();
+		const FAMath::Vector4D& GetTextLocation() const;
 
 		/**@brief Returns a constant reference to the text string.
 		*/
-		const std::wstring& textString();
+		const std::wstring& GetTextString() const;
 
-		/**@brief Returns a constant reference to the text size.
+		/**@brief Returns the text size.
 		*/
-		const float& textSize();
+		float GetTextSize() const;
 
 		/**@brief Returns a constant reference to the color brush.
 		*/
-		const Microsoft::WRL::ComPtr<ID2D1SolidColorBrush>& brush();
+		const Microsoft::WRL::ComPtr<ID2D1SolidColorBrush>& GetBrush() const;
 
 		/**@brief Returns a constant reference to the format of the text.
 		*/
-		const Microsoft::WRL::ComPtr<IDWriteTextFormat>& format();
+		const Microsoft::WRL::ComPtr<IDWriteTextFormat>& GetFormat() const;
 
 		/**@brief Returns a constant reference to the text color.
 		*/
-		const FAColor::Color& textColor();
+		const FAColor::Color& GetTextColor() const;
 
 		/**@brief Changes the text size to the specified size.
 		*/
-		void setTextSize(const DeviceResources& deviceResources, float textSize);
+		void SetTextSize(const DeviceResources& deviceResources, float textSize);
 
 		/**@brief Changes the text color to the specified color.
 		*/
-		void setTextColor(const FAColor::Color& textColor);
+		void SetTextColor(const FAColor::Color& textColor);
 
 		/**@brief Changes the text string to the specified string.
 		*/
-		void setTextString(const std::wstring& textString);
+		void SetTextString(const std::wstring& textString);
 
 		/**@brief Changes the text location to the specified location.
 		*/
-		void setTextLocation(const FAMath::Vector4D& textLocation);
+		void SetTextLocation(const FAMath::Vector4D& textLocation);
 
 	private:
 

@@ -35,23 +35,23 @@ namespace FAWindow
 
 		/**@brief Returns the window handle.
 		*/
-		HWND windowHandle() const;
+		HWND GetWindowHandle() const;
 
 		/**@brief Returns the width of the window.
 		*/
-		unsigned int width() const ;
+		unsigned int GetWidth() const ;
 
 		/**@brief Returns the height of the window.
 		*/
-		unsigned int height() const;
+		unsigned int GetHeight() const;
 
 		/**@brief Sets the width of the window to the specified width.
 		*/
-		void setWidth(unsigned int width);
+		void SetWidth(unsigned int width);
 
 		/**@brief Sets the height of the window o the specified height.
 		*/
-		void setHeight(unsigned int height);
+		void SetHeight(unsigned int height);
 
 	private:
 		HWND mWindowHandle;

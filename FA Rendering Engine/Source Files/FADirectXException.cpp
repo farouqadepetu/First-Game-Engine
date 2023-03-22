@@ -23,7 +23,7 @@ DirectXException::DirectXException(HRESULT hr, const std::wstring& functionName,
 #endif
 }
 
-std::wstring DirectXException::errorMsg() const
+std::wstring DirectXException::ErrorMsg() const
 {
 	//the _com_error class lets us retrieve the error message associated with the HRESULT error code
 	_com_error error(errorCode);

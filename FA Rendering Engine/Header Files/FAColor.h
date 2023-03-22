@@ -16,60 +16,56 @@ namespace FAColor
 	class Color
 	{
 	public:
+
 		/**@brief Default Constructor.
-		* Initializes the color to black (0.0, 0.0, 0.0, 1.0).
+		* Initializes the color to the specified RGBA values.
 		*/
-		Color();
+		Color(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 1.0f);
 
 		/**@brief Overloaded Constructor.
 		* Initializes the color to the specified color.
 		*/
 		Color(const FAMath::Vector4D& color);
 
-		/**@brief Overloaded Constructor.
-		* Initializes the color to the specified RGBA values.
-		*/
-		Color(float r, float g, float b, float a);
-
-		/**@brief Sets the color to the specified color.
-		*/
-		void setColor(const FAMath::Vector4D& color);
-
-		/**@brief Sets the red component to the specified float value.
-		*/
-		void setRed(float r);
-
-		/**@brief Sets the green component to the specified float value.
-		*/
-		void setGreen(float g);
-
-		/**@brief Sets the blue component to the specified float value.
-		*/
-		void setBlue(float b);
-
-		/**@brief Sets the alpha component to the specified float value.
-		*/
-		void setAlpha(float a);
-
 		/**@brief Returns the color.
 		*/
-		FAMath::Vector4D getColor() const;
+		const FAMath::Vector4D& GetColor() const;
 
 		/**@brief Returns the value of the red component.
 		*/
-		float getRed() const;
+		float GetRed() const;
 
 		/**@brief Returns the value of the blue component.
 		*/
-		float getGreen() const;
+		float GetGreen() const;
 
 		/**@brief Returns the value of the green component.
 		*/
-		float getBlue() const;
+		float GetBlue() const;
 
 		/**@brief Returns the value of the alpha component.
 		*/
-		float getAlpha() const;
+		float GetAlpha() const;
+
+		/**@brief Sets the color to the specified color.
+		*/
+		void SetColor(const FAMath::Vector4D& color);
+
+		/**@brief Sets the red component to the specified float value.
+		*/
+		void SetRed(float r);
+
+		/**@brief Sets the green component to the specified float value.
+		*/
+		void SetGreen(float g);
+
+		/**@brief Sets the blue component to the specified float value.
+		*/
+		void SetBlue(float b);
+
+		/**@brief Sets the alpha component to the specified float value.
+		*/
+		void SetAlpha(float a);
 
 		/**@brief Adds this objects color to the specified color and stores the result in this object.
 		* Does component-wise addtion. If any of the resultant components are > 1.0f, they are set to 1.0f.

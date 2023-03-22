@@ -22,16 +22,16 @@ namespace FARender
 
 		/**@brief Creates the vertex buffer and stores all of the specified vertices in the vertex buffer.
 		*/
-		void createVertexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		void CreateVertexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data, UINT numBytes);
 
 		/**@brief Creates the vertex buffer view and stores it.
 		*/
-		void createVertexBufferView(UINT numBytes, UINT stride);
+		void CreateVertexBufferView(UINT numBytes, UINT stride);
 
 		/**@brief Returns a constant reference to the vertex buffer view.
 		*/
-		const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView();
+		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView();
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> mVertexDefaultBuffer;
@@ -52,16 +52,16 @@ namespace FARender
 
 		/**@brief Returns a constant reference to the vertex buffer view.
 		*/
-		const D3D12_INDEX_BUFFER_VIEW& indexBufferView();
+		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView();
 
 		/**@brief Creates the vertex buffer and stores all of the specified vertices in the vertex buffer.
 		*/
-		void createIndexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		void CreateIndexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data, UINT numBytes);
 
 		/**@brief Creates the vertex buffer view and stores it.
 		*/
-		void createIndexBufferView(UINT numBytes, DXGI_FORMAT format);
+		void CreateIndexBufferView(UINT numBytes, DXGI_FORMAT format);
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> mIndexDefaultBuffer;
@@ -87,32 +87,27 @@ namespace FARender
 
 		/**@brief Returns a reference to the constant buffer resource.
 		*/
-		Microsoft::WRL::ComPtr<ID3D12Resource>& constantBuffer();
+		Microsoft::WRL::ComPtr<ID3D12Resource>& GetConstantBuffer();
 
 		/**@brief Returns a constant reference to the constant buffer resource.
 		*/
-		const Microsoft::WRL::ComPtr<ID3D12Resource>& constantBuffer() const;
-
-		/**@brief Returns a reference to the mapped data pointer.
-		*/
-		BYTE*& mappedData();
+		const Microsoft::WRL::ComPtr<ID3D12Resource>& GetConstantBuffer() const;
 
 		/**@brief Creates and maps the constant buffer.
 		* The number of bytes allocated should be a multiple of 256 bytes.
 		*/
-		void createConstantBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const UINT& numOfBytes);
+		void CreateConstantBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const UINT& numOfBytes);
 
 		/**@brief Creates and maps the constant buffer view and stores it in the specified descriptor heap.
-		*
 		*/
-		void createConstantBufferView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		void CreateConstantBufferView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& cbvHeap, UINT cbvSize, UINT cBufferIndex,
 			UINT cbvHeapIndex, UINT numBytes);
 
 		/**@brief Copies data from the given data into the constant buffer.
 		* Uses 0-indexing.
 		*/
-		void copyData(UINT index, UINT byteSize, const void* data, const UINT64& numOfBytes);
+		void CopyData(UINT index, UINT byteSize, const void* data, const UINT64& numOfBytes);
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> mConstantBuffer;

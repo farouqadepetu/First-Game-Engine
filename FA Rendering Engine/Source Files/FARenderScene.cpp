@@ -8,89 +8,89 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//RENDER SCENE FUNCITON DEFINTIONS
 
-	DeviceResources RenderScene::dResources;
+	DeviceResources RenderScene::mDeviceResources;
 
 	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND handle)
 	{
-		dResources.initializeDirect3D(width, height, handle);
+		mDeviceResources.InitializeDirect3D(width, height, handle);
 	}
 
-	DeviceResources& RenderScene::deviceResources()
+	DeviceResources& RenderScene::GetDeviceResources()
 	{
-		return dResources;
+		return mDeviceResources;
 	}
 
-	const DeviceResources& RenderScene::deviceResources() const
+	const DeviceResources& RenderScene::GetDeviceResources() const
 	{
-		return dResources;
+		return mDeviceResources;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3DBlob>& RenderScene::shader(const std::wstring& name) const
+	const Microsoft::WRL::ComPtr<ID3DBlob>& RenderScene::GetShader(const std::wstring& name) const
 	{
 		return mShaders.at(name);
 	}
 
-	const std::vector<D3D12_INPUT_ELEMENT_DESC>& RenderScene::inputElementLayout(const std::wstring& name) const
+	const std::vector<D3D12_INPUT_ELEMENT_DESC>& RenderScene::GetInputElementLayout(const std::wstring& name) const
 	{
 		return mInputElementDescriptions.at(name);
 	}
 
-	const D3D12_RASTERIZER_DESC& RenderScene::rasterizationState(const std::wstring& name) const
+	const D3D12_RASTERIZER_DESC& RenderScene::GetRasterizationState(const std::wstring& name) const
 	{
 		return mRasterizationStates.at(name);
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12PipelineState>& RenderScene::pso(const std::wstring& drawSettingsName) const
+	const Microsoft::WRL::ComPtr<ID3D12PipelineState>& RenderScene::GetPSO(const std::wstring& drawSettingsName) const
 	{
 		return mSceneObjects.at(drawSettingsName).pipelineState;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12RootSignature>& RenderScene::rootSignature(const std::wstring& drawSettingsName) const
+	const Microsoft::WRL::ComPtr<ID3D12RootSignature>& RenderScene::GetRootSignature(const std::wstring& drawSettingsName) const
 	{
 		return mSceneObjects.at(drawSettingsName).rootSig;
 	}
 
-	const D3D_PRIMITIVE_TOPOLOGY& RenderScene::primitive(const std::wstring& drawSettingsName) const
+	const D3D_PRIMITIVE_TOPOLOGY& RenderScene::GetPrimitive(const std::wstring& drawSettingsName) const
 	{
 		return mSceneObjects.at(drawSettingsName).prim;
 	}
 
-	FAShapes::DrawArguments& RenderScene::drawArguments(const std::wstring& drawSettingsName, unsigned int index)
+	FAShapes::DrawArguments& RenderScene::GetDrawArguments(const std::wstring& drawSettingsName, unsigned int index)
 	{
 		return mSceneObjects.at(drawSettingsName).drawArgs.at(index);
 	}
 
-	const FAShapes::DrawArguments& RenderScene::drawArguments(const std::wstring& drawSettingsName, unsigned int index) const
+	const FAShapes::DrawArguments& RenderScene::GetDrawArguments(const std::wstring& drawSettingsName, unsigned int index) const
 	{
 		return mSceneObjects.at(drawSettingsName).drawArgs.at(index);
 	}
 
-	ConstantBuffer& RenderScene::cBuffer()
+	ConstantBuffer& RenderScene::GetConstantBuffer()
 	{
 		return mConstantBuffer[currentFrame];
 	}
 
-	const ConstantBuffer& RenderScene::cBuffer() const
+	const ConstantBuffer& RenderScene::GetConstantBuffer() const
 	{
 		return mConstantBuffer[currentFrame];
 	}
 
-	const UINT& RenderScene::cbvSize() const
+	const UINT& RenderScene::GetCBVSize() const
 	{
 		return mCBVSize;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& RenderScene::cbvHeap() const
+	const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& RenderScene::GetCBVHeap() const
 	{
 		return mCBVHeap;
 	}
 
-	const D3D12_ROOT_PARAMETER& RenderScene::cbvHeapRootParameter() const
+	const D3D12_ROOT_PARAMETER& RenderScene::GetCBVHeapRootParameter() const
 	{
 		return mCBVHeapRootParameter;
 	}
 
-	void RenderScene::loadShader(const std::wstring& filename, const std::wstring& name)
+	void RenderScene::LoadShader(const std::wstring& filename, const std::wstring& name)
 	{
 		//opens the file
 		std::ifstream fin(filename, std::ios::binary);
@@ -114,18 +114,18 @@ namespace FARender
 		mShaders[name] = blob;
 	}
 
-	void RenderScene::removeShader(const std::wstring& shaderName)
+	void RenderScene::RemoveShader(const std::wstring& shaderName)
 	{
 		mShaders.erase(shaderName);
 	}
 
-	void RenderScene::storeInputElementDescriptions(const std::wstring& name,
+	void RenderScene::StoreInputElementDescriptions(const std::wstring& name,
 		const std::vector<D3D12_INPUT_ELEMENT_DESC>& inputElementLayout)
 	{
 		mInputElementDescriptions[name] = inputElementLayout;
 	}
 
-	void RenderScene::storeInputElementDescriptions(const std::wstring& name,
+	void RenderScene::StoreInputElementDescriptions(const std::wstring& name,
 		const D3D12_INPUT_ELEMENT_DESC* inputElementLayout,
 		UINT numElements)
 	{
@@ -133,12 +133,12 @@ namespace FARender
 			inputElementLayout + numElements);
 	}
 
-	void RenderScene::removeInputElementDescription(const std::wstring& name)
+	void RenderScene::RemoveInputElementDescription(const std::wstring& name)
 	{
 		mInputElementDescriptions.erase(name);
 	}
 
-	void RenderScene::createRasterizationState(D3D12_FILL_MODE fillMode, BOOL enableMultisample, const std::wstring& name)
+	void RenderScene::CreateRasterizationState(D3D12_FILL_MODE fillMode, BOOL enableMultisample, const std::wstring& name)
 	{
 		D3D12_RASTERIZER_DESC rDescription{};
 		rDescription.FillMode = fillMode;
@@ -156,12 +156,12 @@ namespace FARender
 		mRasterizationStates[name] = rDescription;
 	}
 
-	void RenderScene::removeRasterizationState(const std::wstring& name)
+	void RenderScene::RemoveRasterizationState(const std::wstring& name)
 	{
 		mRasterizationStates.erase(name);
 	}
 
-	void RenderScene::createPSO(const std::wstring& drawSettingsName, const std::wstring& rStateName,
+	void RenderScene::CreatePSO(const std::wstring& drawSettingsName, const std::wstring& rStateName,
 		const std::wstring& vsName, const std::wstring& psName, const std::wstring& inputLayoutName,
 		const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, UINT sampleCount)
 	{
@@ -190,19 +190,19 @@ namespace FARender
 		pState.PrimitiveTopologyType = primitiveType;
 
 		pState.NumRenderTargets = 1;
-		pState.RTVFormats[0] = dResources.backBufferFormat();
+		pState.RTVFormats[0] = mDeviceResources.GetBackBufferFormat();
 
-		pState.DSVFormat = dResources.depthStencilFormat();
+		pState.DSVFormat = mDeviceResources.GetDepthStencilFormat();
 
 		pState.SampleDesc.Count = sampleCount;
 		pState.SampleDesc.Quality = 0;
 
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> tempPSO;
-		ThrowIfFailed(dResources.device()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&tempPSO)));
+		ThrowIfFailed(mDeviceResources.GetDevice()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&tempPSO)));
 		mSceneObjects.at(drawSettingsName).pipelineState = tempPSO;
 	}
 
-	void RenderScene::createRootSignature(const std::wstring& drawSettingsName, 
+	void RenderScene::CreateRootSignature(const std::wstring& drawSettingsName, 
 		const D3D12_ROOT_PARAMETER* rootParameters, UINT numParameters)
 	{
 		//Describe a root signature to store all our root parameters.
@@ -228,27 +228,27 @@ namespace FARender
 		ThrowIfFailed(e);
 
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
-		ThrowIfFailed(dResources.device()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
+		ThrowIfFailed(mDeviceResources.GetDevice()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
 			seralizedRootSignature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
 
 		mSceneObjects.at(drawSettingsName).rootSig = rootSignature;
 	}
 
-	void RenderScene::createVertexBuffer(const void* data, UINT numBytes, UINT stride)
+	void RenderScene::CreateVertexBuffer(const void* data, UINT numBytes, UINT stride)
 	{
-		mVertexBuffer.createVertexBuffer(dResources.device(), dResources.commandList(), data, numBytes);
-		mVertexBuffer.createVertexBufferView(numBytes, stride);
+		mVertexBuffer.CreateVertexBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), data, numBytes);
+		mVertexBuffer.CreateVertexBufferView(numBytes, stride);
 	}
 
-	void RenderScene::createIndexBuffer(const void* data, UINT numBytes, DXGI_FORMAT format)
+	void RenderScene::CreateIndexBuffer(const void* data, UINT numBytes, DXGI_FORMAT format)
 	{
-		mIndexBuffer.createIndexBuffer(dResources.device(), dResources.commandList(), data, numBytes);
-		mIndexBuffer.createIndexBufferView(numBytes, format);
+		mIndexBuffer.CreateIndexBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), data, numBytes);
+		mIndexBuffer.CreateIndexBufferView(numBytes, format);
 	}
 
-	void RenderScene::createCBVHeap(UINT numDescriptors, UINT shaderRegister)
+	void RenderScene::CreateCBVHeap(UINT numDescriptors, UINT shaderRegister)
 	{
-		mCBVSize = dResources.device()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		mCBVSize = mDeviceResources.GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		//Need a CBV for each object for each frame.
 		D3D12_DESCRIPTOR_HEAP_DESC cbvDescriptorHeapDescription{};
@@ -256,7 +256,7 @@ namespace FARender
 		cbvDescriptorHeapDescription.NumDescriptors = numDescriptors * numFrames;
 		cbvDescriptorHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbvDescriptorHeapDescription.NodeMask = 0;
-		ThrowIfFailed(dResources.device()->CreateDescriptorHeap(&cbvDescriptorHeapDescription, IID_PPV_ARGS(&mCBVHeap)));
+		ThrowIfFailed(mDeviceResources.GetDevice()->CreateDescriptorHeap(&cbvDescriptorHeapDescription, IID_PPV_ARGS(&mCBVHeap)));
 
 		//Describes the number of CBV's in the CB descriptor heap
 		mCBVHeapDescription.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
@@ -281,122 +281,122 @@ namespace FARender
 		mCBVHeapRootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	}
 
-	void RenderScene::createConstantBuffer(UINT numOfBytes)
+	void RenderScene::CreateConstantBuffer(UINT numOfBytes)
 	{
 		for (UINT i = 0; i < numFrames; ++i)
 		{
-			mConstantBuffer[i].createConstantBuffer(dResources.device(), numOfBytes);
+			mConstantBuffer[i].CreateConstantBuffer(mDeviceResources.GetDevice(), numOfBytes);
 		}
 	}
 
-	void RenderScene::createConstantBufferView( UINT index, UINT numBytes)
+	void RenderScene::CreateConstantBufferView( UINT index, UINT numBytes)
 	{
 		//Create a constant buffer view for each frame.
 		for (UINT i = 0; i < numFrames; ++i)
 		{
-			mConstantBuffer[i].createConstantBufferView(dResources.device(), mCBVHeap, mCBVSize, (index * numFrames) + i,
+			mConstantBuffer[i].CreateConstantBufferView(mDeviceResources.GetDevice(), mCBVHeap, mCBVSize, (index * numFrames) + i,
 				index, numBytes);
 		}
 	}
 
-	void RenderScene::setPSO(const std::wstring& drawSettingsName, 
+	void RenderScene::SetPSO(const std::wstring& drawSettingsName, 
 		const Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso)
 	{
 		mSceneObjects.at(drawSettingsName).pipelineState = pso;
 	}
 
-	void RenderScene::setRootSignature(const std::wstring& drawSettingsName, 
+	void RenderScene::SetRootSignature(const std::wstring& drawSettingsName, 
 		const Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature)
 	{
 		mSceneObjects.at(drawSettingsName).rootSig = rootSignature;
 	}
 
-	void RenderScene::setPrimitive(const std::wstring& drawSettingsName, 
+	void RenderScene::SetPrimitive(const std::wstring& drawSettingsName, 
 		const D3D_PRIMITIVE_TOPOLOGY& primitive)
 	{
 		mSceneObjects.at(drawSettingsName).prim = primitive;
 	}
 
-	void RenderScene::addDrawArgument(const std::wstring& drawSettingsName,
+	void RenderScene::AddDrawArgument(const std::wstring& drawSettingsName,
 		const FAShapes::DrawArguments& drawArg)
 	{
 		mSceneObjects.at(drawSettingsName).drawArgs.push_back(drawArg);
 	}
 
-	void RenderScene::addDrawArgument(const std::wstring& drawSettingsName,
+	void RenderScene::AddDrawArgument(const std::wstring& drawSettingsName,
 		unsigned int indexCount, unsigned int locationOfFirstIndex, int indexOfFirstVertex, int indexOfConstantData)
 	{
 		FAShapes::DrawArguments drawArgs{ indexCount, locationOfFirstIndex, indexOfFirstVertex, indexOfConstantData };
 		mSceneObjects.at(drawSettingsName).drawArgs.push_back(drawArgs);
 	}
 
-	void RenderScene::removeDrawArgument(const std::wstring& drawSettingsName, unsigned int index)
+	void RenderScene::RemoveDrawArgument(const std::wstring& drawSettingsName, unsigned int index)
 	{
 		std::vector<FAShapes::DrawArguments>::iterator it = mSceneObjects.at(drawSettingsName).drawArgs.begin();
 		mSceneObjects.at(drawSettingsName).drawArgs.erase(it + index);
 	}
 
-	void RenderScene::createDrawSettings(const std::wstring& drawSettingsName)
+	void RenderScene::CreateDrawSettings(const std::wstring& drawSettingsName)
 	{
 		mSceneObjects[drawSettingsName];
 	}
 
-	void RenderScene::removeDrawSettings(const std::wstring& drawSettingsName)
+	void RenderScene::RemoveDrawSettings(const std::wstring& drawSettingsName)
 	{
 		mSceneObjects.erase(drawSettingsName);
 	}
 
-	void RenderScene::createText(const std::wstring& textName, FAMath::Vector4D textLocation, const std::wstring& textString,
+	void RenderScene::CreateText(const std::wstring& textName, FAMath::Vector4D textLocation, const std::wstring& textString,
 		float textSize, const FAColor::Color textColor)
 	{
-		mSceneText[textName].initialize(dResources, textLocation, textString, textSize, textColor);
+		mSceneText[textName].Initialize(mDeviceResources, textLocation, textString, textSize, textColor);
 	}
 
-	void RenderScene::removeText(const std::wstring& textName)
+	void RenderScene::RemoveText(const std::wstring& textName)
 	{
 		mSceneText.erase(textName);
 	}
 
-	void RenderScene::changeTextLocation(const std::wstring& textName, FAMath::Vector4D textLocation)
+	void RenderScene::ChangeTextLocation(const std::wstring& textName, FAMath::Vector4D textLocation)
 	{
-		mSceneText.at(textName).setTextLocation(textLocation);
+		mSceneText.at(textName).SetTextLocation(textLocation);
 	}
 
-	void RenderScene::changeTextString(const std::wstring& textName, const std::wstring& textString)
+	void RenderScene::ChangeTextString(const std::wstring& textName, const std::wstring& textString)
 	{
-		mSceneText.at(textName).setTextString(textString);
+		mSceneText.at(textName).SetTextString(textString);
 	}
 
-	void RenderScene::changeTextSize(const std::wstring& textName, float textSize)
+	void RenderScene::ChangeTextSize(const std::wstring& textName, float textSize)
 	{
-		mSceneText.at(textName).setTextSize(dResources, textSize);
+		mSceneText.at(textName).SetTextSize(mDeviceResources, textSize);
 	}
 
-	void RenderScene::changeTextColor(const std::wstring& textName, const FAColor::Color textColor)
+	void RenderScene::ChangeTextColor(const std::wstring& textName, const FAColor::Color textColor)
 	{
-		mSceneText.at(textName).setTextColor(textColor);
+		mSceneText.at(textName).SetTextColor(textColor);
 	}
 
-	void RenderScene::beforeDrawObjects()
+	void RenderScene::BeforeDrawObjects()
 	{
-		dResources.draw();
+		mDeviceResources.Draw();
 
 		//Link the CBV descriptor heaps to the pipeline
 		ID3D12DescriptorHeap* dH[] = { mCBVHeap.Get() };
-		dResources.commandList()->SetDescriptorHeaps(1, dH);
+		mDeviceResources.GetCommandList()->SetDescriptorHeaps(1, dH);
 
-		dResources.commandList()->IASetVertexBuffers(0, 1, &mVertexBuffer.vertexBufferView());
+		mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, &mVertexBuffer.GetVertexBufferView());
 
-		dResources.commandList()->IASetIndexBuffer(&mIndexBuffer.indexBufferView());
+		mDeviceResources.GetCommandList()->IASetIndexBuffer(&mIndexBuffer.GetIndexBufferView());
 	}
 
-	void RenderScene::drawObjects(const std::wstring& drawSettingsName)
+	void RenderScene::DrawObjects(const std::wstring& drawSettingsName)
 	{
-		dResources.commandList()->SetPipelineState(mSceneObjects.at(drawSettingsName).pipelineState.Get());
+		mDeviceResources.GetCommandList()->SetPipelineState(mSceneObjects.at(drawSettingsName).pipelineState.Get());
 
-		dResources.commandList()->SetGraphicsRootSignature(mSceneObjects.at(drawSettingsName).rootSig.Get());
+		mDeviceResources.GetCommandList()->SetGraphicsRootSignature(mSceneObjects.at(drawSettingsName).rootSig.Get());
 
-		dResources.commandList()->IASetPrimitiveTopology(mSceneObjects.at(drawSettingsName).prim);
+		mDeviceResources.GetCommandList()->IASetPrimitiveTopology(mSceneObjects.at(drawSettingsName).prim);
 
 		//draw all the objects the share the same PSO, root signature and primitive
 		for (const FAShapes::DrawArguments& i : mSceneObjects.at(drawSettingsName).drawArgs)
@@ -407,55 +407,55 @@ namespace FARender
 
 			handle.Offset((i.indexOfConstantData * numFrames) + currentFrame, mCBVSize);
 
-			dResources.commandList()->SetGraphicsRootDescriptorTable(0, handle);
+			mDeviceResources.GetCommandList()->SetGraphicsRootDescriptorTable(0, handle);
 
-			dResources.commandList()->DrawIndexedInstanced(i.indexCount, 1,
+			mDeviceResources.GetCommandList()->DrawIndexedInstanced(i.indexCount, 1,
 				i.locationOfFirstIndex, i.indexOfFirstVertex, 0);
 		}
 	}
 
-	void RenderScene::afterDrawObjects(bool renderText)
+	void RenderScene::AfterDrawObjects(bool renderText)
 	{
-		dResources.rtBufferTransition(renderText);
+		mDeviceResources.RTBufferTransition(renderText);
 
-		dResources.execute();
+		mDeviceResources.Execute();
 	}
 
-	void RenderScene::beforeDrawText()
+	void RenderScene::BeforeDrawText()
 	{
-		dResources.beforeTextDraw();
+		mDeviceResources.BeforeTextDraw();
 	}
 
-	void RenderScene::drawText(const std::wstring& textName)
+	void RenderScene::RenderText(const std::wstring& textName)
 	{
-		D2D_RECT_F r{ mSceneText.at(textName).textLocation().x(), mSceneText.at(textName).textLocation().y(),
-			mSceneText.at(textName).textLocation().z(), mSceneText.at(textName).textLocation().w() };
+		D2D_RECT_F r{ mSceneText.at(textName).GetTextLocation().GetX(), mSceneText.at(textName).GetTextLocation().GetY(),
+			mSceneText.at(textName).GetTextLocation().GetZ(), mSceneText.at(textName).GetTextLocation().GetW() };
 
-		dResources.device2DContext()->DrawTextW(mSceneText.at(textName).textString().c_str(),
-			(UINT32)mSceneText.at(textName).textString().size(), mSceneText.at(textName).format().Get(),
-			&r, mSceneText.at(textName).brush().Get());
+		mDeviceResources.GetDevice2DContext()->DrawTextW(mSceneText.at(textName).GetTextString().c_str(),
+			(UINT32)mSceneText.at(textName).GetTextString().size(), mSceneText.at(textName).GetFormat().Get(),
+			&r, mSceneText.at(textName).GetBrush().Get());
 	}
 
-	void RenderScene::afterDrawText()
+	void RenderScene::AfterDrawText()
 	{
-		dResources.afterTextDraw();
+		mDeviceResources.AfterTextDraw();
 	}
 
-	void RenderScene::afterDraw()
+	void RenderScene::AfterDraw()
 	{
-		dResources.present();
+		mDeviceResources.Present();
 
 		//Update the current fence value
-		dResources.updateCurrentFrameFenceValue();
+		mDeviceResources.UpdateCurrentFrameFenceValue();
 
 		//Add a fence instruction to the command queue.
-		dResources.signal();
+		mDeviceResources.Signal();
 	}
 
-	void RenderScene::executeAndFlush()
+	void RenderScene::ExecuteAndFlush()
 	{
-		dResources.execute();
-		dResources.flushCommandQueue();
+		mDeviceResources.Execute();
+		mDeviceResources.FlushCommandQueue();
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------

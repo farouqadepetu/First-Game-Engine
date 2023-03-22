@@ -12,169 +12,169 @@ namespace FARender
 
 	DeviceResources::DeviceResources(unsigned int width, unsigned int height, HWND windowHandle)
 	{
-		initializeDirect3D(width, height, windowHandle);
+		InitializeDirect3D(width, height, windowHandle);
 	}
 
 	DeviceResources::~DeviceResources()
 	{
 		if (mDirect3DDevice != nullptr)
-			flushCommandQueue();
+			FlushCommandQueue();
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12Device>& DeviceResources::device() const
+	const Microsoft::WRL::ComPtr<ID3D12Device>& DeviceResources::GetDevice() const
 	{
 		return mDirect3DDevice;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& DeviceResources::commandQueue() const
+	const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& DeviceResources::GetCommandQueue() const
 	{
 		return mCommandQueue;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& DeviceResources::commandAllocator() const
+	const Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& DeviceResources::GetCommandAllocator() const
 	{
 		return mCommandAllocator[currentFrame];
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& DeviceResources::commandList() const
+	const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& DeviceResources::GetCommandList() const
 	{
 		return mCommandList;
 	}
 
-	const DXGI_FORMAT& DeviceResources::backBufferFormat() const
+	const DXGI_FORMAT& DeviceResources::GetBackBufferFormat() const
 	{
 		return mBackBufferFormat;
 	}
 
-	const UINT DeviceResources::numOfSwapChainBuffers() const
+	const UINT DeviceResources::GetNumOfSwapChainBuffers() const
 	{
 		return mNumOfSwapChainBuffers;
 	}
 
-	const Microsoft::WRL::ComPtr<IDXGISwapChain1>& DeviceResources::swapChain() const
+	const Microsoft::WRL::ComPtr<IDXGISwapChain1>& DeviceResources::GetSwapChain() const
 	{
 		return mSwapChain;
 	}
 
-	const UINT& DeviceResources::rtvDescriptorSize() const
+	const UINT& DeviceResources::GetRTVDescriptorSize() const
 	{
 		return mRTVSize;
 	}
 
-	const UINT& DeviceResources::dsvDescriptorSize() const
+	const UINT& DeviceResources::GetDSVDescriptorSize() const
 	{
 		return mDSVSize;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& DeviceResources::rtvDescriptorHeap() const
+	const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& DeviceResources::GetRTVDescriptorHeap() const
 	{
 		return mRTVHeap;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& DeviceResources::dsvDescriptorHeap() const
+	const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& DeviceResources::GetDSVDescriptorHeap() const
 	{
 		return mDSVHeap;
 	}
 
-	const D3D12_VIEWPORT& DeviceResources::viewport() const
+	const D3D12_VIEWPORT& DeviceResources::GetViewport() const
 	{
 		return mViewport;
 	}
 
-	const D3D12_RECT& DeviceResources::scissor() const
+	const D3D12_RECT& DeviceResources::GetScissor() const
 	{
 		return mScissor;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12Resource>* DeviceResources::swapChainBuffers() const
+	const Microsoft::WRL::ComPtr<ID3D12Resource>* DeviceResources::GetSwapChainBuffers() const
 	{
 		return mSwapChainBuffers;
 	}
 
-	const UINT& DeviceResources::currentBackBuffer() const
+	const UINT& DeviceResources::GetCurrentBackBuffer() const
 	{
 		return mCurrentBackBuffer;
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12Resource>& DeviceResources::depthStencilBuffer() const
+	const Microsoft::WRL::ComPtr<ID3D12Resource>& DeviceResources::GetDepthStencilBuffer() const
 	{
 		return mDepthStencilBuffer;
 	}
 
-	const DXGI_FORMAT& DeviceResources::depthStencilFormat() const
+	const DXGI_FORMAT& DeviceResources::GetDepthStencilFormat() const
 	{
 		return mDepthStencilFormat;
 	}
 
-	bool& DeviceResources::isMSAAEnabled()
+	bool DeviceResources::IsMSAAEnabled()
 	{
 		return mIsMSAAEnabled;
 	}
 
-	const bool& DeviceResources::isMSAAEnabled() const
+	void DeviceResources::DisableMSAA()
 	{
-		return mIsMSAAEnabled;
+		mIsMSAAEnabled = false;
 	}
 
-	UINT& DeviceResources::sampleCount()
+	void DeviceResources::EnableMSAA()
+	{
+		mIsMSAAEnabled = true;
+	}
+
+	UINT& DeviceResources::GetSampleCount()
 	{
 		return mSampleCount;
 	}
 
-	const UINT& DeviceResources::sampleCount() const
+	const UINT& DeviceResources::GetSampleCount() const
 	{
 		return mSampleCount;
 	}
 
-	UINT64& DeviceResources::currentFenceValue()
-	{
-		return mFenceValue;
-	}
-
-	const UINT64& DeviceResources::currentFenceValue() const
+	const UINT64& DeviceResources::GetCurrentFenceValue() const
 	{
 		return mFenceValue;
 	}
 
 
-	const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& DeviceResources::device2DContext() const
+	const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& DeviceResources::GetDevice2DContext() const
 	{
 		return mDirect2DDeviceContext;
 	}
 
-	const Microsoft::WRL::ComPtr<IDWriteFactory>& DeviceResources::directWriteFactory() const
+	const Microsoft::WRL::ComPtr<IDWriteFactory>& DeviceResources::GetDirectWriteFactory() const
 	{
 		return mDirectWriteFactory;
 	}
 
-	void DeviceResources::updateCurrentFrameFenceValue()
+	void DeviceResources::UpdateCurrentFrameFenceValue()
 	{
 		mCurrentFrameFenceValue[currentFrame] = ++mFenceValue;
 	}
 
-	void  DeviceResources::initializeDirect3D(unsigned int width, unsigned int height, HWND handle)
+	void  DeviceResources::InitializeDirect3D(unsigned int width, unsigned int height, HWND handle)
 	{
-		enableDebugLayer();
-		createDirect3DDevice();
-		createDXGIFactory();
-		createFence();
-		queryDescriptorSizes();
-		createCommandObjects();
-		createSwapChain(handle);
-		createRTVHeap();
-		createDSVHeap();
+		EnableDebugLayer();
+		CreateDirect3DDevice();
+		CreateDXGIFactory();
+		CreateFence();
+		QueryDescriptorSizes();
+		CreateCommandObjects();
+		CreateSwapChain(handle);
+		CreateRTVHeap();
+		CreateDSVHeap();
 
-		initializeText();
+		InitializeText();
 
-		checkMSAASupport();
-		createMSAARTVHeap();
-		createMSAADSVHeap();
+		CheckMSAASupport();
+		CreateMSAARTVHeap();
+		CreateMSAADSVHeap();
 
-		resize(width, height, handle);
+		Resize(width, height, handle);
 		mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr);
 	}
 
-	void DeviceResources::enableDebugLayer()
+	void DeviceResources::EnableDebugLayer()
 	{
 		//enables the debug layer for additional information
 #if defined(_DEBUG) || defined(DEBUG)
@@ -184,12 +184,12 @@ namespace FARender
 #endif
 	}
 
-	void DeviceResources::createDirect3DDevice()
+	void DeviceResources::CreateDirect3DDevice()
 	{
 		ThrowIfFailed(D3D12CreateDevice(0, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&mDirect3DDevice)));
 	}
 
-	void DeviceResources::createDXGIFactory()
+	void DeviceResources::CreateDXGIFactory()
 	{
 		UINT flag = 0;
 #if defined(_DEBUG) || defined(DEBUG)
@@ -198,18 +198,18 @@ namespace FARender
 		ThrowIfFailed(CreateDXGIFactory2(flag, IID_PPV_ARGS(&mDXGIFactory)));
 	}
 
-	void DeviceResources::createFence()
+	void DeviceResources::CreateFence()
 	{
 		ThrowIfFailed(mDirect3DDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
 	}
 
-	void DeviceResources::queryDescriptorSizes()
+	void DeviceResources::QueryDescriptorSizes()
 	{
 		mRTVSize = mDirect3DDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 		mDSVSize = mDirect3DDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 	}
 
-	void DeviceResources::createCommandObjects()
+	void DeviceResources::CreateCommandObjects()
 	{
 		//describes the command queue.
 		D3D12_COMMAND_QUEUE_DESC commandQueueDescription{};
@@ -239,7 +239,7 @@ namespace FARender
 		mCommandList->Close();
 	}
 
-	void DeviceResources::createSwapChain(HWND handle)
+	void DeviceResources::CreateSwapChain(HWND handle)
 	{
 		mSwapChain.Reset();
 
@@ -265,7 +265,7 @@ namespace FARender
 			&swapChainDescription, nullptr, nullptr, &mSwapChain));
 	}
 
-	void DeviceResources::createRTVHeap()
+	void DeviceResources::CreateRTVHeap()
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDescription{};
 		rtvDescriptorHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -275,7 +275,7 @@ namespace FARender
 		ThrowIfFailed(mDirect3DDevice->CreateDescriptorHeap(&rtvDescriptorHeapDescription, IID_PPV_ARGS(&mRTVHeap)));
 	}
 
-	void DeviceResources::createDSVHeap()
+	void DeviceResources::CreateDSVHeap()
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC dsvDescriptorHeapDescription{};
 		dsvDescriptorHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
@@ -285,7 +285,7 @@ namespace FARender
 		ThrowIfFailed(mDirect3DDevice->CreateDescriptorHeap(&dsvDescriptorHeapDescription, IID_PPV_ARGS(&mDSVHeap)));
 	}
 
-	void DeviceResources::createRenderTargetBufferAndView()
+	void DeviceResources::CreateRenderTargetBufferAndView()
 	{
 		//Create Render Target View (Descriptor)
 
@@ -303,7 +303,7 @@ namespace FARender
 		mDirect3DDevice->CreateRenderTargetView(mSwapChainBuffers[1].Get(), nullptr, rtvHeapHandle.Offset(1, mRTVSize));
 	}
 
-	void DeviceResources::createDepthStencilBufferAndView(int width, int height)
+	void DeviceResources::CreateDepthStencilBufferAndView(int width, int height)
 	{
 		//Create Depth/Stenicl Buffer and View (Descriptor)
 
@@ -341,7 +341,7 @@ namespace FARender
 			mDSVHeap->GetCPUDescriptorHandleForHeapStart());
 	}
 
-	void DeviceResources::flushCommandQueue()
+	void DeviceResources::FlushCommandQueue()
 	{
 		++mFenceValue;
 
@@ -368,7 +368,7 @@ namespace FARender
 		}
 	}
 
-	void DeviceResources::waitForGPU() const
+	void DeviceResources::WaitForGPU() const
 	{
 		//if the signal command has not been executed, wait until it is
 		if (mCurrentFrameFenceValue[currentFrame] != 0 &&
@@ -391,20 +391,20 @@ namespace FARender
 		}
 	}
 
-	void DeviceResources::signal()
+	void DeviceResources::Signal()
 	{
 		mCommandQueue->Signal(mFence.Get(), mFenceValue);
 	}
 
-	void DeviceResources::resize(int width, int height, const HWND& handle)
+	void DeviceResources::Resize(int width, int height, const HWND& handle)
 	{
 		//make sure all of the commands in the command list have been executed before adding new commands.
-		flushCommandQueue();
+		FlushCommandQueue();
 
 		//reset the command list to add new commands
 		ThrowIfFailed(mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr));
 
-		resetTextBuffers();
+		ResetTextBuffers();
 
 		//Reset/Release all buffers that have a reference to the swap chain.
 		mSwapChainBuffers[0].Reset();
@@ -424,17 +424,17 @@ namespace FARender
 		mCurrentBackBuffer = 0;
 
 		//Make RT buffers, DS buffer, RT view and DS view
-		createRenderTargetBufferAndView();
-		createDepthStencilBufferAndView(width, height);
+		CreateRenderTargetBufferAndView();
+		CreateDepthStencilBufferAndView(width, height);
 
 		if (mMSAA4xSupported && mIsMSAAEnabled)
 		{
 			//Make MSAA RT buffer, MSAA DS buffer, MSAA RT view and MSAA DS view
-			createMSAARenderTargetBufferAndView(width, height);
-			createMSAADepthStencilBufferAndView(width, height);
+			CreateMSAARenderTargetBufferAndView(width, height);
+			CreateMSAADepthStencilBufferAndView(width, height);
 		}
 
-		textResize(handle);
+		TextResize(handle);
 
 		//Close the command list.
 		//Store all your command lists in a ID3D12CommandList array.
@@ -445,7 +445,7 @@ namespace FARender
 		mCommandQueue->ExecuteCommandLists(s, commandLists);
 
 		//make sure all of the commands in the command list have been executed before adding new commands.
-		flushCommandQueue();
+		FlushCommandQueue();
 
 		//Viewport and scissor rectangles
 		mViewport.TopLeftX = 0.0f;
@@ -459,22 +459,22 @@ namespace FARender
 		mScissor = { 0, 0, width, height };
 	}
 
-	void DeviceResources::resetCommandList()
+	void DeviceResources::ResetCommandList()
 	{
 		mCommandList->Reset(mCommandAllocator[currentFrame].Get(), nullptr);
 	}
 
-	void DeviceResources::resetCommandAllocator()
+	void DeviceResources::ResetCommandAllocator()
 	{
 		mCommandAllocator[currentFrame].Reset();
 	}
 
-	void DeviceResources::resetDirectCommandList()
+	void DeviceResources::ResetDirectCommandList()
 	{
 		mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr);
 	}
 
-	void DeviceResources::execute() const
+	void DeviceResources::Execute() const
 	{
 		ThrowIfFailed(mCommandList->Close());
 		ID3D12CommandList* commandLists[] = { mCommandList.Get() };
@@ -482,14 +482,14 @@ namespace FARender
 		mCommandQueue->ExecuteCommandLists(s, commandLists);
 	}
 
-	void DeviceResources::present()
+	void DeviceResources::Present()
 	{
 		//swap the front and back buffers
-		ThrowIfFailed(swapChain()->Present(0, 0));
+		ThrowIfFailed(mSwapChain->Present(0, 0));
 		mCurrentBackBuffer = (mCurrentBackBuffer + 1) % mNumOfSwapChainBuffers;
 	}
 
-	void DeviceResources::draw()
+	void DeviceResources::Draw()
 	{
 		//Reseting command allocator allows us to reuse the memory.
 		//Make sure all the commands in the command list is executed before calling this.
@@ -559,7 +559,7 @@ namespace FARender
 		}
 	}
 
-	void DeviceResources::rtBufferTransition(bool renderText)
+	void DeviceResources::RTBufferTransition(bool renderText)
 	{
 		if (mMSAA4xSupported && mIsMSAAEnabled)
 		{
@@ -608,7 +608,7 @@ namespace FARender
 	}
 
 
-	void DeviceResources::initializeText()
+	void DeviceResources::InitializeText()
 	{
 		//-----------------------------------------------------------------------------------------------------------------------------
 		//Create a D3D11On12 Device
@@ -648,7 +648,7 @@ namespace FARender
 
 	}
 
-	void DeviceResources::resetTextBuffers()
+	void DeviceResources::ResetTextBuffers()
 	{
 		mDirect2DDeviceContext->SetTarget(nullptr);
 
@@ -662,7 +662,7 @@ namespace FARender
 		mDevice11Context->Flush();
 	}
 
-	void DeviceResources::textResize(const HWND& handle)
+	void DeviceResources::TextResize(const HWND& handle)
 	{
 		//-----------------------------------------------------------------------------------------------------------------------------
 		//Create a wrapped 11on12 resource to the back buffers
@@ -701,7 +701,7 @@ namespace FARender
 	}
 
 
-	void DeviceResources::beforeTextDraw()
+	void DeviceResources::BeforeTextDraw()
 	{
 		//gives direct2D access to our back buffer
 		mDevice11on12->AcquireWrappedResources(mWrappedBuffers[mCurrentBackBuffer].GetAddressOf(), 1);
@@ -712,7 +712,7 @@ namespace FARender
 		mDirect2DDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	}
 
-	void DeviceResources::afterTextDraw()
+	void DeviceResources::AfterTextDraw()
 	{
 		ThrowIfFailed(mDirect2DDeviceContext->EndDraw());
 
@@ -723,7 +723,7 @@ namespace FARender
 		mDevice11Context->Flush();
 	}
 
-	void DeviceResources::checkMSAASupport()
+	void DeviceResources::CheckMSAASupport()
 	{
 		//Describes the format and sample count we want to check to see if it is supported.
 		D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS levels{};
@@ -737,7 +737,7 @@ namespace FARender
 			mMSAA4xSupported = true;
 	}
 
-	void DeviceResources::createMSAARTVHeap()
+	void DeviceResources::CreateMSAARTVHeap()
 	{
 		if (mMSAA4xSupported)
 		{
@@ -752,7 +752,7 @@ namespace FARender
 		}
 	}
 
-	void DeviceResources::createMSAADSVHeap()
+	void DeviceResources::CreateMSAADSVHeap()
 	{
 		if (mMSAA4xSupported)
 		{
@@ -767,7 +767,7 @@ namespace FARender
 		}
 	}
 
-	void DeviceResources::createMSAARenderTargetBufferAndView(int width, int height)
+	void DeviceResources::CreateMSAARenderTargetBufferAndView(int width, int height)
 	{
 		//mMSAARenderTargetBuffer.Reset();
 
@@ -804,7 +804,7 @@ namespace FARender
 
 	}
 
-	void DeviceResources::createMSAADepthStencilBufferAndView(int width, int height)
+	void DeviceResources::CreateMSAADepthStencilBufferAndView(int width, int height)
 	{
 		//mMSAADepthStencilBuffer.Reset();
 
