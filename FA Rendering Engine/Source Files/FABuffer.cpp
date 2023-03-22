@@ -158,16 +158,6 @@ namespace FARender
 		mMappedData = nullptr;
 	}
 
-	Microsoft::WRL::ComPtr<ID3D12Resource>& ConstantBuffer::GetConstantBuffer()
-	{
-		return mConstantBuffer;
-	}
-
-	const Microsoft::WRL::ComPtr<ID3D12Resource>& ConstantBuffer::GetConstantBuffer() const
-	{
-		return mConstantBuffer;
-	}
-
 	void ConstantBuffer::CreateConstantBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const UINT& numOfBytes)
 	{
 		//describe the constant buffer
@@ -220,7 +210,7 @@ namespace FARender
 		device->CreateConstantBufferView(&constBufferViewDescription, handle);
 	}
 
-	void ConstantBuffer::CopyData(UINT index, UINT byteSize, const void* data, const UINT64& numOfBytes)
+	void ConstantBuffer::CopyData(UINT index, UINT byteSize, const void* data, UINT64 numOfBytes)
 	{
 		memcpy(&mMappedData[index * byteSize], data, numOfBytes);
 	}

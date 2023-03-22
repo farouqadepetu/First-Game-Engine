@@ -55,7 +55,7 @@ namespace FAShapes
 		//Get the average of all the triangle normals each vertex is a part of.
 		//For each vertex we sum all of the triangle normals it is a part of.
 		std::unordered_map<unsigned int, std::pair<unsigned int, FAMath::Vector3D>> normals;
-		for (int i = 0; i < NUMOFTRIANGLES; ++i)
+		for (int i = 0; i < NUM_OF_TRIANGLES; ++i)
 		{
 			FAMath::Vector3D norm(mTriangles[i].GetNormal());
 			normals[mTriangles[i].GetP0Index()].first++;
@@ -69,7 +69,7 @@ namespace FAShapes
 		}
 
 		//Take the average to get the normal for that vertex.
-		for (int i = 0; i < NUMOFVERTICES; ++i)
+		for (int i = 0; i < NUM_OF_VERTICES; ++i)
 		{
 			mLocalVertices[i].normal = normals[i].second / normals[i].first;
 		}
@@ -138,7 +138,7 @@ namespace FAShapes
 
 	const Triangle& Box::GetTriangle(unsigned int index) const
 	{
-		if (index >= NUMOFTRIANGLES)
+		if (index >= NUM_OF_TRIANGLES)
 			throw std::out_of_range("In the getTriangle function, index is out of range");
 
 		return mTriangles[index];

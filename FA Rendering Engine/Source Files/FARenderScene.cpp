@@ -13,11 +13,8 @@ namespace FARender
 	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND handle)
 	{
 		mDeviceResources.InitializeDirect3D(width, height, handle);
-	}
 
-	DeviceResources& RenderScene::GetDeviceResources()
-	{
-		return mDeviceResources;
+		mCamera.SetAspectRatio((float)width / height);
 	}
 
 	const DeviceResources& RenderScene::GetDeviceResources() const
@@ -65,29 +62,24 @@ namespace FARender
 		return mSceneObjects.at(drawSettingsName).drawArgs.at(index);
 	}
 
-	ConstantBuffer& RenderScene::GetConstantBuffer()
+	FACamera::Camera& RenderScene::GetCamera()
 	{
-		return mConstantBuffer[mDeviceResources.GetCurrentFrame()];
+		return mCamera;
 	}
 
-	const ConstantBuffer& RenderScene::GetConstantBuffer() const
+	const FACamera::Camera& RenderScene::GetCamera() const
 	{
-		return mConstantBuffer[mDeviceResources.GetCurrentFrame()];
+		return mCamera;
 	}
 
-	const UINT& RenderScene::GetCBVSize() const
+	FARender::Text& RenderScene::GetText(std::wstring textName)
 	{
-		return mCBVSize;
+		return mTexts.at(textName);
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& RenderScene::GetCBVHeap() const
+	const FARender::Text& RenderScene::GetText(std::wstring textName) const
 	{
-		return mCBVHeap;
-	}
-
-	const D3D12_ROOT_PARAMETER& RenderScene::GetCBVHeapRootParameter() const
-	{
-		return mCBVHeapRootParameter;
+		return mTexts.at(textName);
 	}
 
 	void RenderScene::LoadShader(const std::wstring& filename, const std::wstring& name)
@@ -202,13 +194,12 @@ namespace FARender
 		mSceneObjects.at(drawSettingsName).pipelineState = tempPSO;
 	}
 
-	void RenderScene::CreateRootSignature(const std::wstring& drawSettingsName, 
-		const D3D12_ROOT_PARAMETER* rootParameters, UINT numParameters)
+	void RenderScene::CreateRootSignature(const std::wstring& drawSettingsName)
 	{
 		//Describe a root signature to store all our root parameters.
 		D3D12_ROOT_SIGNATURE_DESC rootSignatureDescription{};
-		rootSignatureDescription.NumParameters = numParameters; //number of root paramters
-		rootSignatureDescription.pParameters = rootParameters; //the array of root parameters
+		rootSignatureDescription.NumParameters = 1; //number of root paramters
+		rootSignatureDescription.pParameters = &mCBVHeapRootParameter; //the array of root parameters
 		rootSignatureDescription.NumStaticSamplers = 0;
 		rootSignatureDescription.pStaticSamplers = nullptr;
 		rootSignatureDescription.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -234,22 +225,24 @@ namespace FARender
 		mSceneObjects.at(drawSettingsName).rootSig = rootSignature;
 	}
 
-	void RenderScene::CreateVertexBuffer(const void* data, UINT numBytes, UINT stride)
+	void RenderScene::CreateVertexBuffer()
 	{
-		mVertexBuffer.CreateVertexBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), data, numBytes);
-		mVertexBuffer.CreateVertexBufferView(numBytes, stride);
+		mVertexBuffer.CreateVertexBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), mVertexList.data(), 
+			mVertexList.size() * sizeof(FAShapes::Vertex));
+
+		mVertexBuffer.CreateVertexBufferView(mVertexList.size() * sizeof(FAShapes::Vertex), sizeof(FAShapes::Vertex));
 	}
 
-	void RenderScene::CreateIndexBuffer(const void* data, UINT numBytes, DXGI_FORMAT format)
+	void RenderScene::CreateIndexBuffer()
 	{
-		mIndexBuffer.CreateIndexBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), data, numBytes);
-		mIndexBuffer.CreateIndexBufferView(numBytes, format);
+		mIndexBuffer.CreateIndexBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), mIndexList.data(), 
+			mIndexList.size() * sizeof(unsigned int));
+
+		mIndexBuffer.CreateIndexBufferView(mIndexList.size() * sizeof(unsigned int), DXGI_FORMAT_R32_UINT);
 	}
 
 	void RenderScene::CreateCBVHeap(UINT numDescriptors, UINT shaderRegister)
 	{
-		mCBVSize = mDeviceResources.GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
 		//Need a CBV for each object for each frame.
 		D3D12_DESCRIPTOR_HEAP_DESC cbvDescriptorHeapDescription{};
 		cbvDescriptorHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -289,13 +282,13 @@ namespace FARender
 		}
 	}
 
-	void RenderScene::CreateConstantBufferView( UINT index, UINT numBytes)
+	void RenderScene::CreateConstantBufferView(UINT index, UINT numBytes)
 	{
 		//Create a constant buffer view for each frame.
 		for (UINT i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
 		{
-			mConstantBuffer[i].CreateConstantBufferView(mDeviceResources.GetDevice(), mCBVHeap, mCBVSize, 
-				(index * DeviceResources::NUM_OF_FRAMES) + i, index, numBytes);
+			mConstantBuffer[i].CreateConstantBufferView(mDeviceResources.GetDevice(), mCBVHeap, 
+				mDeviceResources.GetCBVSize(), (index * DeviceResources::NUM_OF_FRAMES) + i, index, numBytes);
 		}
 	}
 
@@ -349,32 +342,32 @@ namespace FARender
 	void RenderScene::CreateText(const std::wstring& textName, FAMath::Vector4D textLocation, const std::wstring& textString,
 		float textSize, const FAColor::Color textColor)
 	{
-		mSceneText[textName].Initialize(mDeviceResources, textLocation, textString, textSize, textColor);
+		mTexts[textName].Initialize(mDeviceResources, textLocation, textString, textSize, textColor);
 	}
 
 	void RenderScene::RemoveText(const std::wstring& textName)
 	{
-		mSceneText.erase(textName);
+		mTexts.erase(textName);
 	}
 
-	void RenderScene::ChangeTextLocation(const std::wstring& textName, FAMath::Vector4D textLocation)
+	void RenderScene::AddVertices(const std::vector<FAShapes::Vertex>& vertices)
 	{
-		mSceneText.at(textName).SetTextLocation(textLocation);
+		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 	}
 
-	void RenderScene::ChangeTextString(const std::wstring& textName, const std::wstring& textString)
+	void RenderScene::AddVertices(const FAShapes::Vertex* vertices, unsigned int numVertices)
 	{
-		mSceneText.at(textName).SetTextString(textString);
+		mVertexList.insert(mVertexList.end(), vertices, vertices + numVertices);
 	}
 
-	void RenderScene::ChangeTextSize(const std::wstring& textName, float textSize)
+	void RenderScene::AddIndices(const std::vector<unsigned int>& indices)
 	{
-		mSceneText.at(textName).SetTextSize(mDeviceResources, textSize);
+		mIndexList.insert(mIndexList.end(), indices.begin(), indices.end());
 	}
 
-	void RenderScene::ChangeTextColor(const std::wstring& textName, const FAColor::Color textColor)
+	void RenderScene::AddIndices(const unsigned int* indices, unsigned int numIndices)
 	{
-		mSceneText.at(textName).SetTextColor(textColor);
+		mIndexList.insert(mIndexList.end(), indices, indices + numIndices);
 	}
 
 	void RenderScene::BeforeDrawObjects()
@@ -405,7 +398,8 @@ namespace FARender
 			CD3DX12_GPU_DESCRIPTOR_HANDLE handle =
 				CD3DX12_GPU_DESCRIPTOR_HANDLE(mCBVHeap->GetGPUDescriptorHandleForHeapStart());
 
-			handle.Offset((i.indexOfConstantData * DeviceResources::NUM_OF_FRAMES) + mDeviceResources.GetCurrentFrame(), mCBVSize);
+			handle.Offset((i.indexOfConstantData * DeviceResources::NUM_OF_FRAMES) + mDeviceResources.GetCurrentFrame(), 
+				mDeviceResources.GetCBVSize());
 
 			mDeviceResources.GetCommandList()->SetGraphicsRootDescriptorTable(0, handle);
 
@@ -428,12 +422,12 @@ namespace FARender
 
 	void RenderScene::RenderText(const std::wstring& textName)
 	{
-		D2D_RECT_F r{ mSceneText.at(textName).GetTextLocation().GetX(), mSceneText.at(textName).GetTextLocation().GetY(),
-			mSceneText.at(textName).GetTextLocation().GetZ(), mSceneText.at(textName).GetTextLocation().GetW() };
+		D2D_RECT_F r{ mTexts.at(textName).GetTextLocation().GetX(), mTexts.at(textName).GetTextLocation().GetY(),
+			mTexts.at(textName).GetTextLocation().GetZ(), mTexts.at(textName).GetTextLocation().GetW() };
 
-		mDeviceResources.GetDevice2DContext()->DrawTextW(mSceneText.at(textName).GetTextString().c_str(),
-			(UINT32)mSceneText.at(textName).GetTextString().size(), mSceneText.at(textName).GetFormat().Get(),
-			&r, mSceneText.at(textName).GetBrush().Get());
+		mDeviceResources.GetDevice2DContext()->DrawTextW(mTexts.at(textName).GetTextString().c_str(),
+			(UINT32)mTexts.at(textName).GetTextString().size(), mTexts.at(textName).GetFormat().Get(),
+			&r, mTexts.at(textName).GetBrush().Get());
 	}
 
 	void RenderScene::AfterDrawText()
@@ -458,5 +452,22 @@ namespace FARender
 		mDeviceResources.FlushCommandQueue();
 	}
 
+	void RenderScene::NextFrame()
+	{
+		mDeviceResources.NextFrame();
+		mDeviceResources.WaitForGPU();
+	}
+
+	void RenderScene::Resize(unsigned int width, unsigned int height, HWND windowHandle)
+	{
+		mDeviceResources.Resize(width, height, windowHandle);
+
+		mCamera.SetAspectRatio((float)width / height);
+	}
+
+	void RenderScene::CopyData(UINT index, UINT byteSize, const void* data, UINT64 numOfBytes)
+	{
+		mConstantBuffer[mDeviceResources.GetCurrentFrame()].CopyData(index, byteSize, data, numOfBytes);
+	}
 	//-----------------------------------------------------------------------------------------------------------------------
 }

@@ -9,6 +9,7 @@
 #include <string>
 #include "FADeviceResources.h"
 #include "FABuffer.h"
+#include "FACamera.h"
 #include "FAText.h"
 #include "FAShapesUtility.h"
 
@@ -37,10 +38,6 @@ namespace FARender
 
 		RenderScene(const RenderScene&) = delete;
 		RenderScene& operator=(const RenderScene&) = delete;
-
-		/*@brief Returns a reference to the device resources object.
-		*/
-		DeviceResources& GetDeviceResources();
 
 		/*@brief Returns a constant reference to the device resources object.
 		*/
@@ -86,25 +83,23 @@ namespace FARender
 		*/
 		const FAShapes::DrawArguments& GetDrawArguments(const std::wstring& drawSettingsName, unsigned int index) const;
 
-		/*@brief Returns a reference to the constant buffer with the specified name.
+		/*@brief Returns a reference to the this scene's camera;
 		*/
-		ConstantBuffer& GetConstantBuffer();
+		FACamera::Camera& GetCamera();
 
-		/*@brief Returns a constant reference to the constant buffer with the specified name.
+		/*@brief Returns a constant reference to the this scene's camera;
 		*/
-		const ConstantBuffer& GetConstantBuffer() const;
+		const FACamera::Camera& GetCamera() const;
 
-		/**@brief Returns a constant reference to the CBV/SRV/UAV descriptor size.
+		/*@brief Returns a reference to the specified Text object.
+		* If the Text object does not exist an out_of_range exception is thrown.
 		*/
-		const UINT& GetCBVSize() const;
+		FARender::Text& GetText(std::wstring textName);
 
-		/**@brief Returns a constant reference to the CBV descriptor heap.
+		/*@brief Returns a constant reference to the specified Text object.
+		* If the Text object does not exist an out_of_range exception is thrown.
 		*/
-		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& GetCBVHeap() const;
-
-		/**@brief Returns a constant reference to the CBV's heap root parameter.
-		*/
-		const D3D12_ROOT_PARAMETER& GetCBVHeapRootParameter() const;
+		const FARender::Text& GetText(std::wstring textName) const;
 
 		/*@brief Loads a shader's bytecode and stores it with the specified name.
 		*/
@@ -149,20 +144,19 @@ namespace FARender
 		/*@brief Creates a root signature and stores it with the specified name.
 		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
 		*/
-		void CreateRootSignature(const std::wstring& drawSettingsName, 
-			const D3D12_ROOT_PARAMETER* rootParameters, UINT numParameters);
+		void CreateRootSignature(const std::wstring& drawSettingsName);
 
-		/*@brief Creates a vertex buffer with the specified name and stores all of given data in the vertex buffer.
+		/*@brief Creates a vertex buffer with the specified name and stores all of the added vertices.
 		* Also creates a view to the vertex buffer.\n
 		* Execute commands and the flush command queue after calling createVertexBuffer() and createIndexBuffer().
 		*/
-		void CreateVertexBuffer(const void* data, UINT numBytes, UINT stride);
+		void CreateVertexBuffer();
 
-		/**@brief Creates an index buffer with the specified name and stores all of given data in the index buffer.
+		/**@brief Creates an index buffer with the specified name and stores all of the added indices.
 		* Also creates a view to the index buffer.\n
 		* Execute commands and flush the command queue after calling createVertexBuffer() and createIndexBuffer().
 		*/
-		void CreateIndexBuffer(const void* data, UINT numBytes, DXGI_FORMAT format);
+		void CreateIndexBuffer();
 
 		/**@brief Creates the CBV heap.
 		*/
@@ -228,27 +222,21 @@ namespace FARender
 		*/
 		void RemoveText(const std::wstring& textName);
 
-		/**@brief Changes the text location of the specified Text object.
-		* If the Text object does not exist an out_of_range exception is thrown.\n
-		* For text location the first two values in the vector is the top-left location of the rectangle and
-		* the last two values are the bottom-right location of the rectangle.
+		/**@brief Adds the specified vertices to the vertex list.
 		*/
-		void ChangeTextLocation(const std::wstring& textName, FAMath::Vector4D textLocation);
+		void AddVertices(const std::vector<FAShapes::Vertex>& vertices);
 
-		/**@brief Changes the text string of the specified Text object.
-		* If the Text object does not exist an out_of_range exception is thrown.
+		/**@brief Adds the specified vertices to the vertex list.
 		*/
-		void ChangeTextString(const std::wstring& textName, const std::wstring& textString);
+		void AddVertices(const FAShapes::Vertex* vertices, unsigned int numVertices);
 
-		/**@brief Changes the text size of the specified Text object.
-		* If the Text object does not exist an out_of_range exception is thrown.
+		/**@brief Adds the specified vertices to the index list.
 		*/
-		void ChangeTextSize(const std::wstring& textName, float textSize);
+		void AddIndices(const std::vector<unsigned int>& indices);
 
-		/**@brief Changes the text color of the specified Text object.
-		* If the Text object does not exist an out_of_range exception is thrown.
+		/**@brief Adds the specified vertices to the index list.
 		*/
-		void ChangeTextColor(const std::wstring& textName, const FAColor::Color textColor);
+		void AddIndices(const unsigned int* indices, unsigned int numIndices);
 
 		/**@brief Puts all of the commands needed in the command list before drawing the objects of the scene.
 		* Call before calling the first drawObjects function.
@@ -305,7 +293,20 @@ namespace FARender
 		*/
 		void ExecuteAndFlush();
 
+		/**@brief Moves to next frame and waits for the GPU to finish executing the next frame's commands.
+		*/
+		void NextFrame();
+
+		/**@brief Resizes the DeviceResources resources when the window gets resized.
+		*/
+		void Resize(unsigned int width, unsigned int height, HWND windowHandle);
+
+		/**@brief Copies the specified data into the constant buffer.
+		*/
+		void CopyData(UINT index, UINT byteSize, const void* data, UINT64 numOfBytes);
+
 	private:
+
 		//The device resources object that all RenderScene objects share.
 		static DeviceResources mDeviceResources;
 
@@ -321,7 +322,6 @@ namespace FARender
 
 		//Each scene gets one CBV heap.
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCBVHeap;
-		UINT mCBVSize;
 		D3D12_DESCRIPTOR_RANGE mCBVHeapDescription{};
 		D3D12_ROOT_PARAMETER mCBVHeapRootParameter;
 
@@ -329,13 +329,18 @@ namespace FARender
 		//is done executing all the commands that reference it, so each frame needs its own constant buffer.
 		ConstantBuffer mConstantBuffer[DeviceResources::NUM_OF_FRAMES];
 
-		//The vertex and index buffer for this scene
+		//The vertices and indicies for the scene.
+		std::vector<FAShapes::Vertex> mVertexList;
+		std::vector<unsigned int> mIndexList;
+
+		//The vertex and index buffer for the scene.
 		VertexBuffer mVertexBuffer;
 		IndexBuffer mIndexBuffer;
 
 		//All of the text that is rendered with the scene.
-		//Stores all of the possible draw settings that the scene uses.
-		std::unordered_map <std::wstring, Text> mSceneText;
+		std::unordered_map <std::wstring, Text> mTexts;
 
+		//The camera for the scene.
+		FACamera::Camera mCamera;
 	};
 }

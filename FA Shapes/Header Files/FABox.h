@@ -18,11 +18,11 @@ namespace FAShapes
 
 		/**@brief Number of vertices the box has.
 		*/
-		static const unsigned int NUMOFVERTICES{ 8 };
+		static const unsigned int NUM_OF_VERTICES{ 8 };
 
 		/**@brief Number of triangles that make up the box.
 		*/
-		static const unsigned int NUMOFTRIANGLES{ 12 };
+		static const unsigned int NUM_OF_TRIANGLES{ 12 };
 
 		/**@brief Constructor.
 		* Creates a Box of length 2 centered around the origin.
@@ -167,10 +167,10 @@ namespace FAShapes
 		FAMath::Vector3D mZ;
 
 		//local cooridnates
-		Vertex mLocalVertices[NUMOFVERTICES];
+		Vertex mLocalVertices[NUM_OF_VERTICES];
 
 		//the triangles that make up the box
-		Triangle mTriangles[NUMOFTRIANGLES];
+		Triangle mTriangles[NUM_OF_TRIANGLES];
 
 		//color of the box
 		FAColor::Color mColor;

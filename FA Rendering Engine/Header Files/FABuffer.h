@@ -85,14 +85,6 @@ namespace FARender
 		*/
 		~ConstantBuffer();
 
-		/**@brief Returns a reference to the constant buffer resource.
-		*/
-		Microsoft::WRL::ComPtr<ID3D12Resource>& GetConstantBuffer();
-
-		/**@brief Returns a constant reference to the constant buffer resource.
-		*/
-		const Microsoft::WRL::ComPtr<ID3D12Resource>& GetConstantBuffer() const;
-
 		/**@brief Creates and maps the constant buffer.
 		* The number of bytes allocated should be a multiple of 256 bytes.
 		*/
@@ -107,7 +99,7 @@ namespace FARender
 		/**@brief Copies data from the given data into the constant buffer.
 		* Uses 0-indexing.
 		*/
-		void CopyData(UINT index, UINT byteSize, const void* data, const UINT64& numOfBytes);
+		void CopyData(UINT index, UINT byteSize, const void* data, UINT64 numOfBytes);
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> mConstantBuffer;

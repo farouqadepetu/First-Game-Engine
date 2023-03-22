@@ -16,7 +16,7 @@
 namespace FARender
 {
 	/** @class DeviceResources ""
-	*	@brief A wrapper for a Direct3D 12 device, swapchain, depth buffer, MSAA buffers and command objects.
+	*	@brief A wrapper for resources that are needed to render using the Direct3D 12 API.
 	*/
 	class DeviceResources
 	{
@@ -49,6 +49,10 @@ namespace FARender
 		/**@brief Returns a constant reference to the depth stencil format.
 		*/
 		const DXGI_FORMAT& GetDepthStencilFormat() const;
+
+		/**@brief The size of a constant buffer view.
+		*/
+		UINT GetCBVSize() const;
 
 		/**@brief Returns the current frame.
 		*/
@@ -166,6 +170,7 @@ namespace FARender
 
 		UINT mRTVSize;
 		UINT mDSVSize;
+		UINT mCBVSize;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRTVHeap;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDSVHeap;
 
@@ -194,43 +199,43 @@ namespace FARender
 		std::vector<Microsoft::WRL::ComPtr<IDXGISurface>> mSurfaces;
 
 		//Call all of these functions to initialize Direct3D
-		void EnableDebugLayer();
-		void CreateDirect3DDevice();
-		void CreateDXGIFactory();
-		void CreateFence();
-		void QueryDescriptorSizes();
-		void CreateCommandObjects();
-		void CreateSwapChain(HWND handle);
-		void CreateRTVHeap();
-		void CreateDSVHeap();
+		void mEnableDebugLayer();
+		void mCreateDirect3DDevice();
+		void mCreateDXGIFactory();
+		void mCreateFence();
+		void mQueryDescriptorSizes();
+		void mCreateCommandObjects();
+		void mCreateSwapChain(HWND handle);
+		void mCreateRTVHeap();
+		void mCreateDSVHeap();
 
 		//if MSAA is supported, creates a MSAA RTV and DSV heap.
-		void CheckMSAASupport();
-		void CreateMSAARTVHeap();
-		void CreateMSAADSVHeap();
+		void mCheckMSAASupport();
+		void mCreateMSAARTVHeap();
+		void mCreateMSAADSVHeap();
 
 		//Creates and initializes everything needed to render text.
-		void InitializeText();
+		void mInitializeText();
 
 		//These functions are for creating swap chain buffers, depth/stencil buffer, render target views and depth/stencil view.
 		//They are called in the resize function.
-		void CreateRenderTargetBufferAndView();
-		void CreateDepthStencilBufferAndView(int width, int height);
+		void mCreateRenderTargetBufferAndView();
+		void mCreateDepthStencilBufferAndView(int width, int height);
 
 		//These functions are for creating a MSAA render target buffer, MSAA depth/stencil buffer, 
 		//MSAA render target view, and a MSAA depth/stencil view.
 		//They are called in the resize function.
-		void CreateMSAARenderTargetBufferAndView(int width, int height);
-		void CreateMSAADepthStencilBufferAndView(int width, int height);
+		void mCreateMSAARenderTargetBufferAndView(int width, int height);
+		void mCreateMSAADepthStencilBufferAndView(int width, int height);
 
 		/* Resets the text buffers.
 		* Gets called in the resize function.
 		*/
-		void ResetTextBuffers();
+		void mResetTextBuffers();
 
 		/*Resizes the necessary text buffers.
 		* Gets called in the resize function.
 		*/
-		void TextResize(const HWND& handle);
+		void mTextResize(const HWND& handle);
 	};
 }
