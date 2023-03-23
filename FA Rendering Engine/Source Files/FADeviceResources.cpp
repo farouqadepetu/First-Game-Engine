@@ -26,7 +26,7 @@ namespace FARender
 		mCreateRTVHeap();
 		mCreateDSVHeap();
 
-		mInitializeText();
+		mTextResources = TextResources(mDirect3DDevice, mCommandQueue, mNumOfSwapChainBuffers);
 
 		mCheckMSAASupport();
 		mCreateMSAARTVHeap();
@@ -72,6 +72,11 @@ namespace FARender
 		return mCurrentFrame;
 	}
 
+	const TextResources& DeviceResources::GetTextResources() const
+	{
+		return mTextResources;
+	}
+
 	bool DeviceResources::IsMSAAEnabled()
 	{
 		return mIsMSAAEnabled;
@@ -87,41 +92,9 @@ namespace FARender
 		mIsMSAAEnabled = true;
 	}
 
-	const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& DeviceResources::GetDevice2DContext() const
-	{
-		return mDirect2DDeviceContext;
-	}
-
-	const Microsoft::WRL::ComPtr<IDWriteFactory>& DeviceResources::GetDirectWriteFactory() const
-	{
-		return mDirectWriteFactory;
-	}
-
 	void DeviceResources::UpdateCurrentFrameFenceValue()
 	{
 		mCurrentFrameFenceValue[mCurrentFrame] = ++mFenceValue;
-	}
-
-	void  DeviceResources::InitializeDirect3D(unsigned int width, unsigned int height, HWND handle)
-	{
-		mEnableDebugLayer();
-		mCreateDirect3DDevice();
-		mCreateDXGIFactory();
-		mCreateFence();
-		mQueryDescriptorSizes();
-		mCreateCommandObjects();
-		mCreateSwapChain(handle);
-		mCreateRTVHeap();
-		mCreateDSVHeap();
-
-		mInitializeText();
-
-		mCheckMSAASupport();
-		mCreateMSAARTVHeap();
-		mCreateMSAADSVHeap();
-
-		Resize(width, height, handle);
-		mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr);
 	}
 
 	void DeviceResources::mEnableDebugLayer()
@@ -347,7 +320,7 @@ namespace FARender
 		mCommandQueue->Signal(mFence.Get(), mFenceValue);
 	}
 
-	void DeviceResources::Resize(int width, int height, const HWND& handle)
+	void DeviceResources::Resize(int width, int height, const HWND& windowHandle)
 	{
 		//make sure all of the commands in the command list have been executed before adding new commands.
 		FlushCommandQueue();
@@ -355,7 +328,8 @@ namespace FARender
 		//reset the command list to add new commands
 		ThrowIfFailed(mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr));
 
-		mResetTextBuffers();
+		mTextResources.ResetBuffers();
+		//mResetTextBuffers();
 
 		//Reset/Release all buffers that have a reference to the swap chain.
 		mSwapChainBuffers[0].Reset();
@@ -385,7 +359,8 @@ namespace FARender
 			mCreateMSAADepthStencilBufferAndView(width, height);
 		}
 
-		mTextResize(handle);
+		mTextResources.ResizeBuffers(mSwapChainBuffers, windowHandle);
+		//mTextResize(handle);
 
 		//Close the command list.
 		//Store all your command lists in a ID3D12CommandList array.
@@ -549,7 +524,7 @@ namespace FARender
 	}
 
 
-	void DeviceResources::mInitializeText()
+	/*void DeviceResources::mInitializeText()
 	{
 		//-----------------------------------------------------------------------------------------------------------------------------
 		//Create a D3D11On12 Device
@@ -639,29 +614,33 @@ namespace FARender
 				mDirect2DBuffers[i].GetAddressOf()));
 		}
 		//-----------------------------------------------------------------------------------------------------------------------------
-	}
+	}*/
 
 
 	void DeviceResources::BeforeTextDraw()
 	{
+		mTextResources.BeforeRenderText(mCurrentBackBuffer);
+
 		//gives direct2D access to our back buffer
-		mDevice11on12->AcquireWrappedResources(mWrappedBuffers[mCurrentBackBuffer].GetAddressOf(), 1);
+		/*mDevice11on12->AcquireWrappedResources(mWrappedBuffers[mCurrentBackBuffer].GetAddressOf(), 1);
 
 		//Render text to back buffer
 		mDirect2DDeviceContext->SetTarget(mDirect2DBuffers[mCurrentBackBuffer].Get());
 		mDirect2DDeviceContext->BeginDraw();
-		mDirect2DDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+		mDirect2DDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());*/
 	}
 
 	void DeviceResources::AfterTextDraw()
 	{
-		ThrowIfFailed(mDirect2DDeviceContext->EndDraw());
+		mTextResources.AfterRenderText(mCurrentBackBuffer);
+
+		/*ThrowIfFailed(mDirect2DDeviceContext->EndDraw());
 
 		//Releasing the wrapped render target resource transitions the back buffer to present state.
 		mDevice11on12->ReleaseWrappedResources(mWrappedBuffers[mCurrentBackBuffer].GetAddressOf(), 1);
 
 		//Submit the commands to the shared D3D12 command queue.
-		mDevice11Context->Flush();
+		mDevice11Context->Flush();*/
 	}
 
 	void DeviceResources::mCheckMSAASupport()

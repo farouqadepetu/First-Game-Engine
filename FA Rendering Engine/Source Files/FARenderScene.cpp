@@ -339,7 +339,9 @@ namespace FARender
 	void RenderScene::CreateText(const std::wstring& textName, FAMath::Vector4D textLocation, const std::wstring& textString,
 		float textSize, const FAColor::Color textColor)
 	{
-		mTexts[textName].Initialize(mDeviceResources, textLocation, textString, textSize, textColor);
+		Text temp(textLocation, textString, textSize, textColor);
+
+		mTexts[textName] = temp;
 	}
 
 	void RenderScene::RemoveText(const std::wstring& textName)
@@ -419,12 +421,36 @@ namespace FARender
 
 	void RenderScene::RenderText(const std::wstring& textName)
 	{
-		D2D_RECT_F r{ mTexts.at(textName).GetTextLocation().GetX(), mTexts.at(textName).GetTextLocation().GetY(),
-			mTexts.at(textName).GetTextLocation().GetZ(), mTexts.at(textName).GetTextLocation().GetW() };
+		Text* textToRender{ &mTexts.at(textName) };
 
-		mDeviceResources.GetDevice2DContext()->DrawTextW(mTexts.at(textName).GetTextString().c_str(),
-			(UINT32)mTexts.at(textName).GetTextString().size(), mTexts.at(textName).GetFormat().Get(),
-			&r, mTexts.at(textName).GetBrush().Get());
+		D2D_RECT_F textLocation{ textToRender->GetTextLocation().GetX(), textToRender->GetTextLocation().GetY(),
+			textToRender->GetTextLocation().GetZ(), textToRender->GetTextLocation().GetW() };
+
+		D2D1_COLOR_F textColor{ textToRender->GetTextColor().GetRed(), textToRender->GetTextColor().GetGreen(),
+			textToRender->GetTextColor().GetBlue(), textToRender->GetTextColor().GetAlpha() };
+
+		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mDirect2DBrush;
+		Microsoft::WRL::ComPtr<IDWriteTextFormat> mDirectWriteFormat;
+
+		ThrowIfFailed(mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->CreateSolidColorBrush(textColor,
+			mDirect2DBrush.GetAddressOf()));
+
+		ThrowIfFailed(mDeviceResources.GetTextResources().GetDirectWriteFactory()->CreateTextFormat(
+			L"Verdana",
+			nullptr,
+			DWRITE_FONT_WEIGHT_NORMAL,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			textToRender->GetTextSize(),
+			L"en-us",
+			&mDirectWriteFormat));
+
+		ThrowIfFailed(mDirectWriteFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING));
+		ThrowIfFailed(mDirectWriteFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
+
+		mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->DrawTextW(textToRender->GetTextString().c_str(),
+			(UINT32)textToRender->GetTextString().size(), mDirectWriteFormat.Get(),
+			&textLocation, mDirect2DBrush.Get());
 	}
 
 	void RenderScene::AfterDrawText()

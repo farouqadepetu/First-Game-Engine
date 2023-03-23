@@ -258,17 +258,17 @@ namespace FARender
 
 		/**@brief Transitions the render target buffer to the correct state and excutes all the beforeDrawObjects and drawObjects commands.
 		* Pass in true if you are going to render text, false otherwise.
-		* Call after calling all the drawObjects functions.
+		* Call after calling all the DrawObjects functions.
 		*/
 		void AfterDrawObjects(bool renderText);
 		
 		/**@brief Puts all of the commands needed in the command list before drawing the text of the scene.
-		* Call before calling the first drawText function.
+		* Call before calling the first RenderText function.
 		*/
 		void BeforeDrawText();
 
 		/**@brief Draws the specified Text object.
-		* Call in between a beforeDrawObjects function and a afterDrawObjects function.\n
+		* Call in between a BeforeDrawText function and a AfterDrawText function.\n
 		*
 		* Ex.\n
 		* beforeDrawText()\n
@@ -281,6 +281,7 @@ namespace FARender
 		void RenderText(const std::wstring& textName);
 
 		/**@brief Transitions the render target buffer and executes all of the text drawing commands.
+		* Call after calling all the RenderText functions.
 		*/
 		void AfterDrawText();
 

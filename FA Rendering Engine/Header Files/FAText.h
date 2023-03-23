@@ -5,7 +5,6 @@
 */
 
 #include <string>
-#include "FADeviceResources.h"
 #include "FAColor.h"
 
 namespace FARender
@@ -18,24 +17,14 @@ namespace FARender
 	{
 	public:
 
-		/**@brief Default Constructor.
-		*/
-		Text();
+		Text() = default;
 
 		/**@brief Overloaded Constructor.
 		* Initializes the format of the text.\n
 		* For text location the first two values in the vector is the top-left location of the rectangle and
 		* the last two values are the bottom-right location of the rectangle.
 		*/
-		Text(const DeviceResources& deviceResources,
-			const FAMath::Vector4D& textLocation, const std::wstring& textString, float textSize, const FAColor::Color& textColor);
-
-		/**@brief Initializes the format of the text.
-		* For text location the  first two values in the vector is the top-left location of the rectangle and
-		* the last two values are the bottom-right location of the rectangle.
-		*/
-		void Initialize(const DeviceResources& deviceResources,
-			const FAMath::Vector4D& textLocation, const std::wstring& textString, float textSize, const FAColor::Color& textColor);
+		Text(const FAMath::Vector4D& textLocation, const std::wstring& textString, float textSize, const FAColor::Color& textColor);
 
 		/**@brief Returns a constant reference to the text location.
 		*/
@@ -49,21 +38,13 @@ namespace FARender
 		*/
 		float GetTextSize() const;
 
-		/**@brief Returns a constant reference to the color brush.
-		*/
-		const Microsoft::WRL::ComPtr<ID2D1SolidColorBrush>& GetBrush() const;
-
-		/**@brief Returns a constant reference to the format of the text.
-		*/
-		const Microsoft::WRL::ComPtr<IDWriteTextFormat>& GetFormat() const;
-
 		/**@brief Returns a constant reference to the text color.
 		*/
 		const FAColor::Color& GetTextColor() const;
 
 		/**@brief Changes the text size to the specified size.
 		*/
-		void SetTextSize(const DeviceResources& deviceResources, float textSize);
+		void SetTextSize(float textSize);
 
 		/**@brief Changes the text color to the specified color.
 		*/
@@ -81,10 +62,7 @@ namespace FARender
 
 		FAMath::Vector4D mTextLocation;
 		std::wstring mText;
-		float mTextSize;
+		float mTextSize{ 0.0f };
 		FAColor::Color mTextColor;
-
-		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mDirect2DBrush;
-		Microsoft::WRL::ComPtr<IDWriteTextFormat> mDirectWriteFormat;
 	};
 }

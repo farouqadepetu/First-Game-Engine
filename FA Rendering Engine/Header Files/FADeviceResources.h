@@ -7,11 +7,7 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
-#include <d3d11.h>
-#include <d3d11on12.h>
-#include <d2d1_3.h>
-#include <dwrite.h>
-#include <vector>
+#include "FATextResources.h"
 
 namespace FARender
 {
@@ -59,6 +55,10 @@ namespace FARender
 		*/
 		unsigned int GetCurrentFrame() const;
 
+		/**@brief Returns a constant reference to the TextResources object.
+		*/
+		const TextResources& GetTextResources() const;
+
 		/**@brief Returns true if MSAA is enabled, false otherwise.
 		*/
 		bool IsMSAAEnabled();
@@ -71,30 +71,9 @@ namespace FARender
 		*/
 		void EnableMSAA();
 
-		/**@brief Returns a constant reference to the direct 2D device context.
-		*/
-		const Microsoft::WRL::ComPtr<ID2D1DeviceContext>& GetDevice2DContext() const;
-
-		/**@brief Returns a constant reference to the direct direct write factory.
-		*/
-		const Microsoft::WRL::ComPtr<IDWriteFactory>& GetDirectWriteFactory() const;
-
 		/**@brief Updates the current frames fence value.
 		*/
 		void UpdateCurrentFrameFenceValue();
-
-		/**@brief Initializes Direct3D.
-		* Enables the debug layer if in debug mode.\n
-		* Creates a Direct3D 12 device.\n
-		* Creates a DXGI factory object.\n
-		* Creates a fence.\n
-		* Queries descriptor sizes.\n
-		* Creates command objects.\n
-		* Creates a swap chain.\n
-		* Creates a render target view and a depth/stencil view heap.
-		* Creates the initial render target buffers, depth stencil buffer, MSAA buffers and text buffers.
-		*/
-		void InitializeDirect3D(unsigned int width, unsigned int height, HWND handle);
 
 		/**@brief Synchronizes the CPU and GPU.
 		*	Use this function to make sure all of the commands in command list are executed by the GPU
@@ -146,6 +125,17 @@ namespace FARender
 
 	private:
 
+		/**@brief Initializes Direct3D.
+		* Enables the debug layer if in debug mode.\n
+		* Creates a Direct3D 12 device.\n
+		* Creates a DXGI factory object.\n
+		* Creates a fence.\n
+		* Queries descriptor sizes.\n
+		* Creates command objects.\n
+		* Creates a swap chain.\n
+		* Creates a render target view and a depth/stencil view heap.
+		* Creates the initial render target buffers, depth stencil buffer, MSAA buffers and text buffers.
+		*/
 		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle);
 
 		unsigned int mCurrentFrame{ 0 };
@@ -188,19 +178,7 @@ namespace FARender
 		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAARenderTargetBuffer;
 		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAADepthStencilBuffer;
 
-		Microsoft::WRL::ComPtr<ID3D11Device> mDevice11;
-		Microsoft::WRL::ComPtr<ID3D11DeviceContext> mDevice11Context;
-		Microsoft::WRL::ComPtr<ID3D11On12Device> mDevice11on12;
-
-		Microsoft::WRL::ComPtr<ID2D1Device2> mDirect2DDevice;
-		Microsoft::WRL::ComPtr<ID2D1Factory3> mDirect2DFactory;
-		Microsoft::WRL::ComPtr<ID2D1DeviceContext> mDirect2DDeviceContext;
-
-		Microsoft::WRL::ComPtr<IDWriteFactory> mDirectWriteFactory;
-
-		std::vector<Microsoft::WRL::ComPtr<ID3D11Resource>> mWrappedBuffers;
-		std::vector<Microsoft::WRL::ComPtr<ID2D1Bitmap1>> mDirect2DBuffers;
-		std::vector<Microsoft::WRL::ComPtr<IDXGISurface>> mSurfaces;
+		TextResources mTextResources;
 
 		//Call all of these functions to initialize Direct3D
 		void mEnableDebugLayer();
@@ -218,9 +196,6 @@ namespace FARender
 		void mCreateMSAARTVHeap();
 		void mCreateMSAADSVHeap();
 
-		//Creates and initializes everything needed to render text.
-		void mInitializeText();
-
 		//These functions are for creating swap chain buffers, depth/stencil buffer, render target views and depth/stencil view.
 		//They are called in the resize function.
 		void mCreateRenderTargetBufferAndView();
@@ -231,15 +206,5 @@ namespace FARender
 		//They are called in the resize function.
 		void mCreateMSAARenderTargetBufferAndView(int width, int height);
 		void mCreateMSAADepthStencilBufferAndView(int width, int height);
-
-		/* Resets the text buffers.
-		* Gets called in the resize function.
-		*/
-		void mResetTextBuffers();
-
-		/*Resizes the necessary text buffers.
-		* Gets called in the resize function.
-		*/
-		void mTextResize(const HWND& handle);
 	};
 }
