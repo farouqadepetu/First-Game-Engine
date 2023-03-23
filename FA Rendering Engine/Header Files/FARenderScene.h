@@ -34,7 +34,7 @@ namespace FARender
 	{
 	public:
 
-		RenderScene(unsigned int width, unsigned int height, HWND handle);
+		RenderScene(unsigned int width, unsigned int height, HWND windowHandle);
 
 		RenderScene(const RenderScene&) = delete;
 		RenderScene& operator=(const RenderScene&) = delete;
@@ -308,7 +308,7 @@ namespace FARender
 	private:
 
 		//The device resources object that all RenderScene objects share.
-		static DeviceResources mDeviceResources;
+		DeviceResources& mDeviceResources;
 
 		//Stores all of the shaders and input element descriptions for this scene.
 		std::unordered_map<std::wstring, Microsoft::WRL::ComPtr<ID3DBlob>> mShaders;
@@ -320,7 +320,7 @@ namespace FARender
 		//Stores all of the possible draw settings that the scene uses.
 		std::unordered_map <std::wstring, DrawSettings> mSceneObjects;
 
-		//Each scene gets one CBV heap.
+		//Each scene gets a CBV heap.
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCBVHeap;
 		D3D12_DESCRIPTOR_RANGE mCBVHeapDescription{};
 		D3D12_ROOT_PARAMETER mCBVHeapRootParameter;

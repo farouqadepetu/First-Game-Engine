@@ -7,9 +7,33 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//DEVICE RESOURCES FUNCTION DEFINITIONS
 
+	DeviceResources& DeviceResources::GetInstance(unsigned int width, unsigned int height, HWND windowHandle)
+	{
+		static DeviceResources instance(width, height, windowHandle);
+
+		return instance;
+	}
+
 	DeviceResources::DeviceResources(unsigned int width, unsigned int height, HWND windowHandle)
 	{
-		InitializeDirect3D(width, height, windowHandle);
+		mEnableDebugLayer();
+		mCreateDirect3DDevice();
+		mCreateDXGIFactory();
+		mCreateFence();
+		mQueryDescriptorSizes();
+		mCreateCommandObjects();
+		mCreateSwapChain(windowHandle);
+		mCreateRTVHeap();
+		mCreateDSVHeap();
+
+		mInitializeText();
+
+		mCheckMSAASupport();
+		mCreateMSAARTVHeap();
+		mCreateMSAADSVHeap();
+
+		Resize(width, height, windowHandle);
+		mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr);
 	}
 
 	DeviceResources::~DeviceResources()

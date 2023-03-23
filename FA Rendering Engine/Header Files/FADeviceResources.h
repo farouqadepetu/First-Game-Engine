@@ -16,16 +16,17 @@
 namespace FARender
 {
 	/** @class DeviceResources ""
-	*	@brief A wrapper for resources that are needed to render using the Direct3D 12 API.
+	*	@brief A wrapper for resources that are needed to render objects and text using the Direct3D 12 API.
 	*/
 	class DeviceResources
 	{
 	public:
 		static const unsigned int NUM_OF_FRAMES{ 3 };
 
-		DeviceResources() = default;
-
-		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle);
+		/**@brief Call to make an object of DeviceResources.
+		* This only allows one instance to exist.
+		*/
+		static DeviceResources& GetInstance(unsigned int width, unsigned int height, HWND windowHandle);
 
 		DeviceResources(const DeviceResources&) = delete;
 		DeviceResources& operator=(const DeviceResources&) = delete;
@@ -144,6 +145,9 @@ namespace FARender
 		void NextFrame();
 
 	private:
+
+		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle);
+
 		unsigned int mCurrentFrame{ 0 };
 
 		Microsoft::WRL::ComPtr<ID3D12Device> mDirect3DDevice;

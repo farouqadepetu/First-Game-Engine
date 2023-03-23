@@ -8,12 +8,9 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//RENDER SCENE FUNCITON DEFINTIONS
 
-	DeviceResources RenderScene::mDeviceResources;
-
-	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND handle)
+	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND windowHandle) : 
+		mDeviceResources{ DeviceResources::GetInstance(width, height, windowHandle) }
 	{
-		mDeviceResources.InitializeDirect3D(width, height, handle);
-
 		mCamera.SetAspectRatio((float)width / height);
 	}
 
