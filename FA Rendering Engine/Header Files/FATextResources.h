@@ -18,7 +18,7 @@ namespace FARender
 		TextResources() = default;
 
 		/**@brief Constructor.
-		* Initializes the resources.
+		* Initializes the text resources.
 		*/
 		TextResources(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& commandQueue, unsigned int numSwapChainBuffers);

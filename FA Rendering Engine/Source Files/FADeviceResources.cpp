@@ -22,11 +22,12 @@ namespace FARender
 		mCreateFence();
 		mQueryDescriptorSizes();
 		mCreateCommandObjects();
-		mCreateSwapChain(windowHandle);
-		mCreateRTVHeap();
+
+		mSwapChain = SwapChain(mDirect3DDevice, mDXGIFactory, mCommandQueue, windowHandle, 2);
+
 		mCreateDSVHeap();
 
-		mTextResources = TextResources(mDirect3DDevice, mCommandQueue, mNumOfSwapChainBuffers);
+		mTextResources = TextResources(mDirect3DDevice, mCommandQueue, mSwapChain.GetNumOfSwapChainBuffers());
 
 		mCheckMSAASupport();
 		mCreateMSAARTVHeap();
@@ -52,9 +53,9 @@ namespace FARender
 		return mCommandList;
 	}
 
-	const DXGI_FORMAT& DeviceResources::GetBackBufferFormat() const
+	DXGI_FORMAT DeviceResources::GetBackBufferFormat() const
 	{
-		return mBackBufferFormat;
+		return mSwapChain.GetBackBufferFormat();
 	}
 
 	const DXGI_FORMAT& DeviceResources::GetDepthStencilFormat() const
@@ -69,7 +70,7 @@ namespace FARender
 
 	unsigned int DeviceResources::GetCurrentFrame() const
 	{
-		return mCurrentFrame;
+		return mCurrentFrameIndex;
 	}
 
 	const TextResources& DeviceResources::GetTextResources() const
@@ -94,7 +95,7 @@ namespace FARender
 
 	void DeviceResources::UpdateCurrentFrameFenceValue()
 	{
-		mCurrentFrameFenceValue[mCurrentFrame] = ++mFenceValue;
+		mCurrentFrameFenceValue[mCurrentFrameIndex] = ++mFenceValue;
 	}
 
 	void DeviceResources::mEnableDebugLayer()
@@ -163,42 +164,6 @@ namespace FARender
 		mCommandList->Close();
 	}
 
-	void DeviceResources::mCreateSwapChain(HWND handle)
-	{
-		mSwapChain.Reset();
-
-		//This describes the multi-sampling parameters we want
-		DXGI_SAMPLE_DESC multiSamplingDescription{};
-		multiSamplingDescription.Count = 1;
-		multiSamplingDescription.Quality = 0;
-
-		DXGI_SWAP_CHAIN_DESC1 swapChainDescription{};
-		swapChainDescription.Width = 0;
-		swapChainDescription.Height = 0;
-		swapChainDescription.Format = mBackBufferFormat;
-		swapChainDescription.Stereo = FALSE;
-		swapChainDescription.SampleDesc = multiSamplingDescription;
-		swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapChainDescription.BufferCount = mNumOfSwapChainBuffers;
-		swapChainDescription.Scaling = DXGI_SCALING_NONE;
-		swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-		swapChainDescription.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-		swapChainDescription.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
-		ThrowIfFailed(mDXGIFactory->CreateSwapChainForHwnd(mCommandQueue.Get(), handle,
-			&swapChainDescription, nullptr, nullptr, &mSwapChain));
-	}
-
-	void DeviceResources::mCreateRTVHeap()
-	{
-		D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDescription{};
-		rtvDescriptorHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		rtvDescriptorHeapDescription.NumDescriptors = mNumOfSwapChainBuffers;
-		rtvDescriptorHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		rtvDescriptorHeapDescription.NodeMask = 0;
-		ThrowIfFailed(mDirect3DDevice->CreateDescriptorHeap(&rtvDescriptorHeapDescription, IID_PPV_ARGS(&mRTVHeap)));
-	}
-
 	void DeviceResources::mCreateDSVHeap()
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC dsvDescriptorHeapDescription{};
@@ -207,24 +172,6 @@ namespace FARender
 		dsvDescriptorHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		dsvDescriptorHeapDescription.NodeMask = 0;
 		ThrowIfFailed(mDirect3DDevice->CreateDescriptorHeap(&dsvDescriptorHeapDescription, IID_PPV_ARGS(&mDSVHeap)));
-	}
-
-	void DeviceResources::mCreateRenderTargetBufferAndView()
-	{
-		//Create Render Target View (Descriptor)
-
-		//store the first swap chain buffer in a Resource object.
-		ThrowIfFailed(mSwapChain->GetBuffer(0, IID_PPV_ARGS(mSwapChainBuffers[0].GetAddressOf())));
-		//store the second swap chain buffer in a Resource object.
-		ThrowIfFailed(mSwapChain->GetBuffer(1, IID_PPV_ARGS(mSwapChainBuffers[1].GetAddressOf())));
-
-		//This is a class that stores the address of the first element in the rtv descriptor heap.
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRTVHeap->GetCPUDescriptorHandleForHeapStart());
-
-		mDirect3DDevice->CreateRenderTargetView(mSwapChainBuffers[0].Get(), nullptr, rtvHeapHandle);
-
-		//rtvHeapHandle.Offset(1, rtvDescriptorSize) this function will give me the address of any descriptor in the descriptor heap
-		mDirect3DDevice->CreateRenderTargetView(mSwapChainBuffers[1].Get(), nullptr, rtvHeapHandle.Offset(1, mRTVSize));
 	}
 
 	void DeviceResources::mCreateDepthStencilBufferAndView(int width, int height)
@@ -295,8 +242,8 @@ namespace FARender
 	void DeviceResources::WaitForGPU() const
 	{
 		//if the signal command has not been executed, wait until it is
-		if (mCurrentFrameFenceValue[mCurrentFrame] != 0 &&
-			mFence->GetCompletedValue() < mCurrentFrameFenceValue[mCurrentFrame])
+		if (mCurrentFrameFenceValue[mCurrentFrameIndex] != 0 &&
+			mFence->GetCompletedValue() < mCurrentFrameFenceValue[mCurrentFrameIndex])
 		{
 			//create an event object and store an handle to it
 			HANDLE eventHandle{ CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS) };
@@ -304,7 +251,7 @@ namespace FARender
 			if (eventHandle != nullptr)
 			{
 				//This function will fire(raise) an event when the signal command is executed by the GPU
-				ThrowIfFailed(mFence->SetEventOnCompletion(mCurrentFrameFenceValue[mCurrentFrame], eventHandle));
+				ThrowIfFailed(mFence->SetEventOnCompletion(mCurrentFrameFenceValue[mCurrentFrameIndex], eventHandle));
 
 				//Wait until the GPU has executed the signal command
 				WaitForSingleObject(eventHandle, INFINITE);
@@ -329,11 +276,10 @@ namespace FARender
 		ThrowIfFailed(mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr));
 
 		mTextResources.ResetBuffers();
-		//mResetTextBuffers();
 
 		//Reset/Release all buffers that have a reference to the swap chain.
-		mSwapChainBuffers[0].Reset();
-		mSwapChainBuffers[1].Reset();
+		mSwapChain.ResetBuffers();
+
 		mDepthStencilBuffer.Reset();
 
 		//reset MSAA buffers
@@ -344,12 +290,12 @@ namespace FARender
 		}
 
 		//Resize the swap chain buffers
-		mSwapChain->ResizeBuffers(mNumOfSwapChainBuffers, width, height, mBackBufferFormat,
-			DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
-		mCurrentBackBuffer = 0;
+		mSwapChain.ResizeSwapChain(width, height);
 
-		//Make RT buffers, DS buffer, RT view and DS view
-		mCreateRenderTargetBufferAndView();
+		//Create render target buffers and views to them.
+		mSwapChain.CreateRenderTargetBuffersAndViews(mDirect3DDevice);
+
+		//Create depth stencil buffer and view to it.
 		mCreateDepthStencilBufferAndView(width, height);
 
 		if (mMSAA4xSupported && mIsMSAAEnabled)
@@ -359,8 +305,7 @@ namespace FARender
 			mCreateMSAADepthStencilBufferAndView(width, height);
 		}
 
-		mTextResources.ResizeBuffers(mSwapChainBuffers, windowHandle);
-		//mTextResize(handle);
+		mTextResources.ResizeBuffers(mSwapChain.GetSwapChainBuffers(), windowHandle);
 
 		//Close the command list.
 		//Store all your command lists in a ID3D12CommandList array.
@@ -396,18 +341,17 @@ namespace FARender
 	void DeviceResources::Present()
 	{
 		//swap the front and back buffers
-		ThrowIfFailed(mSwapChain->Present(0, 0));
-		mCurrentBackBuffer = (mCurrentBackBuffer + 1) % mNumOfSwapChainBuffers;
+		mSwapChain.Present();
 	}
 
 	void DeviceResources::Draw()
 	{
 		//Reseting command allocator allows us to reuse the memory.
 		//Make sure all the commands in the command list is executed before calling this.
-		ThrowIfFailed(mCommandAllocator[mCurrentFrame]->Reset());
+		ThrowIfFailed(mCommandAllocator[mCurrentFrameIndex]->Reset());
 
 		//Reset command list
-		ThrowIfFailed(mCommandList->Reset(mCommandAllocator[mCurrentFrame].Get(), nullptr));
+		ThrowIfFailed(mCommandList->Reset(mCommandAllocator[mCurrentFrameIndex].Get(), nullptr));
 
 		//Link viewport to the rasterization stage
 		mCommandList->RSSetViewports(1, &mViewport);
@@ -418,11 +362,7 @@ namespace FARender
 		if (mMSAA4xSupported && mIsMSAAEnabled)
 		{
 			//Transistion the current back buffer to resolve dest state from present state
-			CD3DX12_RESOURCE_BARRIER currentBackBufferTransitionToResolveDestState =
-				CD3DX12_RESOURCE_BARRIER::Transition(mSwapChainBuffers[mCurrentBackBuffer].Get(),
-					D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RESOLVE_DEST);
-
-			mCommandList->ResourceBarrier(1, &currentBackBufferTransitionToResolveDestState);
+			mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RESOLVE_DEST);
 
 			//Transistion the msaa RT buffer to render target state from resolve source
 			CD3DX12_RESOURCE_BARRIER msaaRTVTransitionToRenderTarget =
@@ -448,31 +388,28 @@ namespace FARender
 		else
 		{
 			//Transistion the current back buffer to  render state from present state
-			CD3DX12_RESOURCE_BARRIER currentBackBufferTransitionToRenderState =
-				CD3DX12_RESOURCE_BARRIER::Transition(mSwapChainBuffers[mCurrentBackBuffer].Get(),
-					D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-			mCommandList->ResourceBarrier(1, &currentBackBufferTransitionToRenderState);
-
-			//clear the back buffer
+			//Clear the current back buffer
 			const float backBufferClearValue[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRTVHeap->GetCPUDescriptorHandleForHeapStart(),
-				mCurrentBackBuffer, mRTVSize);
-			mCommandList->ClearRenderTargetView(rtvHeapHandle, backBufferClearValue, 0, nullptr);
+			mSwapChain.ClearCurrentBackBuffer(mCommandList, backBufferClearValue);
 
-			//clear the DS buffer
+			//Clear the DS buffer
 			mCommandList->ClearDepthStencilView(mDSVHeap->GetCPUDescriptorHandleForHeapStart(),
 				D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
-			//Specify which back buffer to render to
 			CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHeapHandle(mDSVHeap->GetCPUDescriptorHandleForHeapStart());
-			mCommandList->OMSetRenderTargets(1, &rtvHeapHandle, true, &dsvHeapHandle);
+
+			CD3DX12_CPU_DESCRIPTOR_HANDLE currentBackBufferView{ mSwapChain.GetCurrentBackBufferView() };
+
+			//Link the current back buffer and depth stencil buffer to the pipeline.
+			mCommandList->OMSetRenderTargets(1, &currentBackBufferView, true, &dsvHeapHandle);
 		}
 	}
 
 	void DeviceResources::NextFrame()
 	{
-		mCurrentFrame = (mCurrentFrame + 1) % NUM_OF_FRAMES;
+		mCurrentFrameIndex = (mCurrentFrameIndex + 1) % NUM_OF_FRAMES;
 	}
 
 	void DeviceResources::RTBufferTransition(bool renderText)
@@ -487,26 +424,18 @@ namespace FARender
 			mCommandList->ResourceBarrier(1, &msaaRTVTransitionToResolveSourceState);
 
 			//Copy a multi-sampled resource into a non-multi-sampled resource
-			mCommandList->ResolveSubresource(mSwapChainBuffers[mCurrentBackBuffer].Get(), 0, mMSAARenderTargetBuffer.Get(),
-				0, mBackBufferFormat);
+			mCommandList->ResolveSubresource(mSwapChain.GetCurrentBackBuffer().Get(), 0, mMSAARenderTargetBuffer.Get(),
+				0, mSwapChain.GetBackBufferFormat());
 
 			if (renderText)
 			{
 				//Transistion the current back buffer to render target state from resolve dest state
-				CD3DX12_RESOURCE_BARRIER currentBackBufferTransitionToRenderTarget =
-					CD3DX12_RESOURCE_BARRIER::Transition(mSwapChainBuffers[mCurrentBackBuffer].Get(),
-						D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-				mCommandList->ResourceBarrier(1, &currentBackBufferTransitionToRenderTarget);
+				mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
 			}
 			else
 			{
 				//Transistion the current back buffer to present state from resolve dest state
-				CD3DX12_RESOURCE_BARRIER currentBackBufferTransitionToRenderTarget =
-					CD3DX12_RESOURCE_BARRIER::Transition(mSwapChainBuffers[mCurrentBackBuffer].Get(),
-						D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_PRESENT);
-
-				mCommandList->ResourceBarrier(1, &currentBackBufferTransitionToRenderTarget);
+				mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_PRESENT);
 			}
 		}
 		else
@@ -514,140 +443,26 @@ namespace FARender
 			if (!renderText)
 			{
 				//Transistion the current back buffer to present state from render target state
-				CD3DX12_RESOURCE_BARRIER currentBackBufferTransitionToPresent =
-					CD3DX12_RESOURCE_BARRIER::Transition(mSwapChainBuffers[mCurrentBackBuffer].Get(),
-						D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-
-				mCommandList->ResourceBarrier(1, &currentBackBufferTransitionToPresent);
+				mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 			}
 		}
 	}
 
-
-	/*void DeviceResources::mInitializeText()
-	{
-		//-----------------------------------------------------------------------------------------------------------------------------
-		//Create a D3D11On12 Device
-
-		ThrowIfFailed(D3D11On12CreateDevice(mDirect3DDevice.Get(),
-			D3D11_CREATE_DEVICE_SINGLETHREADED | D3D11_CREATE_DEVICE_DEBUG | D3D11_CREATE_DEVICE_BGRA_SUPPORT,
-			nullptr, 0, (IUnknown**)mCommandQueue.GetAddressOf(), 1, 0, &mDevice11, &mDevice11Context, nullptr));
-
-		//Query the 11On12 device from the 11 device.
-		ThrowIfFailed(mDevice11.As(&mDevice11on12));
-		//-----------------------------------------------------------------------------------------------------------------------------
-
-
-		//-----------------------------------------------------------------------------------------------------------------------------
-		//Create Direct2D factory, Direct2D device, Direct2D device context and DirectWrite factory.
-
-		D2D1_FACTORY_OPTIONS factoryOptions{ D2D1_DEBUG_LEVEL_INFORMATION };
-		ThrowIfFailed(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, factoryOptions, mDirect2DFactory.GetAddressOf()));
-
-		Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
-		ThrowIfFailed(mDevice11on12.As(&dxgiDevice));
-
-		ThrowIfFailed(mDirect2DFactory->CreateDevice(dxgiDevice.Get(), &mDirect2DDevice));
-		ThrowIfFailed(mDirect2DDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &mDirect2DDeviceContext));
-
-		ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &mDirectWriteFactory));
-		//-----------------------------------------------------------------------------------------------------------------------------
-
-		//-----------------------------------------------------------------------------------------------------------------------------
-		//Resize the buffers to match the number of swap chain buffers
-
-		mWrappedBuffers.resize(mNumOfSwapChainBuffers);
-		mDirect2DBuffers.resize(mNumOfSwapChainBuffers);
-		mSurfaces.resize(mNumOfSwapChainBuffers);
-
-		//-----------------------------------------------------------------------------------------------------------------------------
-
-	}
-
-	void DeviceResources::mResetTextBuffers()
-	{
-		mDirect2DDeviceContext->SetTarget(nullptr);
-
-		for (int i = 0; i < mNumOfSwapChainBuffers; ++i)
-		{
-			mWrappedBuffers[i].Reset();
-			mDirect2DBuffers[i].Reset();
-			mSurfaces[i].Reset();
-		}
-
-		mDevice11Context->Flush();
-	}
-
-	void DeviceResources::mTextResize(const HWND& handle)
-	{
-		//-----------------------------------------------------------------------------------------------------------------------------
-		//Create a wrapped 11on12 resource to the back buffers
-
-		D3D11_RESOURCE_FLAGS direct11ResourceFlags{ D3D11_BIND_RENDER_TARGET };
-
-		//creates a wrapped resource to each of our swap chain buffers
-		for (int i = 0; i < mNumOfSwapChainBuffers; ++i)
-		{
-			ThrowIfFailed(mDevice11on12->CreateWrappedResource(mSwapChainBuffers[i].Get(), &direct11ResourceFlags,
-				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, IID_PPV_ARGS(mWrappedBuffers[i].GetAddressOf())));
-		}
-		//-----------------------------------------------------------------------------------------------------------------------------
-
-
-		//-----------------------------------------------------------------------------------------------------------------------------
-		//Create a render target for D2D to draw directly to the back buffers.
-
-		// Query the window's dpi settings, which will be used to create
-		// D2D's render targets.
-		float dpi = (float)GetDpiForWindow(handle);
-
-		D2D1_BITMAP_PROPERTIES1 bitmapProperties = D2D1::BitmapProperties1(
-			D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-			D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
-			dpi, dpi);
-
-		for (int i = 0; i < mNumOfSwapChainBuffers; ++i)
-		{
-			ThrowIfFailed(mWrappedBuffers[i].As(&mSurfaces[i]));
-
-			ThrowIfFailed(mDirect2DDeviceContext->CreateBitmapFromDxgiSurface(mSurfaces[i].Get(), &bitmapProperties,
-				mDirect2DBuffers[i].GetAddressOf()));
-		}
-		//-----------------------------------------------------------------------------------------------------------------------------
-	}*/
-
-
 	void DeviceResources::BeforeTextDraw()
 	{
-		mTextResources.BeforeRenderText(mCurrentBackBuffer);
-
-		//gives direct2D access to our back buffer
-		/*mDevice11on12->AcquireWrappedResources(mWrappedBuffers[mCurrentBackBuffer].GetAddressOf(), 1);
-
-		//Render text to back buffer
-		mDirect2DDeviceContext->SetTarget(mDirect2DBuffers[mCurrentBackBuffer].Get());
-		mDirect2DDeviceContext->BeginDraw();
-		mDirect2DDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());*/
+		mTextResources.BeforeRenderText(mSwapChain.GetCurrentBackBufferIndex());
 	}
 
 	void DeviceResources::AfterTextDraw()
 	{
-		mTextResources.AfterRenderText(mCurrentBackBuffer);
-
-		/*ThrowIfFailed(mDirect2DDeviceContext->EndDraw());
-
-		//Releasing the wrapped render target resource transitions the back buffer to present state.
-		mDevice11on12->ReleaseWrappedResources(mWrappedBuffers[mCurrentBackBuffer].GetAddressOf(), 1);
-
-		//Submit the commands to the shared D3D12 command queue.
-		mDevice11Context->Flush();*/
+		mTextResources.AfterRenderText(mSwapChain.GetCurrentBackBufferIndex());
 	}
 
 	void DeviceResources::mCheckMSAASupport()
 	{
 		//Describes the format and sample count we want to check to see if it is supported.
 		D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS levels{};
-		levels.Format = mBackBufferFormat;
+		levels.Format = mSwapChain.GetBackBufferFormat();
 		levels.SampleCount = 4;
 
 		ThrowIfFailed(mDirect3DDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
@@ -696,14 +511,14 @@ namespace FARender
 		mMSAARenderTargetBufferDesc.Height = height;
 		mMSAARenderTargetBufferDesc.DepthOrArraySize = 1;
 		mMSAARenderTargetBufferDesc.MipLevels = 1;
-		mMSAARenderTargetBufferDesc.Format = mBackBufferFormat;
+		mMSAARenderTargetBufferDesc.Format = mSwapChain.GetBackBufferFormat();
 		mMSAARenderTargetBufferDesc.SampleDesc.Count = 4;
 		mMSAARenderTargetBufferDesc.SampleDesc.Quality = 0;
 		mMSAARenderTargetBufferDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		mMSAARenderTargetBufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
 		D3D12_CLEAR_VALUE msaaRTBufferClearValue{};
-		msaaRTBufferClearValue.Format = mBackBufferFormat;
+		msaaRTBufferClearValue.Format = mSwapChain.GetBackBufferFormat();
 		msaaRTBufferClearValue.Color[0] = 0.0f;
 		msaaRTBufferClearValue.Color[1] = 0.0f;
 		msaaRTBufferClearValue.Color[2] = 0.0f;

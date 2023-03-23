@@ -8,6 +8,7 @@
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include "FATextResources.h"
+#include "FASwapChain.h"
 
 namespace FARender
 {
@@ -41,7 +42,7 @@ namespace FARender
 
 		/**@brief Returns a constant reference to the back buffer format.
 		*/
-		const DXGI_FORMAT& GetBackBufferFormat() const;
+		DXGI_FORMAT GetBackBufferFormat() const;
 
 		/**@brief Returns a constant reference to the depth stencil format.
 		*/
@@ -138,7 +139,7 @@ namespace FARender
 		*/
 		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle);
 
-		unsigned int mCurrentFrame{ 0 };
+		unsigned int mCurrentFrameIndex{ 0 };
 
 		Microsoft::WRL::ComPtr<ID3D12Device> mDirect3DDevice;
 
@@ -153,11 +154,7 @@ namespace FARender
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCommandAllocator;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;
 
-		DXGI_FORMAT mBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
-		static const UINT mNumOfSwapChainBuffers{ 2 };
-		UINT mCurrentBackBuffer{ 0 };
-		Microsoft::WRL::ComPtr<IDXGISwapChain1> mSwapChain;
-		Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffers[mNumOfSwapChainBuffers];
+		SwapChain mSwapChain;
 
 		Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer;
 		DXGI_FORMAT mDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
@@ -165,7 +162,6 @@ namespace FARender
 		UINT mRTVSize;
 		UINT mDSVSize;
 		UINT mCBVSize;
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRTVHeap;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDSVHeap;
 
 		D3D12_VIEWPORT mViewport{};
@@ -187,8 +183,7 @@ namespace FARender
 		void mCreateFence();
 		void mQueryDescriptorSizes();
 		void mCreateCommandObjects();
-		void mCreateSwapChain(HWND handle);
-		void mCreateRTVHeap();
+
 		void mCreateDSVHeap();
 
 		//if MSAA is supported, creates a MSAA RTV and DSV heap.
@@ -196,9 +191,6 @@ namespace FARender
 		void mCreateMSAARTVHeap();
 		void mCreateMSAADSVHeap();
 
-		//These functions are for creating swap chain buffers, depth/stencil buffer, render target views and depth/stencil view.
-		//They are called in the resize function.
-		void mCreateRenderTargetBufferAndView();
 		void mCreateDepthStencilBufferAndView(int width, int height);
 
 		//These functions are for creating a MSAA render target buffer, MSAA depth/stencil buffer, 
