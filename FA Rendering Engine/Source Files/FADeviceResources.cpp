@@ -243,7 +243,7 @@ namespace FARender
 		mSwapChain.ResizeSwapChain(width, height);
 
 		//Create render target buffers and views to them.
-		mSwapChain.CreateRenderTargetBuffersAndViews(mDirect3DDevice);
+		mSwapChain.CreateRenderTargetBuffersAndViews(mDirect3DDevice, mRTVSize);
 
 		//Create depth stencil buffer and view to it.
 		mDepthStencil.CreateDepthStencilBufferAndView(mDirect3DDevice, width, height);
@@ -342,12 +342,12 @@ namespace FARender
 
 			//Clear the current back buffer
 			const float backBufferClearValue[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			mSwapChain.ClearCurrentBackBuffer(mCommandList, backBufferClearValue);
+			mSwapChain.ClearCurrentBackBuffer(mCommandList, mRTVSize, backBufferClearValue);
 
 			//Clear the DS buffer
 			mDepthStencil.ClearDepthStencilBuffer(mCommandList, 1.0f);
 
-			CD3DX12_CPU_DESCRIPTOR_HANDLE currentBackBufferView{ mSwapChain.GetCurrentBackBufferView() };
+			CD3DX12_CPU_DESCRIPTOR_HANDLE currentBackBufferView{ mSwapChain.GetCurrentBackBufferView(mRTVSize) };
 			CD3DX12_CPU_DESCRIPTOR_HANDLE depthStencilView{ mDepthStencil.GetDepthStencilView() };
 
 			//Link the current back buffer and depth stencil buffer to the pipeline.

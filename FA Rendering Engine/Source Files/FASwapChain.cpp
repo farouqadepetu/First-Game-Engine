@@ -7,8 +7,6 @@ namespace FARender
 		const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& commandQueue, HWND windowHandle, unsigned int numBuffers) : 
 		mBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM }, mNumOfSwapChainBuffers{ numBuffers }, mCurrentBackBufferIndex{ 0 }
 	{
-		mRTVSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
 		mSwapChain.Reset();
 
 		//This describes the multi-sampling parameters we want
@@ -53,10 +51,10 @@ namespace FARender
 		return mSwapChainBuffers[mCurrentBackBufferIndex];
 	}
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE SwapChain::GetCurrentBackBufferView() const
+	CD3DX12_CPU_DESCRIPTOR_HANDLE SwapChain::GetCurrentBackBufferView(unsigned int rtvSize) const
 	{
 		return CD3DX12_CPU_DESCRIPTOR_HANDLE(mRTVHeap->GetCPUDescriptorHandleForHeapStart(),
-			mCurrentBackBufferIndex, mRTVSize);
+			mCurrentBackBufferIndex, rtvSize);
 	}
 
 	unsigned int SwapChain::GetNumOfSwapChainBuffers() const
@@ -89,7 +87,7 @@ namespace FARender
 		mCurrentBackBufferIndex = 0;
 	}
 
-	void SwapChain::CreateRenderTargetBuffersAndViews(const Microsoft::WRL::ComPtr<ID3D12Device>& device)
+	void SwapChain::CreateRenderTargetBuffersAndViews(const Microsoft::WRL::ComPtr<ID3D12Device>& device, unsigned int rtvSize)
 	{
 		//This is a class that stores the address of the first element in the rtv descriptor heap.
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRTVHeap->GetCPUDescriptorHandleForHeapStart());
@@ -100,16 +98,16 @@ namespace FARender
 			ThrowIfFailed(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mSwapChainBuffers[i].GetAddressOf())));
 
 			//Create and store a description to the swap chain buffer in the RTV heap.
-			device->CreateRenderTargetView(mSwapChainBuffers[i].Get(), nullptr, rtvHeapHandle.Offset(i, mRTVSize));
+			device->CreateRenderTargetView(mSwapChainBuffers[i].Get(), nullptr, rtvHeapHandle.Offset(i, rtvSize));
 		}
 	}
 
 	void SwapChain::ClearCurrentBackBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
-		const float* backBufferClearValue)
+		unsigned int rtvSize, const float* backBufferClearValue)
 	{
 		//Get the address of the view to the current back buffer
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRTVHeap->GetCPUDescriptorHandleForHeapStart(),
-			mCurrentBackBufferIndex, mRTVSize);
+			mCurrentBackBufferIndex, rtvSize);
 
 		//Clear the current back buffer.
 		commandList->ClearRenderTargetView(rtvHeapHandle, backBufferClearValue, 0, nullptr);

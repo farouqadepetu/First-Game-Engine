@@ -32,7 +32,7 @@ namespace FARender
 
 		/**@brief Returns the address of the view to the current render target buffer.
 		*/
-		CD3DX12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferView() const;
+		CD3DX12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferView(unsigned int rtvSize) const;
 
 		/**@brief Returns the number of swap chain buffers.
 		*/
@@ -56,12 +56,12 @@ namespace FARender
 
 		/**@brief Creates the render target buffer and views to them.
 		*/
-		void CreateRenderTargetBuffersAndViews(const Microsoft::WRL::ComPtr<ID3D12Device>& device);
+		void CreateRenderTargetBuffersAndViews(const Microsoft::WRL::ComPtr<ID3D12Device>& device, unsigned int rtvSize);
 
 		/**@brief Clears the current render target buffer.
 		*/
 		void ClearCurrentBackBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
-			const float* backBufferClearValue);
+			unsigned int rtvSize, const float* backBufferClearValue);
 
 		/**@brief Transitions the current render target buffer from the specified before state to the specified after state.
 		*/
@@ -75,12 +75,13 @@ namespace FARender
 	private:
 
 		DXGI_FORMAT mBackBufferFormat;
+
 		unsigned int mNumOfSwapChainBuffers;
 		unsigned int mCurrentBackBufferIndex;
+
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> mSwapChain;
 		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> mSwapChainBuffers;
 
-		unsigned int mRTVSize;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRTVHeap;
 	};
 }
