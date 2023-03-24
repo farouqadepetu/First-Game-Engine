@@ -3,9 +3,11 @@
 
 namespace FARender
 {
-	SwapChain::SwapChain(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const Microsoft::WRL::ComPtr<IDXGIFactory4>& dxgiFactory,
-		const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& commandQueue, HWND windowHandle, unsigned int numBuffers) : 
-		mBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM }, mNumOfSwapChainBuffers{ numBuffers }, mCurrentBackBufferIndex{ 0 }
+	SwapChain::SwapChain(const Microsoft::WRL::ComPtr<IDXGIFactory4>& dxgiFactory,
+		const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& commandQueue, HWND windowHandle, 
+		DXGI_FORMAT rtFormat, DXGI_FORMAT dsFormat, unsigned int numRenderTargetBuffers) :
+		mNumRenderTargetBuffers{ numRenderTargetBuffers },mCurrentBackBufferIndex{ 0 }, 
+		mRenderTargetBuffers{ rtFormat }, mDepthStencilBuffer { dsFormat }
 	{
 		mSwapChain.Reset();
 
@@ -17,11 +19,11 @@ namespace FARender
 		DXGI_SWAP_CHAIN_DESC1 swapChainDescription{};
 		swapChainDescription.Width = 0;
 		swapChainDescription.Height = 0;
-		swapChainDescription.Format = mBackBufferFormat;
+		swapChainDescription.Format = rtFormat;
 		swapChainDescription.Stereo = FALSE;
 		swapChainDescription.SampleDesc = multiSamplingDescription;
 		swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapChainDescription.BufferCount = mNumOfSwapChainBuffers;
+		swapChainDescription.BufferCount = mNumRenderTargetBuffers;
 		swapChainDescription.Scaling = DXGI_SCALING_NONE;
 		swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		swapChainDescription.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
@@ -30,36 +32,22 @@ namespace FARender
 		ThrowIfFailed(dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), windowHandle,
 			&swapChainDescription, nullptr, nullptr, &mSwapChain));
 
-		mSwapChainBuffers.resize(mNumOfSwapChainBuffers);
-
-		//Create render target view heap to store descriptions of the render target buffers.
-		D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDescription{};
-		rtvDescriptorHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		rtvDescriptorHeapDescription.NumDescriptors = mNumOfSwapChainBuffers;
-		rtvDescriptorHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		rtvDescriptorHeapDescription.NodeMask = 0;
-		ThrowIfFailed(device->CreateDescriptorHeap(&rtvDescriptorHeapDescription, IID_PPV_ARGS(&mRTVHeap)));
+		mRenderTargetBuffers.resize(mNumRenderTargetBuffers);
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12Resource>* SwapChain::GetSwapChainBuffers() const
+	const RenderTargetBuffer* SwapChain::GetRenderTargetBuffers() const
 	{
-		return mSwapChainBuffers.data();
+		return mRenderTargetBuffers.data();
 	}
 
 	const Microsoft::WRL::ComPtr<ID3D12Resource>& SwapChain::GetCurrentBackBuffer() const
 	{
-		return mSwapChainBuffers[mCurrentBackBufferIndex];
+		return mRenderTargetBuffers[mCurrentBackBufferIndex].GetRenderTargetBuffer();
 	}
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE SwapChain::GetCurrentBackBufferView(unsigned int rtvSize) const
+	unsigned int SwapChain::GetNumRenderTargetBuffers() const
 	{
-		return CD3DX12_CPU_DESCRIPTOR_HANDLE(mRTVHeap->GetCPUDescriptorHandleForHeapStart(),
-			mCurrentBackBufferIndex, rtvSize);
-	}
-
-	unsigned int SwapChain::GetNumOfSwapChainBuffers() const
-	{
-		return mNumOfSwapChainBuffers;
+		return mNumRenderTargetBuffers;
 	}
 
 	unsigned int SwapChain::GetCurrentBackBufferIndex() const
@@ -69,55 +57,83 @@ namespace FARender
 
 	DXGI_FORMAT SwapChain::GetBackBufferFormat() const
 	{
-		return mBackBufferFormat;
+		return mRenderTargetBuffers[0].GetRenderTargetFormat();
+	}
+
+	DXGI_FORMAT SwapChain::GetDepthStencilFormat() const
+	{
+		return mDepthStencilBuffer.GetDepthStencilFormat();
 	}
 
 	void SwapChain::ResetBuffers()
 	{
-		for (auto& i : mSwapChainBuffers)
+		for (auto& i : mRenderTargetBuffers)
 		{
-			i.Reset();
+			i.ResetBuffer();
 		}
+
+		mDepthStencilBuffer.ResetBuffer();
 	}
 
 	void SwapChain::ResizeSwapChain(unsigned width, unsigned height)
 	{
-		mSwapChain->ResizeBuffers(mNumOfSwapChainBuffers, width, height, mBackBufferFormat,
+		mSwapChain->ResizeBuffers(mNumRenderTargetBuffers, width, height, mRenderTargetBuffers[0].GetRenderTargetFormat(),
 			DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 		mCurrentBackBufferIndex = 0;
 	}
 
-	void SwapChain::CreateRenderTargetBuffersAndViews(const Microsoft::WRL::ComPtr<ID3D12Device>& device, unsigned int rtvSize)
+	void SwapChain::CreateRenderTargetBuffersAndViews(const Microsoft::WRL::ComPtr<ID3D12Device>& device, 
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int indexOfWhereToStoreFirstView,
+		unsigned int rtvSize)
 	{
-		//This is a class that stores the address of the first element in the rtv descriptor heap.
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRTVHeap->GetCPUDescriptorHandleForHeapStart());
+		//Get the address of where you want to store the first view in the RTV heap.
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), indexOfWhereToStoreFirstView, 
+			rtvSize);
 
-		for (unsigned int i = 0; i < mNumOfSwapChainBuffers; ++i)
+		for (unsigned int i = 0; i < mNumRenderTargetBuffers; ++i)
 		{
 			//store the swap chain buffer in a Resource object.
-			ThrowIfFailed(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mSwapChainBuffers[i].GetAddressOf())));
+			ThrowIfFailed(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mRenderTargetBuffers[i].GetRenderTargetBuffer().GetAddressOf())));
 
 			//Create and store a description to the swap chain buffer in the RTV heap.
-			device->CreateRenderTargetView(mSwapChainBuffers[i].Get(), nullptr, rtvHeapHandle.Offset(i, rtvSize));
+			device->CreateRenderTargetView(mRenderTargetBuffers[i].GetRenderTargetBuffer().Get(), nullptr, 
+				rtvHeapHandle.Offset(i, rtvSize));
 		}
 	}
 
-	void SwapChain::ClearCurrentBackBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
-		unsigned int rtvSize, const float* backBufferClearValue)
+	void SwapChain::CreateDepthStencilBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvHeap, unsigned int indexOfWhereToStoreView, unsigned int dsvSize,
+		unsigned int width, unsigned int height)
 	{
-		//Get the address of the view to the current back buffer
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(mRTVHeap->GetCPUDescriptorHandleForHeapStart(),
-			mCurrentBackBufferIndex, rtvSize);
+		mDepthStencilBuffer.CreateDepthStencilBufferAndView(device, dsvHeap, indexOfWhereToStoreView, dsvSize, width, height);
+	}
+
+	void SwapChain::ClearCurrentBackBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int indexOfFirstView, unsigned int rtvSize, 
+		const float* backBufferClearValue)
+	{
+		//Get the address of the first swap chain buffer view in the heap.
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), indexOfFirstView, rtvSize);
+
+		//offset to the current back buffer.
+		rtvHeapHandle.Offset(mCurrentBackBufferIndex, rtvSize);
 
 		//Clear the current back buffer.
 		commandList->ClearRenderTargetView(rtvHeapHandle, backBufferClearValue, 0, nullptr);
+	}
+
+	void SwapChain::ClearDepthStencilBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvHeap, unsigned int indexOfView, unsigned int dsvSize,
+		float clearValue)
+	{
+		mDepthStencilBuffer.ClearDepthStencilBuffer(commandList, dsvHeap, indexOfView, dsvSize, clearValue);
 	}
 
 	void SwapChain::Transition(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
 		D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
 	{
 		CD3DX12_RESOURCE_BARRIER currentBackBufferTransition =
-			CD3DX12_RESOURCE_BARRIER::Transition(mSwapChainBuffers[mCurrentBackBufferIndex].Get(),
+			CD3DX12_RESOURCE_BARRIER::Transition(mRenderTargetBuffers[mCurrentBackBufferIndex].GetRenderTargetBuffer().Get(),
 				before, after);
 
 		commandList->ResourceBarrier(1, &currentBackBufferTransition);
@@ -127,6 +143,6 @@ namespace FARender
 	{
 		//swap the front and back buffers
 		ThrowIfFailed(mSwapChain->Present(0, 0));
-		mCurrentBackBufferIndex = (mCurrentBackBufferIndex + 1) % mNumOfSwapChainBuffers;
+		mCurrentBackBufferIndex = (mCurrentBackBufferIndex + 1) % mNumRenderTargetBuffers;
 	}
 }

@@ -21,16 +21,13 @@ namespace FARender
 		mCreateDXGIFactory();
 		mCreateFence();
 		mQueryDescriptorSizes();
+		mCreateRTVHeap();
+		mCreateDSVHeap();
 		mCreateCommandObjects();
 
-		mSwapChain = SwapChain(mDirect3DDevice, mDXGIFactory, mCommandQueue, windowHandle, 2);
-		mDepthStencil = DepthStencil(mDirect3DDevice);
-		mMultiSampling = MultiSampling(mDirect3DDevice, mSwapChain.GetBackBufferFormat(), 4);
-		mTextResources = TextResources(mDirect3DDevice, mCommandQueue, mSwapChain.GetNumOfSwapChainBuffers());
-
-		/*mCheckMSAASupport();
-		mCreateMSAARTVHeap();
-		mCreateMSAADSVHeap();*/
+		mSwapChain = SwapChain(mDXGIFactory, mCommandQueue, windowHandle);
+		mMultiSampling = MultiSampling(mDirect3DDevice, mSwapChain.GetBackBufferFormat(), mSwapChain.GetDepthStencilFormat(), 4);
+		mTextResources = TextResources(mDirect3DDevice, mCommandQueue, mSwapChain.GetNumRenderTargetBuffers());
 
 		Resize(width, height, windowHandle);
 		mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr);
@@ -57,9 +54,9 @@ namespace FARender
 		return mSwapChain.GetBackBufferFormat();
 	}
 
-	const DXGI_FORMAT& DeviceResources::GetDepthStencilFormat() const
+	DXGI_FORMAT DeviceResources::GetDepthStencilFormat() const
 	{
-		return mDepthStencil.GetDepthStencilFormat();
+		return mSwapChain.GetDepthStencilFormat();
 	}
 
 	UINT DeviceResources::GetCBVSize() const
@@ -133,6 +130,30 @@ namespace FARender
 		mRTVSize = mDirect3DDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 		mDSVSize = mDirect3DDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 		mCBVSize = mDirect3DDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	}
+
+	void DeviceResources::mCreateRTVHeap()
+	{
+		//Create render target view heap to store descriptions of the render target buffers.
+		//3 descritptors: 2 for the swap chain render target buffers and 1 for the multi-sampling render target buffer.
+		D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDescription{};
+		rtvDescriptorHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		rtvDescriptorHeapDescription.NumDescriptors = 3;
+		rtvDescriptorHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		rtvDescriptorHeapDescription.NodeMask = 0;
+		ThrowIfFailed(mDirect3DDevice->CreateDescriptorHeap(&rtvDescriptorHeapDescription, IID_PPV_ARGS(&mRTVHeap)));
+	}
+
+	void DeviceResources::mCreateDSVHeap()
+	{
+		//Create depth stencil view heap to store descriptions of the depth stencil buffers.
+		//2 descritptors: 1 for the swap chain depth stencil buffer and 1 for the multi-sampling depth stencil buffer.
+		D3D12_DESCRIPTOR_HEAP_DESC dsvDescriptorHeapDescription{};
+		dsvDescriptorHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+		dsvDescriptorHeapDescription.NumDescriptors = 2;
+		dsvDescriptorHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		dsvDescriptorHeapDescription.NodeMask = 0;
+		ThrowIfFailed(mDirect3DDevice->CreateDescriptorHeap(&dsvDescriptorHeapDescription, IID_PPV_ARGS(&mDSVHeap)));
 	}
 
 	void DeviceResources::mCreateCommandObjects()
@@ -233,35 +254,26 @@ namespace FARender
 		//Reset/Release all buffers that have a reference to the swap chain.
 		mSwapChain.ResetBuffers();
 
-		mDepthStencil.ResetBuffer();
-
 		//reset MSAA buffers
 		if (mIsMSAAEnabled)
-		{
 			mMultiSampling.ResetBuffers();
-			//mMSAARenderTargetBuffer.Reset();
-			//mMSAADepthStencilBuffer.Reset();
-		}
-
-		//Resize the swap chain buffers
+		
+		//Resize the swap chain buffers.
 		mSwapChain.ResizeSwapChain(width, height);
 
-		//Create render target buffers and views to them.
-		mSwapChain.CreateRenderTargetBuffersAndViews(mDirect3DDevice, mRTVSize);
+		//Create the swap chains render target buffers and views to them.
+		mSwapChain.CreateRenderTargetBuffersAndViews(mDirect3DDevice, mRTVHeap, 0, mRTVSize);
 
-		//Create depth stencil buffer and view to it.
-		mDepthStencil.CreateDepthStencilBufferAndView(mDirect3DDevice, width, height);
+		//Create the swap chains depth stencil buffer and a view to it.
+		mSwapChain.CreateDepthStencilBufferAndView(mDirect3DDevice, mDSVHeap, 0, mDSVSize, width, height);
 
 		if (mIsMSAAEnabled)
 		{
-			mMultiSampling.CreateRenderTargetBufferAndView(mDirect3DDevice, mSwapChain.GetBackBufferFormat(), width, height);
-			mMultiSampling.CreateDepthStencilBufferAndView(mDirect3DDevice, mDepthStencil.GetDepthStencilFormat(), width, height);
-			//Make MSAA RT buffer, MSAA DS buffer, MSAA RT view and MSAA DS view
-			//mCreateMSAARenderTargetBufferAndView(width, height);
-			//mCreateMSAADepthStencilBufferAndView(width, height);
+			mMultiSampling.CreateRenderTargetBufferAndView(mDirect3DDevice, mRTVHeap, 2, mRTVSize, width, height);
+			mMultiSampling.CreateDepthStencilBufferAndView(mDirect3DDevice, mDSVHeap, 1, mDSVSize, width, height);
 		}
 
-		mTextResources.ResizeBuffers(mSwapChain.GetSwapChainBuffers(), windowHandle);
+		mTextResources.ResizeBuffers(mSwapChain.GetRenderTargetBuffers(), windowHandle);
 
 		//Close the command list.
 		//Store all your command lists in a ID3D12CommandList array.
@@ -322,28 +334,23 @@ namespace FARender
 
 			//Transistion the msaa RT buffer to render target state from resolve source
 			mMultiSampling.Transition(mCommandList, D3D12_RESOURCE_STATE_RESOLVE_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			/*CD3DX12_RESOURCE_BARRIER msaaRTVTransitionToRenderTarget =
-				CD3DX12_RESOURCE_BARRIER::Transition(mMSAARenderTargetBuffer.Get(),
-					D3D12_RESOURCE_STATE_RESOLVE_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-			mCommandList->ResourceBarrier(1, &msaaRTVTransitionToRenderTarget);*/
 
 			//clear the msaa RT buffer
 			const float msaaRTClearValue[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			mMultiSampling.ClearRenderTargetBuffer(mCommandList, msaaRTClearValue);
-			/*CD3DX12_CPU_DESCRIPTOR_HANDLE msaaRTVHeapHandle(mMSAARTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-				0, mRTVSize);
-			mCommandList->ClearRenderTargetView(msaaRTVHeapHandle, msaaRTClearValue, 0, nullptr);*/
+			mMultiSampling.ClearRenderTargetBuffer(mCommandList, mRTVHeap, 2, mRTVSize, msaaRTClearValue);
 
 			//clear the msaa DS buffer
-			mMultiSampling.ClearDepthStencilBuffer(mCommandList, 1.0f);
-			/*mCommandList->ClearDepthStencilView(mMSAADSVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-				D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);*/
+			mMultiSampling.ClearDepthStencilBuffer(mCommandList, mDSVHeap, 1, mDSVSize, 1.0f);
+			
+			//Get the address of the view to the MSAA render target buffer.
+			CD3DX12_CPU_DESCRIPTOR_HANDLE msaaRenderTargetBufferViewAddress(mRTVHeap->GetCPUDescriptorHandleForHeapStart(),
+				2, mRTVSize);
 
-			//Specify which back buffer to render to
-			//CD3DX12_CPU_DESCRIPTOR_HANDLE msaaDSVHeapHandle(mMSAADSVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-			CD3DX12_CPU_DESCRIPTOR_HANDLE msaaRenderTargetBufferViewAddress{ mMultiSampling.GetRenderTargetBufferView() };
-			CD3DX12_CPU_DESCRIPTOR_HANDLE msaaDepthStencilBufferViewAddress{ mMultiSampling.GetDepthStencilBufferView() };
+			//Get the address of the view to the MSAA depth stencil buffer.
+			CD3DX12_CPU_DESCRIPTOR_HANDLE msaaDepthStencilBufferViewAddress(mDSVHeap->GetCPUDescriptorHandleForHeapStart(),
+				1, mDSVSize);
+
+			//Link the MSAA render target buffer and depth stencil buffer to the pipeline.
 			mCommandList->OMSetRenderTargets(1, &msaaRenderTargetBufferViewAddress, true, &msaaDepthStencilBufferViewAddress);
 		}
 		else
@@ -351,17 +358,22 @@ namespace FARender
 			//Transistion the current back buffer to  render state from present state
 			mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-			//Clear the current back buffer
+			//Clear the swap chains current back buffer
 			const float backBufferClearValue[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			mSwapChain.ClearCurrentBackBuffer(mCommandList, mRTVSize, backBufferClearValue);
+			mSwapChain.ClearCurrentBackBuffer(mCommandList, mRTVHeap, 0, mRTVSize, backBufferClearValue);
 
-			//Clear the DS buffer
-			mDepthStencil.ClearDepthStencilBuffer(mCommandList, 1.0f);
+			//Clear the swap chains DS buffer
+			mSwapChain.ClearDepthStencilBuffer(mCommandList, mDSVHeap, 0, mDSVSize, 1.0f);
 
-			CD3DX12_CPU_DESCRIPTOR_HANDLE currentBackBufferViewAddress{ mSwapChain.GetCurrentBackBufferView(mRTVSize) };
-			CD3DX12_CPU_DESCRIPTOR_HANDLE depthStencilViewAddress{ mDepthStencil.GetDepthStencilView() };
+			//Get address of the view to the swap chains current back buffer.
+			CD3DX12_CPU_DESCRIPTOR_HANDLE currentBackBufferViewAddress(mRTVHeap->GetCPUDescriptorHandleForHeapStart(),
+				mSwapChain.GetCurrentBackBufferIndex(), mRTVSize);
 
-			//Link the current back buffer and depth stencil buffer to the pipeline.
+			//Get address of the view to the swap chains depth stencil buffer.
+			CD3DX12_CPU_DESCRIPTOR_HANDLE depthStencilViewAddress(mDSVHeap->GetCPUDescriptorHandleForHeapStart(),
+				0, mDSVSize);
+
+			//Link the current swap chains back buffer and depth stencil buffer to the pipeline.
 			mCommandList->OMSetRenderTargets(1, &currentBackBufferViewAddress, true, &depthStencilViewAddress);
 		}
 	}
@@ -377,11 +389,6 @@ namespace FARender
 		{
 			//Transistion the msaa RT buffer to resolve source state from render target state
 			mMultiSampling.Transition(mCommandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
-			/*CD3DX12_RESOURCE_BARRIER msaaRTVTransitionToResolveSourceState =
-				CD3DX12_RESOURCE_BARRIER::Transition(mMSAARenderTargetBuffer.Get(),
-					D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
-
-			mCommandList->ResourceBarrier(1, &msaaRTVTransitionToResolveSourceState);*/
 
 			//Copy a multi-sampled resource into a non-multi-sampled resource
 			mCommandList->ResolveSubresource(mSwapChain.GetCurrentBackBuffer().Get(), 0, 
@@ -417,122 +424,5 @@ namespace FARender
 	{
 		mTextResources.AfterRenderText(mSwapChain.GetCurrentBackBufferIndex());
 	}
-
-	/*void DeviceResources::mCheckMSAASupport()
-	{
-		//Describes the format and sample count we want to check to see if it is supported.
-		D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS levels{};
-		levels.Format = mSwapChain.GetBackBufferFormat();
-		levels.SampleCount = 4;
-
-		ThrowIfFailed(mDirect3DDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
-			&levels, sizeof(levels)));
-
-		if (levels.NumQualityLevels > 0)
-			mMSAA4xSupported = true;
-	}
-
-	void DeviceResources::mCreateMSAARTVHeap()
-	{
-		if (mMSAA4xSupported)
-		{
-			D3D12_DESCRIPTOR_HEAP_DESC msaaRTVHeapDescription{};
-			msaaRTVHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-			msaaRTVHeapDescription.NumDescriptors = 1;
-			msaaRTVHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-			msaaRTVHeapDescription.NodeMask = 0;
-
-			ThrowIfFailed(mDirect3DDevice->CreateDescriptorHeap(&msaaRTVHeapDescription,
-				IID_PPV_ARGS(&mMSAARTVDescriptorHeap)));
-		}
-	}
-
-	void DeviceResources::mCreateMSAADSVHeap()
-	{
-		if (mMSAA4xSupported)
-		{
-			D3D12_DESCRIPTOR_HEAP_DESC msaaDSVHeapDescription{};
-			msaaDSVHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-			msaaDSVHeapDescription.NumDescriptors = 1;
-			msaaDSVHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-			msaaDSVHeapDescription.NodeMask = 0;
-
-			ThrowIfFailed(mDirect3DDevice->CreateDescriptorHeap(&msaaDSVHeapDescription,
-				IID_PPV_ARGS(&mMSAADSVDescriptorHeap)));
-		}
-	}
-
-	void DeviceResources::mCreateMSAARenderTargetBufferAndView(int width, int height)
-	{
-		D3D12_RESOURCE_DESC mMSAARenderTargetBufferDesc{};
-		mMSAARenderTargetBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		mMSAARenderTargetBufferDesc.Alignment = 0;
-		mMSAARenderTargetBufferDesc.Width = width;
-		mMSAARenderTargetBufferDesc.Height = height;
-		mMSAARenderTargetBufferDesc.DepthOrArraySize = 1;
-		mMSAARenderTargetBufferDesc.MipLevels = 1;
-		mMSAARenderTargetBufferDesc.Format = mSwapChain.GetBackBufferFormat();
-		mMSAARenderTargetBufferDesc.SampleDesc.Count = 4;
-		mMSAARenderTargetBufferDesc.SampleDesc.Quality = 0;
-		mMSAARenderTargetBufferDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		mMSAARenderTargetBufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-
-		D3D12_CLEAR_VALUE msaaRTBufferClearValue{};
-		msaaRTBufferClearValue.Format = mSwapChain.GetBackBufferFormat();
-		msaaRTBufferClearValue.Color[0] = 0.0f;
-		msaaRTBufferClearValue.Color[1] = 0.0f;
-		msaaRTBufferClearValue.Color[2] = 0.0f;
-		msaaRTBufferClearValue.Color[3] = 1.0f;
-
-		//Use this class to say which type of heap our buffer will be stored in.
-		CD3DX12_HEAP_PROPERTIES msaaRTHeapProp(D3D12_HEAP_TYPE_DEFAULT);
-
-		//Create the RT buffer resouce
-		ThrowIfFailed(mDirect3DDevice->CreateCommittedResource(&msaaRTHeapProp, D3D12_HEAP_FLAG_NONE, &mMSAARenderTargetBufferDesc,
-			D3D12_RESOURCE_STATE_RESOLVE_SOURCE, &msaaRTBufferClearValue, IID_PPV_ARGS(&mMSAARenderTargetBuffer)));
-
-		//Create the RTV
-		mDirect3DDevice->CreateRenderTargetView(mMSAARenderTargetBuffer.Get(), nullptr,
-			mMSAARTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
-	}
-
-	void DeviceResources::mCreateMSAADepthStencilBufferAndView(int width, int height)
-	{
-		D3D12_RESOURCE_DESC mMSAADepthStencilBufferDesc{};
-		mMSAADepthStencilBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		mMSAADepthStencilBufferDesc.Alignment = 0;
-		mMSAADepthStencilBufferDesc.Width = width;
-		mMSAADepthStencilBufferDesc.Height = height;
-		mMSAADepthStencilBufferDesc.DepthOrArraySize = 1;
-		mMSAADepthStencilBufferDesc.MipLevels = 1;
-		mMSAADepthStencilBufferDesc.Format = mDepthStencil.GetDepthStencilFormat();
-		mMSAADepthStencilBufferDesc.SampleDesc.Count = 4;
-		mMSAADepthStencilBufferDesc.SampleDesc.Quality = 0;
-		mMSAADepthStencilBufferDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		mMSAADepthStencilBufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-
-		D3D12_CLEAR_VALUE msaaDSBufferClearValue{};
-		msaaDSBufferClearValue.Format = mDepthStencil.GetDepthStencilFormat();
-		msaaDSBufferClearValue.DepthStencil.Depth = 1.0f;
-		msaaDSBufferClearValue.DepthStencil.Stencil = 0;
-
-		//Use this class to say which type of heap our buffer will be stored in.
-		CD3DX12_HEAP_PROPERTIES msaaDSHeapProp(D3D12_HEAP_TYPE_DEFAULT);
-
-		//Create the msaa DS buffer resouce
-		ThrowIfFailed(mDirect3DDevice->CreateCommittedResource(&msaaDSHeapProp, D3D12_HEAP_FLAG_NONE, &mMSAADepthStencilBufferDesc,
-			D3D12_RESOURCE_STATE_DEPTH_WRITE, &msaaDSBufferClearValue, IID_PPV_ARGS(&mMSAADepthStencilBuffer)));
-
-		//Describe the msaa DSV
-		D3D12_DEPTH_STENCIL_VIEW_DESC dsViewDescription{};
-		dsViewDescription.Format = mDepthStencil.GetDepthStencilFormat();
-		dsViewDescription.Flags = D3D12_DSV_FLAG_NONE;
-		dsViewDescription.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
-
-		//Create the msaa DSV
-		mDirect3DDevice->CreateDepthStencilView(mMSAADepthStencilBuffer.Get(), &dsViewDescription,
-			mMSAADSVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-	}*/
 	//-----------------------------------------------------------------------------------------------------------------------
 }

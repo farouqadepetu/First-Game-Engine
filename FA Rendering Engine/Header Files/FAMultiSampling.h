@@ -2,6 +2,7 @@
 
 #include <wrl.h>
 #include "d3dx12.h"
+#include "FABuffer.h"
 
 namespace FARender
 {
@@ -19,19 +20,15 @@ namespace FARender
 		* Throws a runtime_error if they are not supproted.
 		*/
 		MultiSampling(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			DXGI_FORMAT format, unsigned int sampleCount);
+			DXGI_FORMAT rtFormat, DXGI_FORMAT dsFormat, unsigned int sampleCount);
 
 		/**@brief Returns the MSAA render target buffer.
 		*/
 		const Microsoft::WRL::ComPtr<ID3D12Resource>& GetRenderTargetBuffer();
 
-		/**@brief Returns the address of the MSAA render target buffer view.
-		*/
-		CD3DX12_CPU_DESCRIPTOR_HANDLE GetRenderTargetBufferView() const;
+		DXGI_FORMAT GetRenderTargetFormat();
 
-		/**@brief Returns the address of the MSAA depth stencil buffer view.
-		*/
-		CD3DX12_CPU_DESCRIPTOR_HANDLE GetDepthStencilBufferView() const;
+		DXGI_FORMAT GetDepthStencilFormat();
 
 		/**@brief Resets the MSAA render target buffer and MSAA depth stencil buffer.
 		*/
@@ -40,12 +37,14 @@ namespace FARender
 		/**@brief Creates the MSAA render target buffer and a view to it.
 		*/
 		void CreateRenderTargetBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			DXGI_FORMAT format, unsigned int width, unsigned int height);
+			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int indexOfWhereToStoreView, unsigned int rtvSize,
+			unsigned int width, unsigned int height);
 
 		/**@brief Creates the MSAA depth stencil buffer and a view to it.
 		*/
 		void CreateDepthStencilBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			DXGI_FORMAT format, unsigned int width, unsigned int height);
+			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvHeap, unsigned int indexOfWhereToStoreView, unsigned int dsvSize, 
+			unsigned int width, unsigned int height);
 
 		/**@brief Transitions the MSAA render target buffer from the specified before state to the specified after state.
 		*/
@@ -54,18 +53,25 @@ namespace FARender
 
 		/**@brief Clears the MSAA render target buffer with the specified clear value.
 		*/
-		void ClearRenderTargetBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const float* clearValue);
+		void ClearRenderTargetBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
+			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int indexOfView, unsigned int rtvSize,
+			const float* clearValue);
 
 		/**@brief Clears the MSAA depth stencil buffer with the specified clear value.
 		*/
 		void ClearDepthStencilBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
+			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvHeap, unsigned int indexOfView, unsigned int dsvSize,
 			float clearValue);
 
 	private:
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mMSAARTVDescriptorHeap;
+		RenderTargetBuffer mMSAARenderTargetBuffer;
+		DepthStencilBuffer mMSAADepthStencilBuffer;
+		unsigned int mSampleCount{ 0 };
+
+		/*Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mMSAARTVDescriptorHeap;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mMSAADSVDescriptorHeap;
 		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAARenderTargetBuffer;
-		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAADepthStencilBuffer;
+		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAADepthStencilBuffer;*/
 
 	};
 }

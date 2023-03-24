@@ -6,6 +6,7 @@
 #include <d2d1_3.h>
 #include <dwrite.h>
 #include <vector>
+#include "FABuffer.h"
 
 namespace FARender
 {
@@ -37,7 +38,7 @@ namespace FARender
 
 		/**@brief Resizes the buffers.
 		*/
-		void ResizeBuffers(const Microsoft::WRL::ComPtr<ID3D12Resource>* swapChainBuffers, HWND windowHandle);
+		void ResizeBuffers(const RenderTargetBuffer* renderTargetBuffers, HWND windowHandle);
 
 		/**@brief Prepares to render text.
 		*/

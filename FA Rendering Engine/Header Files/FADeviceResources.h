@@ -8,7 +8,6 @@
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include "FASwapChain.h"
-#include "FADepthStencil.h"
 #include "FAMultiSampling.h"
 #include "FATextResources.h"
 
@@ -48,7 +47,7 @@ namespace FARender
 
 		/**@brief Returns a constant reference to the depth stencil format.
 		*/
-		const DXGI_FORMAT& GetDepthStencilFormat() const;
+		DXGI_FORMAT GetDepthStencilFormat() const;
 
 		/**@brief The size of a constant buffer view.
 		*/
@@ -122,7 +121,7 @@ namespace FARender
 		*/
 		void Draw();
 
-		/**@brief Update our current frame value to go to the next frame.
+		/**@brief Updates the current frame value to go to the next frame.
 		*/
 		void NextFrame();
 
@@ -160,20 +159,16 @@ namespace FARender
 		UINT mDSVSize;
 		UINT mCBVSize;
 
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRTVHeap;
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDSVHeap;
+
 		SwapChain mSwapChain;
-		DepthStencil mDepthStencil;
+
+		bool mIsMSAAEnabled{ false };
+		MultiSampling mMultiSampling;
 
 		D3D12_VIEWPORT mViewport{};
 		D3D12_RECT mScissor{};
-
-		MultiSampling mMultiSampling;
-
-		bool mIsMSAAEnabled{ false };
-		/*bool mMSAA4xSupported = false;
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mMSAARTVDescriptorHeap;
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mMSAADSVDescriptorHeap;
-		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAARenderTargetBuffer;
-		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAADepthStencilBuffer;*/
 
 		TextResources mTextResources;
 
@@ -183,17 +178,8 @@ namespace FARender
 		void mCreateDXGIFactory();
 		void mCreateFence();
 		void mQueryDescriptorSizes();
+		void mCreateRTVHeap();
+		void mCreateDSVHeap();
 		void mCreateCommandObjects();
-
-		//if MSAA is supported, creates a MSAA RTV and DSV heap.
-		/*void mCheckMSAASupport();
-		void mCreateMSAARTVHeap();
-		void mCreateMSAADSVHeap();
-
-		//These functions are for creating a MSAA render target buffer, MSAA depth/stencil buffer, 
-		//MSAA render target view, and a MSAA depth/stencil view.
-		//They are called in the resize function.
-		void mCreateMSAARenderTargetBufferAndView(int width, int height);
-		void mCreateMSAADepthStencilBufferAndView(int width, int height);*/
 	};
 }

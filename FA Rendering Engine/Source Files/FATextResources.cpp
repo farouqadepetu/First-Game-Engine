@@ -69,7 +69,7 @@ namespace FARender
 		mDevice11Context->Flush();
 	}
 
-	void TextResources::ResizeBuffers(const Microsoft::WRL::ComPtr<ID3D12Resource>* swapChainBuffers, HWND windowHandle)
+	void TextResources::ResizeBuffers(const RenderTargetBuffer* renderTargetBuffers, HWND windowHandle)
 	{
 		int numBuffers = (int)mWrappedBuffers.size();
 
@@ -81,7 +81,8 @@ namespace FARender
 		//creates a wrapped resource to each of our swap chain buffers
 		for (int i = 0; i < numBuffers; ++i)
 		{
-			ThrowIfFailed(mDevice11on12->CreateWrappedResource(swapChainBuffers[i].Get(), &direct11ResourceFlags,
+			ThrowIfFailed(mDevice11on12->CreateWrappedResource(renderTargetBuffers[i].GetRenderTargetBuffer().Get(), 
+				&direct11ResourceFlags,
 				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, IID_PPV_ARGS(mWrappedBuffers[i].GetAddressOf())));
 		}
 		//-----------------------------------------------------------------------------------------------------------------------------

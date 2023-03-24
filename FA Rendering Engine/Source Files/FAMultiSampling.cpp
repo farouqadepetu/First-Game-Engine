@@ -4,81 +4,67 @@
 namespace FARender
 {
 	MultiSampling::MultiSampling(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-		DXGI_FORMAT format, unsigned int sampleCount)
+		DXGI_FORMAT rtFormat, DXGI_FORMAT dsFormat, unsigned int sampleCount) :
+		mMSAARenderTargetBuffer{ rtFormat }, mMSAADepthStencilBuffer{ dsFormat }
 	{
-		//Describes the format and sample count we want to check to see if it is supported.
+		//Describes the render target format and sample count we want to check to see if it is supported.
 		D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS levels{};
-		levels.Format = format;
+		levels.Format = rtFormat;
 		levels.SampleCount = sampleCount;
 
 		ThrowIfFailed(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
 			&levels, sizeof(levels)));
 
-		//The speicifed format and sample count is supported by the GPU.
+		//The speicifed render target format and sample count is supported by the GPU.
 		if (levels.NumQualityLevels > 0)
-		{
-			//Create the MSAA render target view heap
-			D3D12_DESCRIPTOR_HEAP_DESC msaaRTVHeapDescription{};
-			msaaRTVHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-			msaaRTVHeapDescription.NumDescriptors = 1;
-			msaaRTVHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-			msaaRTVHeapDescription.NodeMask = 0;
-			ThrowIfFailed(device->CreateDescriptorHeap(&msaaRTVHeapDescription,
-				IID_PPV_ARGS(&mMSAARTVDescriptorHeap)));
-
-			//Create the MSAA depth stencil view heap
-			D3D12_DESCRIPTOR_HEAP_DESC msaaDSVHeapDescription{};
-			msaaDSVHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-			msaaDSVHeapDescription.NumDescriptors = 1;
-			msaaDSVHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-			msaaDSVHeapDescription.NodeMask = 0;
-			ThrowIfFailed(device->CreateDescriptorHeap(&msaaDSVHeapDescription,
-				IID_PPV_ARGS(&mMSAADSVDescriptorHeap)));
-		}
+			mSampleCount = sampleCount;
 		else
 			throw std::runtime_error("The specified format and/or sample count is not supported by the Direct3D 12 device");
 	}
 
 	const Microsoft::WRL::ComPtr<ID3D12Resource>& MultiSampling::GetRenderTargetBuffer()
 	{
-		return mMSAARenderTargetBuffer;
+		return mMSAARenderTargetBuffer.GetRenderTargetBuffer();
 	}
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE MultiSampling::GetRenderTargetBufferView() const
+	DXGI_FORMAT MultiSampling::GetRenderTargetFormat()
 	{
-		return CD3DX12_CPU_DESCRIPTOR_HANDLE(mMSAARTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-			
+		return mMSAARenderTargetBuffer.GetRenderTargetFormat();
 	}
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE MultiSampling::GetDepthStencilBufferView() const
+	DXGI_FORMAT MultiSampling::GetDepthStencilFormat()
 	{
-		return CD3DX12_CPU_DESCRIPTOR_HANDLE(mMSAADSVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		return mMSAADepthStencilBuffer.GetDepthStencilFormat();
 	}
 
 	void MultiSampling::ResetBuffers()
 	{
-		mMSAARenderTargetBuffer.Reset();
-		mMSAADepthStencilBuffer.Reset();
+		mMSAARenderTargetBuffer.ResetBuffer();
+		mMSAADepthStencilBuffer.ResetBuffer();
 	}
 
-	void MultiSampling::CreateRenderTargetBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device, 
-		DXGI_FORMAT format, unsigned int width, unsigned int height)
+	void MultiSampling::CreateRenderTargetBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int indexOfWhereToStoreView, unsigned int rtvSize,
+		unsigned int width, unsigned int height)
 	{
-		D3D12_RESOURCE_DESC mMSAARenderTargetBufferDesc{};
+		mMSAARenderTargetBuffer.CreateRenderTargetBufferAndView(device, rtvHeap, indexOfWhereToStoreView, rtvSize, 
+			width, height, mSampleCount);
+
+		/*D3D12_RESOURCE_DESC mMSAARenderTargetBufferDesc{};
 		mMSAARenderTargetBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		mMSAARenderTargetBufferDesc.Alignment = 0;
 		mMSAARenderTargetBufferDesc.Width = width;
 		mMSAARenderTargetBufferDesc.Height = height;
 		mMSAARenderTargetBufferDesc.DepthOrArraySize = 1;
 		mMSAARenderTargetBufferDesc.MipLevels = 1;
-		mMSAARenderTargetBufferDesc.Format = format;
+		mMSAARenderTargetBufferDesc.Format = mMSAAFormat;
 		mMSAARenderTargetBufferDesc.SampleDesc.Count = 4;
 		mMSAARenderTargetBufferDesc.SampleDesc.Quality = 0;
 		mMSAARenderTargetBufferDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		mMSAARenderTargetBufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
 		D3D12_CLEAR_VALUE msaaRTBufferClearValue{};
-		msaaRTBufferClearValue.Format = format;
+		msaaRTBufferClearValue.Format = mMSAAFormat;
 		msaaRTBufferClearValue.Color[0] = 0.0f;
 		msaaRTBufferClearValue.Color[1] = 0.0f;
 		msaaRTBufferClearValue.Color[2] = 0.0f;
@@ -89,17 +75,23 @@ namespace FARender
 
 		//Create the RT buffer resouce
 		ThrowIfFailed(device->CreateCommittedResource(&msaaRTHeapProp, D3D12_HEAP_FLAG_NONE, &mMSAARenderTargetBufferDesc,
-			D3D12_RESOURCE_STATE_RESOLVE_SOURCE, &msaaRTBufferClearValue, IID_PPV_ARGS(&mMSAARenderTargetBuffer)));
+			D3D12_RESOURCE_STATE_RESOLVE_SOURCE, &msaaRTBufferClearValue, IID_PPV_ARGS(&mMSAARenderTargetBuffer.GetRenderTargetBuffer())));
+
+		//Get the address of where you want to store the view in the RTV heap.
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), indexOfWhereToStoreView, rtvSize);
 
 		//Create the RTV
-		device->CreateRenderTargetView(mMSAARenderTargetBuffer.Get(), nullptr,
-			mMSAARTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		device->CreateRenderTargetView(mMSAARenderTargetBuffer.GetRenderTargetBuffer().Get(), nullptr, rtvHeapHandle);*/
 	}
 
 	void MultiSampling::CreateDepthStencilBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-		DXGI_FORMAT format, unsigned int width, unsigned int height)
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvHeap, unsigned int indexOfWhereToStoreView, unsigned int dsvSize,
+		unsigned int width, unsigned int height)
 	{
-		D3D12_RESOURCE_DESC mMSAADepthStencilBufferDesc{};
+		mMSAADepthStencilBuffer.CreateDepthStencilBufferAndView(device, dsvHeap, indexOfWhereToStoreView, dsvSize, 
+			width, height, mSampleCount);
+
+		/*D3D12_RESOURCE_DESC mMSAADepthStencilBufferDesc{};
 		mMSAADepthStencilBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		mMSAADepthStencilBufferDesc.Alignment = 0;
 		mMSAADepthStencilBufferDesc.Width = width;
@@ -132,32 +124,31 @@ namespace FARender
 
 		//Create the msaa DSV
 		device->CreateDepthStencilView(mMSAADepthStencilBuffer.Get(), &dsViewDescription,
-			mMSAADSVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+			mMSAADSVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());*/
 	}
 
 	void MultiSampling::Transition(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
 		D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
 	{
 		CD3DX12_RESOURCE_BARRIER renderTargetBufferTransition =
-			CD3DX12_RESOURCE_BARRIER::Transition(mMSAARenderTargetBuffer.Get(),
+			CD3DX12_RESOURCE_BARRIER::Transition(mMSAARenderTargetBuffer.GetRenderTargetBuffer().Get(),
 				before, after);
 
 		commandList->ResourceBarrier(1, &renderTargetBufferTransition);
 	}
 
-	void MultiSampling::ClearRenderTargetBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, 
+	void MultiSampling::ClearRenderTargetBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int indexOfView, unsigned int rtvSize,
 		const float* clearValue)
 	{
-		commandList->ClearRenderTargetView(mMSAARTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-			clearValue, 0, nullptr);
+		mMSAARenderTargetBuffer.ClearRenderTargetBuffer(commandList, rtvHeap, indexOfView, rtvSize, clearValue);
 	}
 
 	void MultiSampling::ClearDepthStencilBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvHeap, unsigned int indexOfView, unsigned int dsvSize,
 		float clearValue)
 	{
-		//clear the msaa DS buffer
-		commandList->ClearDepthStencilView(mMSAADSVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-			D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, clearValue, 0, 0, nullptr);
+		mMSAADepthStencilBuffer.ClearDepthStencilBuffer(commandList, dsvHeap, indexOfView, dsvSize, clearValue);
 	}
 
 }
