@@ -306,6 +306,18 @@ namespace FARender
 		*/
 		void CopyData(UINT index, UINT byteSize, const void* data, UINT64 numOfBytes);
 
+		/**@brief Returns true if MSAA is enabled, false otherwise.
+		*/
+		bool IsMSAAEnabled() const;
+
+		/**@brief Disables MSAA.
+		*/
+		void DisableMSAA(unsigned int width, unsigned int height, HWND windowHandle);
+
+		/**@brief Enables MSAA.
+		*/
+		void EnableMSAA(unsigned int width, unsigned int height, HWND windowHandle);
+
 	private:
 
 		//The device resources object that all RenderScene objects share.

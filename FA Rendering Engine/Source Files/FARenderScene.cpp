@@ -492,5 +492,21 @@ namespace FARender
 	{
 		mConstantBuffer[mDeviceResources.GetCurrentFrame()].CopyData(index, byteSize, data, numOfBytes);
 	}
+
+	bool RenderScene::IsMSAAEnabled() const
+	{
+		return mDeviceResources.IsMSAAEnabled();
+	}
+
+	void RenderScene::DisableMSAA(unsigned int width, unsigned int height, HWND windowHandle)
+	{
+		mDeviceResources.DisableMSAA(width, height, windowHandle);
+	}
+
+	void RenderScene::EnableMSAA(unsigned int width, unsigned int height, HWND windowHandle)
+	{
+		mDeviceResources.EnableMSAA(width, height, windowHandle);
+	}
+
 	//-----------------------------------------------------------------------------------------------------------------------
 }

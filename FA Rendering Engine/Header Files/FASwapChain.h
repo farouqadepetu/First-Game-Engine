@@ -8,7 +8,7 @@
 namespace FARender
 {
 	/** @class SwapChain ""
-	*	@brief A wrapper for swap chain resources. Uses DirectD 12 and DXGI.
+	*	@brief A wrapper for swap chain resources. Uses DirectD 12 API and DXGI API.
 	*/
 	class SwapChain
 	{

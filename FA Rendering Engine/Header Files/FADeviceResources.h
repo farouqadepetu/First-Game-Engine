@@ -7,9 +7,10 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
-#include "FATextResources.h"
 #include "FASwapChain.h"
 #include "FADepthStencil.h"
+#include "FAMultiSampling.h"
+#include "FATextResources.h"
 
 namespace FARender
 {
@@ -67,11 +68,11 @@ namespace FARender
 
 		/**@brief Disables MSAA.
 		*/
-		void DisableMSAA();
+		void DisableMSAA(unsigned int width, unsigned int height, HWND windowHandle);
 
 		/**@brief Enables MSAA.
 		*/
-		void EnableMSAA();
+		void EnableMSAA(unsigned int width, unsigned int height, HWND windowHandle);
 
 		/**@brief Updates the current frames fence value.
 		*/
@@ -165,12 +166,14 @@ namespace FARender
 		D3D12_VIEWPORT mViewport{};
 		D3D12_RECT mScissor{};
 
-		bool mMSAA4xSupported = false;
-		bool mIsMSAAEnabled = false;
+		MultiSampling mMultiSampling;
+
+		bool mIsMSAAEnabled{ false };
+		/*bool mMSAA4xSupported = false;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mMSAARTVDescriptorHeap;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mMSAADSVDescriptorHeap;
 		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAARenderTargetBuffer;
-		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAADepthStencilBuffer;
+		Microsoft::WRL::ComPtr<ID3D12Resource> mMSAADepthStencilBuffer;*/
 
 		TextResources mTextResources;
 
@@ -183,7 +186,7 @@ namespace FARender
 		void mCreateCommandObjects();
 
 		//if MSAA is supported, creates a MSAA RTV and DSV heap.
-		void mCheckMSAASupport();
+		/*void mCheckMSAASupport();
 		void mCreateMSAARTVHeap();
 		void mCreateMSAADSVHeap();
 
@@ -191,6 +194,6 @@ namespace FARender
 		//MSAA render target view, and a MSAA depth/stencil view.
 		//They are called in the resize function.
 		void mCreateMSAARenderTargetBufferAndView(int width, int height);
-		void mCreateMSAADepthStencilBufferAndView(int width, int height);
+		void mCreateMSAADepthStencilBufferAndView(int width, int height);*/
 	};
 }
