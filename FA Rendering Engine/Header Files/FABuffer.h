@@ -70,7 +70,7 @@ namespace FARender
 	};
 
 	/** @class ConstantBuffer ""
-	*	@brief This class stores constant data in a Direct3D 12 upload buffers.
+	*	@brief This class stores constant data in a Direct3D 12 upload buffer.
 	*
 	*/
 	class ConstantBuffer

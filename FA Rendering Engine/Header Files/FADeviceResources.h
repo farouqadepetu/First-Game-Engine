@@ -9,6 +9,7 @@
 #include <dxgi1_4.h>
 #include "FATextResources.h"
 #include "FASwapChain.h"
+#include "FADepthStencil.h"
 
 namespace FARender
 {
@@ -62,7 +63,7 @@ namespace FARender
 
 		/**@brief Returns true if MSAA is enabled, false otherwise.
 		*/
-		bool IsMSAAEnabled();
+		bool IsMSAAEnabled() const;
 
 		/**@brief Disables MSAA.
 		*/
@@ -154,15 +155,12 @@ namespace FARender
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCommandAllocator;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;
 
-		SwapChain mSwapChain;
-
-		Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer;
-		DXGI_FORMAT mDepthStencilFormat{ DXGI_FORMAT_D24_UNORM_S8_UINT };
-
 		UINT mRTVSize;
 		UINT mDSVSize;
 		UINT mCBVSize;
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDSVHeap;
+
+		SwapChain mSwapChain;
+		DepthStencil mDepthStencil;
 
 		D3D12_VIEWPORT mViewport{};
 		D3D12_RECT mScissor{};
@@ -184,14 +182,10 @@ namespace FARender
 		void mQueryDescriptorSizes();
 		void mCreateCommandObjects();
 
-		void mCreateDSVHeap();
-
 		//if MSAA is supported, creates a MSAA RTV and DSV heap.
 		void mCheckMSAASupport();
 		void mCreateMSAARTVHeap();
 		void mCreateMSAADSVHeap();
-
-		void mCreateDepthStencilBufferAndView(int width, int height);
 
 		//These functions are for creating a MSAA render target buffer, MSAA depth/stencil buffer, 
 		//MSAA render target view, and a MSAA depth/stencil view.
