@@ -7,15 +7,17 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//DEVICE RESOURCES FUNCTION DEFINITIONS
 
-	DeviceResources& DeviceResources::GetInstance(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames)
+	DeviceResources& DeviceResources::GetInstance(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames,
+		bool isMSAAEnabled, bool isTextEnabled)
 	{
-		static DeviceResources instance(width, height, windowHandle, numFrames);
+		static DeviceResources instance(width, height, windowHandle, numFrames, isMSAAEnabled, isTextEnabled);
 
 		return instance;
 	}
 
-	DeviceResources::DeviceResources(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames) :
-		mNumFrames{ numFrames }, mCurrentFrameIndex{ 0 }, mFenceValue{ 0 }, mIsMSAAEnabled{ false }, mIsTextEnabled{ false }
+	DeviceResources::DeviceResources(unsigned int width, unsigned int height, HWND windowHandle, 
+		unsigned int numFrames, bool isMSAAEnabled, bool isTextEnabled) :
+		mNumFrames{ numFrames }, mCurrentFrameIndex{ 0 }, mFenceValue{ 0 }
 	{
 		mEnableDebugLayer();
 		mCreateDirect3DDevice();
@@ -35,7 +37,7 @@ namespace FARender
 		mMultiSampling = MultiSampling(mDirect3DDevice, mSwapChain.GetBackBufferFormat(), mSwapChain.GetDepthStencilFormat(), 4);
 		mTextResources = TextResources(mDirect3DDevice, mCommandQueue, mSwapChain.GetNumRenderTargetBuffers());
 
-		Resize(width, height, windowHandle);
+		Resize(width, height, windowHandle, isMSAAEnabled, isTextEnabled);
 		mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr);
 	}
 
@@ -83,40 +85,6 @@ namespace FARender
 	const TextResources& DeviceResources::GetTextResources() const
 	{
 		return mTextResources;
-	}
-
-	bool DeviceResources::IsMSAAEnabled() const
-	{
-		return mIsMSAAEnabled;
-	}
-
-	void DeviceResources::DisableMSAA(unsigned int width, unsigned int height, HWND windowHandle)
-	{
-		Resize(width, height, windowHandle);
-		mIsMSAAEnabled = false;
-	}
-
-	void DeviceResources::EnableMSAA(unsigned int width, unsigned int height, HWND windowHandle)
-	{
-		mIsMSAAEnabled = true;
-		Resize(width, height, windowHandle);
-	}
-
-	bool DeviceResources::IsTextEnabled() const
-	{
-		return mIsTextEnabled;
-	}
-
-	void DeviceResources::DisableText(unsigned int width, unsigned int height, HWND windowHandle)
-	{
-		Resize(width, height, windowHandle);
-		mIsTextEnabled = false;
-	}
-
-	void DeviceResources::EnableText(unsigned int width, unsigned int height, HWND windowHandle)
-	{
-		mIsTextEnabled = true;
-		Resize(width, height, windowHandle);
 	}
 
 	void DeviceResources::UpdateCurrentFrameFenceValue()
@@ -269,7 +237,7 @@ namespace FARender
 		mCommandQueue->Signal(mFence.Get(), mFenceValue);
 	}
 
-	void DeviceResources::Resize(int width, int height, const HWND& windowHandle)
+	void DeviceResources::Resize(int width, int height, const HWND& windowHandle, bool isMSAAEnabled, bool isTextEnabled)
 	{
 		//make sure all of the commands in the command list have been executed before adding new commands.
 		FlushCommandQueue();
@@ -277,15 +245,14 @@ namespace FARender
 		//reset the command list to add new commands
 		ThrowIfFailed(mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr));
 
-		if(mIsTextEnabled)
-			mTextResources.ResetBuffers();
+		//Reset text buffers.
+		mTextResources.ResetBuffers();
 
 		//Reset/Release all buffers that have a reference to the swap chain.
 		mSwapChain.ResetBuffers();
 
 		//reset MSAA buffers
-		if (mIsMSAAEnabled)
-			mMultiSampling.ResetBuffers();
+		mMultiSampling.ResetBuffers();
 		
 		//Resize the swap chain buffers.
 		mSwapChain.ResizeSwapChain(width, height);
@@ -296,13 +263,13 @@ namespace FARender
 		//Create the swap chains depth stencil buffer and a view to it.
 		mSwapChain.CreateDepthStencilBufferAndView(mDirect3DDevice, mDSVHeap, 0, mDSVSize, width, height);
 
-		if (mIsMSAAEnabled)
+		if (isMSAAEnabled)
 		{
 			mMultiSampling.CreateRenderTargetBufferAndView(mDirect3DDevice, mRTVHeap, 2, mRTVSize, width, height);
 			mMultiSampling.CreateDepthStencilBufferAndView(mDirect3DDevice, mDSVHeap, 1, mDSVSize, width, height);
 		}
 
-		if (mIsTextEnabled)
+		if (isTextEnabled)
 			mTextResources.ResizeBuffers(mSwapChain.GetRenderTargetBuffers(), windowHandle);
 
 		//Close the command list.
@@ -342,7 +309,7 @@ namespace FARender
 		mSwapChain.Present();
 	}
 
-	void DeviceResources::Draw()
+	void DeviceResources::Draw(bool isMSAAEnabled)
 	{
 		//Reseting command allocator allows us to reuse the memory.
 		//Make sure all the commands in the command list is executed before calling this.
@@ -357,7 +324,7 @@ namespace FARender
 		//Link scissor rectangle to the rasterization stage
 		mCommandList->RSSetScissorRects(1, &mScissor);
 
-		if (mIsMSAAEnabled)
+		if (isMSAAEnabled)
 		{
 			//Transistion the current back buffer to resolve dest state from present state
 			mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RESOLVE_DEST);
@@ -413,9 +380,9 @@ namespace FARender
 		mCurrentFrameIndex = (mCurrentFrameIndex + 1) % mNumFrames;
 	}
 
-	void DeviceResources::RTBufferTransition()
+	void DeviceResources::RTBufferTransition(bool isMSAAEnabled, bool isTextEnabled)
 	{
-		if (mIsMSAAEnabled)
+		if (isMSAAEnabled)
 		{
 			//Transistion the msaa RT buffer to resolve source state from render target state
 			mMultiSampling.Transition(mCommandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
@@ -424,7 +391,7 @@ namespace FARender
 			mCommandList->ResolveSubresource(mSwapChain.GetCurrentBackBuffer().Get(), 0, 
 				mMultiSampling.GetRenderTargetBuffer().Get(), 0, mSwapChain.GetBackBufferFormat());
 
-			if (mIsTextEnabled)
+			if (isTextEnabled)
 			{
 				//Transistion the current back buffer to render target state from resolve dest state
 				mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -437,7 +404,7 @@ namespace FARender
 		}
 		else
 		{
-			if (!mIsTextEnabled)
+			if (!isTextEnabled)
 			{
 				//Transistion the current back buffer to present state from render target state
 				mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -447,14 +414,12 @@ namespace FARender
 
 	void DeviceResources::BeforeTextDraw()
 	{
-		if(mIsTextEnabled)
-			mTextResources.BeforeRenderText(mSwapChain.GetCurrentBackBufferIndex());
+		mTextResources.BeforeRenderText(mSwapChain.GetCurrentBackBufferIndex());
 	}
 
 	void DeviceResources::AfterTextDraw()
 	{
-		if(mIsTextEnabled)
-			mTextResources.AfterRenderText(mSwapChain.GetCurrentBackBufferIndex());
+		mTextResources.AfterRenderText(mSwapChain.GetCurrentBackBufferIndex());
 	}
 	//-----------------------------------------------------------------------------------------------------------------------
 }

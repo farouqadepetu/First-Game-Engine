@@ -8,8 +8,10 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//RENDER SCENE FUNCITON DEFINTIONS
 
-	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND windowHandle) : 
-		mDeviceResources{ DeviceResources::GetInstance(width, height, windowHandle, NUM_OF_FRAMES) }
+	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND windowHandle) :
+		mIsMSAAEnabled{ false }, mIsTextEnabled{ false },
+		mDeviceResources{ DeviceResources::GetInstance(width, height, windowHandle, NUM_OF_FRAMES, mIsMSAAEnabled, mIsTextEnabled) }
+
 	{
 		mCamera.SetAspectRatio((float)width / height);
 	}
@@ -370,7 +372,7 @@ namespace FARender
 
 	void RenderScene::BeforeDrawObjects()
 	{
-		mDeviceResources.Draw();
+		mDeviceResources.Draw(mIsMSAAEnabled);
 
 		//Link the CBV descriptor heaps to the pipeline
 		ID3D12DescriptorHeap* dH[] = { mCBVHeap.Get() };
@@ -410,19 +412,20 @@ namespace FARender
 
 	void RenderScene::AfterDrawObjects()
 	{
-		mDeviceResources.RTBufferTransition();
+		mDeviceResources.RTBufferTransition(mIsMSAAEnabled, mIsTextEnabled);
 
 		mDeviceResources.Execute();
 	}
 
 	void RenderScene::BeforeDrawText()
 	{
-		mDeviceResources.BeforeTextDraw();
+		if(mIsTextEnabled)
+			mDeviceResources.BeforeTextDraw();
 	}
 
 	void RenderScene::RenderText(unsigned int textIndex)
 	{
-		if (mDeviceResources.IsTextEnabled())
+		if (mIsTextEnabled)
 		{
 			Text* textToRender{ &mTexts.at(textIndex) };
 
@@ -459,7 +462,8 @@ namespace FARender
 
 	void RenderScene::AfterDrawText()
 	{
-		mDeviceResources.AfterTextDraw();
+		if (mIsTextEnabled)
+			mDeviceResources.AfterTextDraw();
 	}
 
 	void RenderScene::AfterDraw()
@@ -487,7 +491,7 @@ namespace FARender
 
 	void RenderScene::Resize(unsigned int width, unsigned int height, HWND windowHandle)
 	{
-		mDeviceResources.Resize(width, height, windowHandle);
+		mDeviceResources.Resize(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled);
 
 		mCamera.SetAspectRatio((float)width / height);
 	}
@@ -499,32 +503,36 @@ namespace FARender
 
 	bool RenderScene::IsMSAAEnabled() const
 	{
-		return mDeviceResources.IsMSAAEnabled();
+		return mIsMSAAEnabled;
 	}
 
 	void RenderScene::DisableMSAA(unsigned int width, unsigned int height, HWND windowHandle)
 	{
-		mDeviceResources.DisableMSAA(width, height, windowHandle);
+		mIsMSAAEnabled = false;
+		mDeviceResources.Resize(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled);
 	}
 
 	void RenderScene::EnableMSAA(unsigned int width, unsigned int height, HWND windowHandle)
 	{
-		mDeviceResources.EnableMSAA(width, height, windowHandle);
+		mIsMSAAEnabled = true;
+		mDeviceResources.Resize(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled);
 	}
 
 	bool RenderScene::IsTextEnabled() const
 	{
-		return mDeviceResources.IsTextEnabled();
+		return mIsTextEnabled;
 	}
 
 	void RenderScene::DisableText(unsigned int width, unsigned int height, HWND windowHandle)
 	{
-		mDeviceResources.DisableText(width, height, windowHandle);
+		mIsTextEnabled = false;
+		mDeviceResources.Resize(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled);
 	}
 
 	void RenderScene::EnableText(unsigned int width, unsigned int height, HWND windowHandle)
 	{
-		mDeviceResources.EnableText(width, height, windowHandle);
+		mIsTextEnabled = true;
+		mDeviceResources.Resize(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled);
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------

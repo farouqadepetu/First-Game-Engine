@@ -23,7 +23,8 @@ namespace FARender
 		/**@brief Call to make an object of DeviceResources.
 		* This only allows one instance to exist.
 		*/
-		static DeviceResources& GetInstance(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames);
+		static DeviceResources& GetInstance(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames,
+			bool isMSAAEnabled, bool isTextEnabled);
 
 		DeviceResources(const DeviceResources&) = delete;
 		DeviceResources& operator=(const DeviceResources&) = delete;
@@ -64,30 +65,6 @@ namespace FARender
 		*/
 		const TextResources& GetTextResources() const;
 
-		/**@brief Returns true if MSAA is enabled, false otherwise.
-		*/
-		bool IsMSAAEnabled() const;
-
-		/**@brief Disables MSAA.
-		*/
-		void DisableMSAA(unsigned int width, unsigned int height, HWND windowHandle);
-
-		/**@brief Enables MSAA.
-		*/
-		void EnableMSAA(unsigned int width, unsigned int height, HWND windowHandle);
-
-		/**@brief Returns true if text is enabled, false otherwise.
-		*/
-		bool IsTextEnabled() const;
-
-		/**@brief Disables text.
-		*/
-		void DisableText(unsigned int width, unsigned int height, HWND windowHandle);
-
-		/**@brief Enables text.
-		*/
-		void EnableText(unsigned int width, unsigned int height, HWND windowHandle);
-
 		/**@brief Updates the current frames fence value.
 		*/
 		void UpdateCurrentFrameFenceValue();
@@ -110,11 +87,11 @@ namespace FARender
 		/**@brief Call when the window gets resized.
 		*	Call when you initialize your program.
 		*/
-		void Resize(int width, int height, const HWND& handle);
+		void Resize(int width, int height, const HWND& handle, bool isMSAAEnabled, bool isTextEnabled);
 
 		/**@brief Transistions the render target buffer.
 		*/
-		void RTBufferTransition();
+		void RTBufferTransition(bool isMSAAEnabled, bool isTextEnabled);
 
 		/**@brief Prepares to render text.
 		*/
@@ -134,7 +111,7 @@ namespace FARender
 
 		/*@brief Calls the necessary functions to let the user draw their objects.
 		*/
-		void Draw();
+		void Draw(bool isMSAAEnabled);
 
 		/**@brief Updates the current frame value to go to the next frame.
 		*/
@@ -153,7 +130,8 @@ namespace FARender
 		* Creates a render target view and a depth/stencil view heap.
 		* Creates the initial render target buffers, depth stencil buffer, MSAA buffers and text buffers.
 		*/
-		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames);
+		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames,
+			bool isMSAAEnabled, bool isTextEnabled);
 
 		unsigned int mNumFrames;
 		unsigned int mCurrentFrameIndex;
@@ -180,13 +158,11 @@ namespace FARender
 
 		SwapChain mSwapChain;
 
-		bool mIsMSAAEnabled;
 		MultiSampling mMultiSampling;
 
 		D3D12_VIEWPORT mViewport{};
 		D3D12_RECT mScissor{};
 
-		bool mIsTextEnabled;
 		TextResources mTextResources;
 
 		//Call all of these functions to initialize Direct3D

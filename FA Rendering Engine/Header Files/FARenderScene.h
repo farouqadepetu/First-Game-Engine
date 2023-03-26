@@ -22,7 +22,7 @@ namespace FARender
 	{
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState;
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSig;
-		D3D_PRIMITIVE_TOPOLOGY prim;
+		D3D_PRIMITIVE_TOPOLOGY prim{ D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST };
 		std::vector<FAShapes::DrawArguments> drawArgs;
 	};
 
@@ -299,6 +299,9 @@ namespace FARender
 	private:
 
 		static const unsigned int NUM_OF_FRAMES{ 3 };
+
+		bool mIsMSAAEnabled;
+		bool mIsTextEnabled;
 
 		//The device resources object that all RenderScene objects share.
 		DeviceResources& mDeviceResources;
