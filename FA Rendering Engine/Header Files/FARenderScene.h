@@ -22,7 +22,7 @@ namespace FARender
 	{
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState;
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSig;
-		D3D_PRIMITIVE_TOPOLOGY prim = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		D3D_PRIMITIVE_TOPOLOGY prim;
 		std::vector<FAShapes::DrawArguments> drawArgs;
 	};
 
@@ -43,45 +43,17 @@ namespace FARender
 		*/
 		const DeviceResources& GetDeviceResources() const;
 
-		/*@brief Returns a constant reference to the shader with the specified name.
-		* Throws an out_of_range exception if the shader does not exist.
+		/*@brief Returns a reference to the specified DrawArguments structure in the specified DrawSettings structure.
+		* Throws an out_of_range exception if the index to DrawSettings structure or index to the DrawArguments structure
+		* is out of bounds.
 		*/
-		const Microsoft::WRL::ComPtr<ID3DBlob>& GetShader(const std::wstring& name) const;
-
-		/*@brief Returns a constant reference to the specified array of input element layout descriptions.
-		* Throws an out_of_range exception if the array of input element layout descriptions does not exist.
-		*/
-		const std::vector<D3D12_INPUT_ELEMENT_DESC>& GetInputElementLayout(const std::wstring& name) const;
-
-		/*@brief Returns a constant reference to the specified rasterization description.
-		* Throws an out_of_range exception if the rasterization description does not exist.
-		*/
-		const D3D12_RASTERIZER_DESC& GetRasterizationState(const std::wstring& name) const;
-
-		/*@brief Returns a constant reference to the PSO in the specified DrawSettings.
-		* Throws an out_of_range exception if the DrawSettings does not exist.
-		*/
-		const Microsoft::WRL::ComPtr<ID3D12PipelineState>& GetPSO(const std::wstring& drawSettingsName) const;
-
-		/*@brief Returns a constant reference to the root signature in the specified DrawSettings structure.
-		* Throws an out_of_range exception if the DrawSettings does not exist.
-		*/
-		const Microsoft::WRL::ComPtr<ID3D12RootSignature>& GetRootSignature(const std::wstring& drawSettingsName) const;
-
-		/*@brief Returns a constant reference to the primitive in the specified DrawSettings structure.
-		* Throws an out_of_range exception if the DrawSettings does not exist.
-		*/
-		const D3D_PRIMITIVE_TOPOLOGY& GetPrimitive(const std::wstring& drawSettingsName) const;
-
-		/*@brief Returns a reference to the specified DrawArguments object in the specified DrawSettings structure.
-		* Throws an out_of_range exception if the DrawSettings does not exist or if the index is out of range.
-		*/
-		FAShapes::DrawArguments& GetDrawArguments(const std::wstring& drawSettingsName, unsigned int index);
+		FAShapes::DrawArguments& GetDrawArguments(unsigned int drawSettingsIndex, unsigned int drawArgsIndex);
 
 		/*@brief Returns a constant reference to the specified DrawArguments object in the specified DrawSettings structure.
-		* Throws an out_of_range exception if the DrawSettings does not exist or if the index is out of range.
+		* Throws an out_of_range exception if the index to DrawSettings structure or index to the DrawArguments structure
+		* is out of bounds.
 		*/
-		const FAShapes::DrawArguments& GetDrawArguments(const std::wstring& drawSettingsName, unsigned int index) const;
+		const FAShapes::DrawArguments& GetDrawArguments(unsigned int drawSettingsIndex, unsigned int drawArgsIndex) const;
 
 		/*@brief Returns a reference to the this scene's camera;
 		*/
@@ -92,59 +64,52 @@ namespace FARender
 		const FACamera::Camera& GetCamera() const;
 
 		/*@brief Returns a reference to the specified Text object.
-		* If the Text object does not exist an out_of_range exception is thrown.
+		* If the index of the Text object is out of bounds an out_of_range exception is thrown.
 		*/
-		FARender::Text& GetText(std::wstring textName);
+		FARender::Text& GetText(unsigned int textIndex);
 
 		/*@brief Returns a constant reference to the specified Text object.
-		* If the Text object does not exist an out_of_range exception is thrown.
+		* If the index of the Text object is out of bounds an out_of_range exception is thrown.
 		*/
-		const FARender::Text& GetText(std::wstring textName) const;
+		const FARender::Text& GetText(unsigned int textIndex) const;
 
-		/*@brief Loads a shader's bytecode and stores it with the specified name.
+		/*@brief Loads a shader's bytecode and stores it.
 		*/
-		void LoadShader(const std::wstring& filename, const std::wstring& name);
+		void LoadShader(const std::wstring& filename);
 
-		/*@brief Removes the specified shader.
-		* If the specified shader does not exist an out_of_range exception is thrown.
+		/*@brief Loads a shaders file, compiles it into bytecode and stores the bytecode.
 		*/
-		void RemoveShader(const std::wstring& shaderName);
+		void LoadShaderAndCompile(const std::wstring& filename, const std::string& entryPointName, const std::string& target);
 
-		/*@brief Stores an array of input element descriptions with the specified name.
+		/*@brief Removes the Shader structue at the specified index.
+		* If the index to the specifed Shader structure is out of bounds, an out_of_range exception is thrown.
 		*/
-		void StoreInputElementDescriptions(const std::wstring& name, const std::vector<D3D12_INPUT_ELEMENT_DESC>& inputElementLayout);
+		void RemoveShader(unsigned int index);
 
-		/*@brief Stores an array of input element descriptions with the specified name.
+		/*@brief Creates an input element description and stores it.
 		*/
-		void StoreInputElementDescriptions(const std::wstring& name, const D3D12_INPUT_ELEMENT_DESC* inputElementLayout, 
-			UINT numElements);
+		void CreateInputElementDescription(const char* semanticName, unsigned int semanticIndex,
+			DXGI_FORMAT format, unsigned int inputSlot, unsigned int byteOffset,
+			D3D12_INPUT_CLASSIFICATION inputSlotClassifcation = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
+			unsigned int instanceStepRate = 0);
 
 		/*@brief Removes the specified input element description.
-		* If the specified input element description does not exist an out_of_range exception is thrown.
+		* If the index to the input element description is out of bounds an out_of_range exceptio is thrown.
 		*/
-		void RemoveInputElementDescription(const std::wstring& name);
-
-		/*@brief Creates a rasterization state description and stores it with the specified name.
-		*/
-		void CreateRasterizationState(D3D12_FILL_MODE fillMode, BOOL enableMultisample, const std::wstring& name);
-
-		/*@brief Removes the specified rasterization state.
-		* If the specified rasterization state does not exist an out_of_range exception is thrown.
-		*/
-		void RemoveRasterizationState(const std::wstring& name);
+		void RemoveInputElementDescription(unsigned int index);
 
 		/*@brief Creates a PSO and stores it in the specified DrawSettings structure.
-		* If the specifed DrawSettings structure, Rasterization State, Vertex Shader, Pixel Shader or Input Layout
-		* does not exist an out_of_range exception is thrown.
+		* If the indices to the specified DrawSettings structure, Vertex Shader or Pixel Shader
+		* is out of bounds an out_of_range exception is thrown.
 		*/
-		void CreatePSO(const std::wstring& drawSettingsName, const std::wstring& rStateName, 
-			const std::wstring& vsName, const std::wstring& psName, const std::wstring& inputLayoutName,
+		void CreatePSO(unsigned int drawSettingsIndex, D3D12_FILL_MODE fillMode, BOOL enableMultisample,
+			unsigned int vsIndex, unsigned int psIndex,
 			const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, UINT sampleCount);
 
-		/*@brief Creates a root signature and stores it with the specified name.
-		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
+		/*@brief Creates a root signature and stores it in the specified DrawSettings structure.
+		* If the index to the specified DrawSettings structure is out of bounds an out_of_range exception is thrown.
 		*/
-		void CreateRootSignature(const std::wstring& drawSettingsName);
+		void CreateRootSignature(unsigned int drawSettingsIndex);
 
 		/*@brief Creates a vertex buffer with the specified name and stores all of the added vertices.
 		* Also creates a view to the vertex buffer.\n
@@ -171,56 +136,59 @@ namespace FARender
 		void CreateConstantBufferView(UINT index, UINT numBytes);
 
 		/**@brief Sets the PSO in the specified DrawSettings structure to the specified pso.
-		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
+		* If the index to the specified DrawSettings structure is out of bounds an out_of_range exception is thrown.
 		*/
-		void SetPSO(const std::wstring& drawSettingsName, const Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso);
+		void SetPSO(unsigned int drawSettingsIndex, const Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso);
 
 		/**@brief Sets the root signature in the specified DrawSettings structure to the specified root signature.
-		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
+		* If the index to the specified DrawSettings structure is out of bounds an out_of_range exception is thrown.
 		*/
-		void SetRootSignature(const std::wstring& drawSettingsName, const Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature);
+		void SetRootSignature(unsigned int drawSettingsIndex,
+			const Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature);
 
 		/**@brief Sets the Primitive in the specified DrawSettings structure to the specified primitive.
-		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
+		* If the index to the specified DrawSettings structure is out of bounds an out_of_range exception is thrown.
 		*/
-		void SetPrimitive(const std::wstring& drawSettingsName, const D3D_PRIMITIVE_TOPOLOGY& primitive);
+		void SetPrimitive(unsigned int drawSettingsIndex, const D3D_PRIMITIVE_TOPOLOGY& primitive);
 
 		/**@brief Adds the specified draw argument structure to the DrawArguments vector of the specified DrawSettings structure.
-		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
+		* If the index to the specified DrawSettings structure is out of bounds an out_of_range exception is thrown.
 		*/
-		void AddDrawArgument(const std::wstring& drawSettingsName, const FAShapes::DrawArguments& drawArg);
+		void AddDrawArgument(unsigned int drawSettingsIndex, const FAShapes::DrawArguments& drawArg);
 
-		/**@brief Adds the specified draw arguments to the DrawArguments vector of the specified DrawSettings structure.
-		* If the specifed DrawSettings structure does not exist an out_of_range exception is thrown.
+		/**@brief Creates a DrawArgument structure with the specified values.
+		* The created DrawArgument structure is stored in the DrawArguments vector of the specified DrawSettings structure.
+		* If the index to the specified DrawSettings structure is out of bounds an out_of_range exception is thrown.
 		*/
-		void AddDrawArgument(const std::wstring& drawSettingsName,
+		void CreateDrawArgument(unsigned int drawSettingsIndex,
 			unsigned int indexCount, unsigned int locationOfFirstIndex, int indexOfFirstVertex, int indexOfConstantData);
 
-		/**@brief Removes the draw argument in the specified DrawSettings structure at the specified index.
-		* If the DrawSettings does not exist or if the index is out of bounds an out_of_range exception is thrown.
+		/**@brief Removes the specified DrawArgument structure in the DrawArguments vector of the specified DrawSettings structure.
+		* If the index to the specified DrawSettings structure or if the index to the specifed DrawArguments structure
+		* is out of bounds an out_of_range exception is thrown.
 		*/
-		void RemoveDrawArgument(const std::wstring& drawSettingsName, unsigned int index);
+		void RemoveDrawArgument(unsigned int drawSettingsIndex, unsigned int drawArgIndex);
 
-		/**@brief Creates a DrawSettings structure with the specified name.
+		/**@brief Creates a DrawSettings.
 		*/
-		void CreateDrawSettings(const std::wstring& drawSettingsName);
+		void CreateDrawSettings();
 		
 		/**@brief Removes the specified DrawSettings structure.
-		* If the DrawSettings structure does not exist an out_of_range exception is thrown.
+		* If the index to the specified DrawSettings structure is out of bounds an out_of_range exception is thrown.
 		*/
-		void RemoveDrawSettings(const std::wstring& drawSettingsName);
+		void RemoveDrawSettings(unsigned int drawSettingsIndex);
 
-		/**@brief Creates a Text object with the specified properties and stores it with the specified name.
+		/**@brief Creates a Text object with the specified properties and stores it.
 		* For text location the first two values in the vector is the top-left location of the rectangle and
 		* the last two values are the bottom-right location of the rectangle.
 		*/
-		void CreateText(const std::wstring& textName, FAMath::Vector4D textLocation, const std::wstring& textString, 
+		void CreateText(FAMath::Vector4D textLocation, const std::wstring& textString, 
 			float textSize, const FAColor::Color textColor);
 
-		/**@brief Removes the specified text object with the specified name.
-		* If the Text object does not exist an out_of_range exception is thrown.
+		/**@brief Removes the specified Text object.
+		* If the index to the specified DrawSettings structure is out of bounds an out_of_range exception is thrown.
 		*/
-		void RemoveText(const std::wstring& textName);
+		void RemoveText(unsigned int textIndex);
 
 		/**@brief Adds the specified vertices to the vertex list.
 		*/
@@ -252,15 +220,13 @@ namespace FARender
 		* drawObjects()\n
 		* afterDrawObjects()\n
 		*
-		* Throws an out_of_range exception if the specified DrawSettings structure does not exist.
+		* Throws an out_of_range exception if the index of the specified DrawSettings structure is out of bounds.
 		*/
-		void DrawObjects(const std::wstring& drawSettingsName);
+		void DrawObjects(unsigned int drawSettingsIndex);
 
-		/**@brief Transitions the render target buffer to the correct state and excutes all the beforeDrawObjects and drawObjects commands.
-		* Pass in true if you are going to render text, false otherwise.
-		* Call after calling all the DrawObjects functions.
+		/**@brief Transitions the render target buffer to the correct state and excutes commands.
 		*/
-		void AfterDrawObjects(bool renderText);
+		void AfterDrawObjects();
 		
 		/**@brief Puts all of the commands needed in the command list before drawing the text of the scene.
 		* Call before calling the first RenderText function.
@@ -278,7 +244,7 @@ namespace FARender
 		*
 		* Throws an out_of_range exception if the specified Text object does not exist.
 		*/
-		void RenderText(const std::wstring& textName);
+		void RenderText(unsigned int textIndex);
 
 		/**@brief Transitions the render target buffer and executes all of the text drawing commands.
 		* Call after calling all the RenderText functions.
@@ -318,20 +284,33 @@ namespace FARender
 		*/
 		void EnableMSAA(unsigned int width, unsigned int height, HWND windowHandle);
 
+		/**@brief Returns true if text is enabled, false otherwise.
+		*/
+		bool IsTextEnabled() const;
+
+		/**@brief Disables text.
+		*/
+		void DisableText(unsigned int width, unsigned int height, HWND windowHandle);
+
+		/**@brief Enables text.
+		*/
+		void EnableText(unsigned int width, unsigned int height, HWND windowHandle);
+
 	private:
+
+		static const unsigned int NUM_OF_FRAMES{ 3 };
 
 		//The device resources object that all RenderScene objects share.
 		DeviceResources& mDeviceResources;
 
-		//Stores all of the shaders and input element descriptions for this scene.
-		std::unordered_map<std::wstring, Microsoft::WRL::ComPtr<ID3DBlob>> mShaders;
-		std::unordered_map < std::wstring, std::vector<D3D12_INPUT_ELEMENT_DESC>> mInputElementDescriptions;
+		//Stores all of the shaders for this scene.
+		std::vector<Microsoft::WRL::ComPtr<ID3DBlob>> mShaders;
 
-		//Stores all of the rasterization states.
-		std::unordered_map <std::wstring, D3D12_RASTERIZER_DESC> mRasterizationStates;
+		//Stores input element descriptions for the shaders.
+		std::vector<D3D12_INPUT_ELEMENT_DESC> mInputElementDescriptions;
 
-		//Stores all of the possible draw settings that the scene uses.
-		std::unordered_map <std::wstring, DrawSettings> mSceneObjects;
+		//Stores draw settings that the scene uses.
+		std::vector<DrawSettings> mSceneObjects;
 
 		//Each scene gets a CBV heap.
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCBVHeap;
@@ -340,7 +319,7 @@ namespace FARender
 
 		//Stores all of the constant buffers this scene uses. We can't update a constant buffer until the GPU
 		//is done executing all the commands that reference it, so each frame needs its own constant buffer.
-		ConstantBuffer mConstantBuffer[DeviceResources::NUM_OF_FRAMES];
+		ConstantBuffer mConstantBuffer[NUM_OF_FRAMES];
 
 		//The vertices and indicies for the scene.
 		std::vector<FAShapes::Vertex> mVertexList;
@@ -351,7 +330,7 @@ namespace FARender
 		IndexBuffer mIndexBuffer;
 
 		//All of the text that is rendered with the scene.
-		std::unordered_map <std::wstring, Text> mTexts;
+		std::vector<Text> mTexts;
 
 		//The camera for the scene.
 		FACamera::Camera mCamera;

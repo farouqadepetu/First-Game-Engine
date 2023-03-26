@@ -7,22 +7,28 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//DEVICE RESOURCES FUNCTION DEFINITIONS
 
-	DeviceResources& DeviceResources::GetInstance(unsigned int width, unsigned int height, HWND windowHandle)
+	DeviceResources& DeviceResources::GetInstance(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames)
 	{
-		static DeviceResources instance(width, height, windowHandle);
+		static DeviceResources instance(width, height, windowHandle, numFrames);
 
 		return instance;
 	}
 
-	DeviceResources::DeviceResources(unsigned int width, unsigned int height, HWND windowHandle)
+	DeviceResources::DeviceResources(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames) :
+		mNumFrames{ numFrames }, mCurrentFrameIndex{ 0 }, mFenceValue{ 0 }, mIsMSAAEnabled{ false }, mIsTextEnabled{ false }
 	{
 		mEnableDebugLayer();
 		mCreateDirect3DDevice();
 		mCreateDXGIFactory();
+
 		mCreateFence();
+		mCurrentFrameFenceValue.resize(mNumFrames);
+
 		mQueryDescriptorSizes();
 		mCreateRTVHeap();
 		mCreateDSVHeap();
+
+		mCommandAllocators.resize(mNumFrames);
 		mCreateCommandObjects();
 
 		mSwapChain = SwapChain(mDXGIFactory, mCommandQueue, windowHandle);
@@ -59,9 +65,14 @@ namespace FARender
 		return mSwapChain.GetDepthStencilFormat();
 	}
 
-	UINT DeviceResources::GetCBVSize() const
+	unsigned int DeviceResources::GetCBVSize() const
 	{
 		return mCBVSize;
+	}
+
+	unsigned int DeviceResources::GetNumFrames() const
+	{
+		return mNumFrames;
 	}
 
 	unsigned int DeviceResources::GetCurrentFrame() const
@@ -81,13 +92,30 @@ namespace FARender
 
 	void DeviceResources::DisableMSAA(unsigned int width, unsigned int height, HWND windowHandle)
 	{
-		mIsMSAAEnabled = false;
 		Resize(width, height, windowHandle);
+		mIsMSAAEnabled = false;
 	}
 
 	void DeviceResources::EnableMSAA(unsigned int width, unsigned int height, HWND windowHandle)
 	{
 		mIsMSAAEnabled = true;
+		Resize(width, height, windowHandle);
+	}
+
+	bool DeviceResources::IsTextEnabled() const
+	{
+		return mIsTextEnabled;
+	}
+
+	void DeviceResources::DisableText(unsigned int width, unsigned int height, HWND windowHandle)
+	{
+		Resize(width, height, windowHandle);
+		mIsTextEnabled = false;
+	}
+
+	void DeviceResources::EnableText(unsigned int width, unsigned int height, HWND windowHandle)
+	{
+		mIsTextEnabled = true;
 		Resize(width, height, windowHandle);
 	}
 
@@ -171,10 +199,10 @@ namespace FARender
 		ThrowIfFailed(mDirect3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 			IID_PPV_ARGS(mDirectCommandAllocator.GetAddressOf())));
 
-		for (UINT i = 0; i < NUM_OF_FRAMES; ++i)
+		for (UINT i = 0; i < mNumFrames; ++i)
 		{
 			ThrowIfFailed(mDirect3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
-				IID_PPV_ARGS(mCommandAllocator[i].GetAddressOf())));
+				IID_PPV_ARGS(mCommandAllocators[i].GetAddressOf())));
 		}
 
 		ThrowIfFailed(mDirect3DDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
@@ -249,7 +277,8 @@ namespace FARender
 		//reset the command list to add new commands
 		ThrowIfFailed(mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr));
 
-		mTextResources.ResetBuffers();
+		if(mIsTextEnabled)
+			mTextResources.ResetBuffers();
 
 		//Reset/Release all buffers that have a reference to the swap chain.
 		mSwapChain.ResetBuffers();
@@ -273,7 +302,8 @@ namespace FARender
 			mMultiSampling.CreateDepthStencilBufferAndView(mDirect3DDevice, mDSVHeap, 1, mDSVSize, width, height);
 		}
 
-		mTextResources.ResizeBuffers(mSwapChain.GetRenderTargetBuffers(), windowHandle);
+		if (mIsTextEnabled)
+			mTextResources.ResizeBuffers(mSwapChain.GetRenderTargetBuffers(), windowHandle);
 
 		//Close the command list.
 		//Store all your command lists in a ID3D12CommandList array.
@@ -316,10 +346,10 @@ namespace FARender
 	{
 		//Reseting command allocator allows us to reuse the memory.
 		//Make sure all the commands in the command list is executed before calling this.
-		ThrowIfFailed(mCommandAllocator[mCurrentFrameIndex]->Reset());
+		ThrowIfFailed(mCommandAllocators[mCurrentFrameIndex]->Reset());
 
 		//Reset command list
-		ThrowIfFailed(mCommandList->Reset(mCommandAllocator[mCurrentFrameIndex].Get(), nullptr));
+		ThrowIfFailed(mCommandList->Reset(mCommandAllocators[mCurrentFrameIndex].Get(), nullptr));
 
 		//Link viewport to the rasterization stage
 		mCommandList->RSSetViewports(1, &mViewport);
@@ -380,10 +410,10 @@ namespace FARender
 
 	void DeviceResources::NextFrame()
 	{
-		mCurrentFrameIndex = (mCurrentFrameIndex + 1) % NUM_OF_FRAMES;
+		mCurrentFrameIndex = (mCurrentFrameIndex + 1) % mNumFrames;
 	}
 
-	void DeviceResources::RTBufferTransition(bool renderText)
+	void DeviceResources::RTBufferTransition()
 	{
 		if (mIsMSAAEnabled)
 		{
@@ -394,7 +424,7 @@ namespace FARender
 			mCommandList->ResolveSubresource(mSwapChain.GetCurrentBackBuffer().Get(), 0, 
 				mMultiSampling.GetRenderTargetBuffer().Get(), 0, mSwapChain.GetBackBufferFormat());
 
-			if (renderText)
+			if (mIsTextEnabled)
 			{
 				//Transistion the current back buffer to render target state from resolve dest state
 				mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -407,7 +437,7 @@ namespace FARender
 		}
 		else
 		{
-			if (!renderText)
+			if (!mIsTextEnabled)
 			{
 				//Transistion the current back buffer to present state from render target state
 				mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -417,12 +447,14 @@ namespace FARender
 
 	void DeviceResources::BeforeTextDraw()
 	{
-		mTextResources.BeforeRenderText(mSwapChain.GetCurrentBackBufferIndex());
+		if(mIsTextEnabled)
+			mTextResources.BeforeRenderText(mSwapChain.GetCurrentBackBufferIndex());
 	}
 
 	void DeviceResources::AfterTextDraw()
 	{
-		mTextResources.AfterRenderText(mSwapChain.GetCurrentBackBufferIndex());
+		if(mIsTextEnabled)
+			mTextResources.AfterRenderText(mSwapChain.GetCurrentBackBufferIndex());
 	}
 	//-----------------------------------------------------------------------------------------------------------------------
 }

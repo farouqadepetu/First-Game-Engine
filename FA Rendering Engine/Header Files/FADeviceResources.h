@@ -19,12 +19,11 @@ namespace FARender
 	class DeviceResources
 	{
 	public:
-		static const unsigned int NUM_OF_FRAMES{ 3 };
 
 		/**@brief Call to make an object of DeviceResources.
 		* This only allows one instance to exist.
 		*/
-		static DeviceResources& GetInstance(unsigned int width, unsigned int height, HWND windowHandle);
+		static DeviceResources& GetInstance(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames);
 
 		DeviceResources(const DeviceResources&) = delete;
 		DeviceResources& operator=(const DeviceResources&) = delete;
@@ -51,7 +50,11 @@ namespace FARender
 
 		/**@brief The size of a constant buffer view.
 		*/
-		UINT GetCBVSize() const;
+		unsigned int GetCBVSize() const;
+
+		/**@brief Returns the number of frames.
+		*/
+		unsigned int GetNumFrames() const;
 
 		/**@brief Returns the current frame.
 		*/
@@ -72,6 +75,18 @@ namespace FARender
 		/**@brief Enables MSAA.
 		*/
 		void EnableMSAA(unsigned int width, unsigned int height, HWND windowHandle);
+
+		/**@brief Returns true if text is enabled, false otherwise.
+		*/
+		bool IsTextEnabled() const;
+
+		/**@brief Disables text.
+		*/
+		void DisableText(unsigned int width, unsigned int height, HWND windowHandle);
+
+		/**@brief Enables text.
+		*/
+		void EnableText(unsigned int width, unsigned int height, HWND windowHandle);
 
 		/**@brief Updates the current frames fence value.
 		*/
@@ -99,7 +114,7 @@ namespace FARender
 
 		/**@brief Transistions the render target buffer.
 		*/
-		void RTBufferTransition(bool renderText);
+		void RTBufferTransition();
 
 		/**@brief Prepares to render text.
 		*/
@@ -138,20 +153,21 @@ namespace FARender
 		* Creates a render target view and a depth/stencil view heap.
 		* Creates the initial render target buffers, depth stencil buffer, MSAA buffers and text buffers.
 		*/
-		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle);
+		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames);
 
-		unsigned int mCurrentFrameIndex{ 0 };
+		unsigned int mNumFrames;
+		unsigned int mCurrentFrameIndex;
 
 		Microsoft::WRL::ComPtr<ID3D12Device> mDirect3DDevice;
 
 		Microsoft::WRL::ComPtr<IDXGIFactory4> mDXGIFactory;
 
 		Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
-		UINT64 mFenceValue{ 0 };
-		UINT64 mCurrentFrameFenceValue[NUM_OF_FRAMES];
+		UINT64 mFenceValue;
+		std::vector<UINT64> mCurrentFrameFenceValue;
 
 		Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
-		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCommandAllocator[NUM_OF_FRAMES];
+		std::vector<Microsoft::WRL::ComPtr<ID3D12CommandAllocator>> mCommandAllocators;
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCommandAllocator;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;
 
@@ -164,12 +180,13 @@ namespace FARender
 
 		SwapChain mSwapChain;
 
-		bool mIsMSAAEnabled{ false };
+		bool mIsMSAAEnabled;
 		MultiSampling mMultiSampling;
 
 		D3D12_VIEWPORT mViewport{};
 		D3D12_RECT mScissor{};
 
+		bool mIsTextEnabled;
 		TextResources mTextResources;
 
 		//Call all of these functions to initialize Direct3D
