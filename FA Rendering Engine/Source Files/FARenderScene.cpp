@@ -10,7 +10,7 @@ namespace FARender
 
 	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND windowHandle) :
 		mIsMSAAEnabled{ false }, mIsTextEnabled{ false },
-		mDeviceResources{ DeviceResources::GetInstance(width, height, windowHandle, NUM_OF_FRAMES, mIsMSAAEnabled, mIsTextEnabled) }
+		mDeviceResources{ DeviceResources::GetInstance(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled) }
 
 	{
 		mCamera.SetAspectRatio((float)width / height);
@@ -216,20 +216,36 @@ namespace FARender
 		mSceneObjects.at(drawSettingsIndex).rootSig = rootSignature;
 	}
 
-	void RenderScene::CreateVertexBuffer()
+	void RenderScene::CreateStaticVertexBuffer(const void* data, unsigned int numBytes, unsigned int stride)
 	{
-		mVertexBuffer.CreateVertexBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), mVertexList.data(), 
-			static_cast<UINT>(mVertexList.size() * sizeof(FAShapes::Vertex)));
+		mStaticVertexBuffer.CreateStaticBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), data, numBytes);
 
-		mVertexBuffer.CreateVertexBufferView(static_cast<UINT>(mVertexList.size() * sizeof(FAShapes::Vertex)), sizeof(FAShapes::Vertex));
+		mStaticVertexBuffer.CreateVertexBufferView(numBytes, stride);
 	}
 
-	void RenderScene::CreateIndexBuffer()
+	void RenderScene::CreateStaticIndexBuffer(const void* data, unsigned int numBytes, DXGI_FORMAT format)
 	{
-		mIndexBuffer.CreateIndexBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), mIndexList.data(), 
-			static_cast<UINT>(mIndexList.size() * sizeof(unsigned int)));
+		mStaticIndexBuffer.CreateStaticBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), data, numBytes);
 
-		mIndexBuffer.CreateIndexBufferView(static_cast<UINT>(mIndexList.size() * sizeof(unsigned int)), DXGI_FORMAT_R32_UINT);
+		mStaticIndexBuffer.CreateIndexBufferView(numBytes, format);
+	}
+
+	void RenderScene::CreateDynamicVertexBuffer(unsigned int numBytes, unsigned int stride)
+	{
+		for (int i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
+		{
+			mDynamicVertexBuffer[i].CreateDynamicBuffer(mDeviceResources.GetDevice(), numBytes);
+			mDynamicVertexBuffer[i].CreateVertexBufferView(numBytes, stride);
+		}
+	}
+
+	void RenderScene::CreateDynamicIndexBuffer(unsigned int numBytes, DXGI_FORMAT format)
+	{
+		for (int i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
+		{
+			mDynamicIndexBuffer[i].CreateDynamicBuffer(mDeviceResources.GetDevice(), numBytes);
+			mDynamicIndexBuffer[i].CreateIndexBufferView(numBytes, format);
+		}
 	}
 
 	void RenderScene::CreateCBVHeap(UINT numDescriptors, UINT shaderRegister)
@@ -237,7 +253,7 @@ namespace FARender
 		//Need a CBV for each object for each frame.
 		D3D12_DESCRIPTOR_HEAP_DESC cbvDescriptorHeapDescription{};
 		cbvDescriptorHeapDescription.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		cbvDescriptorHeapDescription.NumDescriptors = numDescriptors * mDeviceResources.GetNumFrames();
+		cbvDescriptorHeapDescription.NumDescriptors = numDescriptors * DeviceResources::NUM_OF_FRAMES;
 		cbvDescriptorHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbvDescriptorHeapDescription.NodeMask = 0;
 		ThrowIfFailed(mDeviceResources.GetDevice()->CreateDescriptorHeap(&cbvDescriptorHeapDescription, IID_PPV_ARGS(&mCBVHeap)));
@@ -246,7 +262,7 @@ namespace FARender
 		mCBVHeapDescription.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 
 		//num of descriptors in my cbv descriptor heap that are type cbv
-		mCBVHeapDescription.NumDescriptors = numDescriptors * mDeviceResources.GetNumFrames();
+		mCBVHeapDescription.NumDescriptors = numDescriptors * DeviceResources::NUM_OF_FRAMES;
 
 		//which register does your vertex shader expect the buffer to be in
 		mCBVHeapDescription.BaseShaderRegister = shaderRegister;
@@ -267,22 +283,19 @@ namespace FARender
 
 	void RenderScene::CreateConstantBuffer(UINT numOfBytes)
 	{
-		unsigned int numFrames{ mDeviceResources.GetNumFrames() };
-		for (UINT i = 0; i < numFrames; ++i)
+		for (UINT i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
 		{
-			mConstantBuffer[i].CreateConstantBuffer(mDeviceResources.GetDevice(), numOfBytes);
+			mConstantBuffer[i].CreateDynamicBuffer(mDeviceResources.GetDevice(), numOfBytes);
 		}
 	}
 
 	void RenderScene::CreateConstantBufferView(UINT index, UINT numBytes)
 	{
-		unsigned int numFrames{ mDeviceResources.GetNumFrames() };
-
 		//Create a constant buffer view for each frame.
-		for (UINT i = 0; i < numFrames; ++i)
+		for (UINT i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
 		{
 			mConstantBuffer[i].CreateConstantBufferView(mDeviceResources.GetDevice(), mCBVHeap, 
-				mDeviceResources.GetCBVSize(), (index * numFrames) + i, index, numBytes);
+				mDeviceResources.GetCBVSize(), (index * DeviceResources::NUM_OF_FRAMES) + i, index, numBytes);
 		}
 	}
 
@@ -350,26 +363,6 @@ namespace FARender
 		mTexts.erase(mTexts.begin() + textIndex);
 	}
 
-	void RenderScene::AddVertices(const std::vector<FAShapes::Vertex>& vertices)
-	{
-		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
-	}
-
-	void RenderScene::AddVertices(const FAShapes::Vertex* vertices, unsigned int numVertices)
-	{
-		mVertexList.insert(mVertexList.end(), vertices, vertices + numVertices);
-	}
-
-	void RenderScene::AddIndices(const std::vector<unsigned int>& indices)
-	{
-		mIndexList.insert(mIndexList.end(), indices.begin(), indices.end());
-	}
-
-	void RenderScene::AddIndices(const unsigned int* indices, unsigned int numIndices)
-	{
-		mIndexList.insert(mIndexList.end(), indices, indices + numIndices);
-	}
-
 	void RenderScene::BeforeDrawObjects()
 	{
 		mDeviceResources.Draw(mIsMSAAEnabled);
@@ -377,15 +370,13 @@ namespace FARender
 		//Link the CBV descriptor heaps to the pipeline
 		ID3D12DescriptorHeap* dH[] = { mCBVHeap.Get() };
 		mDeviceResources.GetCommandList()->SetDescriptorHeaps(1, dH);
-
-		mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, &mVertexBuffer.GetVertexBufferView());
-
-		mDeviceResources.GetCommandList()->IASetIndexBuffer(&mIndexBuffer.GetIndexBufferView());
 	}
 
-	void RenderScene::DrawObjects(unsigned int drawSettingsIndex)
+	void RenderScene::DrawStatic(unsigned int drawSettingsIndex)
 	{
-		unsigned int numFrames{ mDeviceResources.GetNumFrames() };
+		mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, &mStaticVertexBuffer.GetVertexBufferView());
+
+		mDeviceResources.GetCommandList()->IASetIndexBuffer(&mStaticIndexBuffer.GetIndexBufferView());
 
 		mDeviceResources.GetCommandList()->SetPipelineState(mSceneObjects.at(drawSettingsIndex).pipelineState.Get());
 
@@ -400,7 +391,38 @@ namespace FARender
 			CD3DX12_GPU_DESCRIPTOR_HANDLE handle =
 				CD3DX12_GPU_DESCRIPTOR_HANDLE(mCBVHeap->GetGPUDescriptorHandleForHeapStart());
 
-			handle.Offset((i.indexOfConstantData * numFrames) + mDeviceResources.GetCurrentFrame(),
+			handle.Offset((i.indexOfConstantData * DeviceResources::NUM_OF_FRAMES) + mDeviceResources.GetCurrentFrame(),
+				mDeviceResources.GetCBVSize());
+
+			mDeviceResources.GetCommandList()->SetGraphicsRootDescriptorTable(0, handle);
+
+			mDeviceResources.GetCommandList()->DrawIndexedInstanced(i.indexCount, 1,
+				i.locationOfFirstIndex, i.indexOfFirstVertex, 0);
+		}
+	}
+
+	void RenderScene::DrawDynamic(unsigned int drawSettingsIndex)
+	{
+		mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, 
+			&mDynamicVertexBuffer[mDeviceResources.GetCurrentFrame()].GetVertexBufferView());
+
+		mDeviceResources.GetCommandList()->IASetIndexBuffer(
+			&mDynamicIndexBuffer[mDeviceResources.GetCurrentFrame()].GetIndexBufferView());
+
+		mDeviceResources.GetCommandList()->SetPipelineState(mSceneObjects.at(drawSettingsIndex).pipelineState.Get());
+
+		mDeviceResources.GetCommandList()->SetGraphicsRootSignature(mSceneObjects.at(drawSettingsIndex).rootSig.Get());
+
+		mDeviceResources.GetCommandList()->IASetPrimitiveTopology(mSceneObjects.at(drawSettingsIndex).prim);
+
+		//draw all the objects the share the same PSO, root signature and primitive
+		for (const FAShapes::DrawArguments& i : mSceneObjects.at(drawSettingsIndex).drawArgs)
+		{
+			//Get the address of the first view in the constant buffer view heap
+			CD3DX12_GPU_DESCRIPTOR_HANDLE handle =
+				CD3DX12_GPU_DESCRIPTOR_HANDLE(mCBVHeap->GetGPUDescriptorHandleForHeapStart());
+
+			handle.Offset((i.indexOfConstantData * DeviceResources::NUM_OF_FRAMES) + mDeviceResources.GetCurrentFrame(),
 				mDeviceResources.GetCBVSize());
 
 			mDeviceResources.GetCommandList()->SetGraphicsRootDescriptorTable(0, handle);
@@ -475,6 +497,9 @@ namespace FARender
 
 		//Add a fence instruction to the command queue.
 		mDeviceResources.Signal();
+
+		mDeviceResources.NextFrame();
+		mDeviceResources.WaitForGPU();
 	}
 
 	void RenderScene::ExecuteAndFlush()
@@ -496,9 +521,19 @@ namespace FARender
 		mCamera.SetAspectRatio((float)width / height);
 	}
 
-	void RenderScene::CopyData(UINT index, UINT byteSize, const void* data, UINT64 numOfBytes)
+	void RenderScene::CopyDataIntoDyanmicVertexBuffer(UINT index, const void* data, UINT64 numOfBytes, UINT stride)
 	{
-		mConstantBuffer[mDeviceResources.GetCurrentFrame()].CopyData(index, byteSize, data, numOfBytes);
+		mDynamicVertexBuffer[mDeviceResources.GetCurrentFrame()].CopyData(index, data, numOfBytes, stride);
+	}
+
+	void RenderScene::CopyDataIntoDyanmicIndexBuffer(UINT index,  const void* data, UINT64 numOfBytes, UINT stride)
+	{
+		mDynamicIndexBuffer[mDeviceResources.GetCurrentFrame()].CopyData(index, data, numOfBytes, stride);
+	}
+
+	void RenderScene::CopyDataIntoConstantBuffer(UINT index, const void* data, UINT64 numOfBytes, UINT stride)
+	{
+		mConstantBuffer[mDeviceResources.GetCurrentFrame()].CopyData(index, data, numOfBytes, stride);
 	}
 
 	bool RenderScene::IsMSAAEnabled() const

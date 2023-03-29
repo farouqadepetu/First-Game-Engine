@@ -20,11 +20,12 @@ namespace FARender
 	{
 	public:
 
+		static const unsigned int NUM_OF_FRAMES{ 3 };
+
 		/**@brief Call to make an object of DeviceResources.
 		* This only allows one instance to exist.
 		*/
-		static DeviceResources& GetInstance(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames,
-			bool isMSAAEnabled, bool isTextEnabled);
+		static DeviceResources& GetInstance(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled, bool isTextEnabled);
 
 		DeviceResources(const DeviceResources&) = delete;
 		DeviceResources& operator=(const DeviceResources&) = delete;
@@ -52,10 +53,6 @@ namespace FARender
 		/**@brief The size of a constant buffer view.
 		*/
 		unsigned int GetCBVSize() const;
-
-		/**@brief Returns the number of frames.
-		*/
-		unsigned int GetNumFrames() const;
 
 		/**@brief Returns the current frame.
 		*/
@@ -130,10 +127,9 @@ namespace FARender
 		* Creates a render target view and a depth/stencil view heap.
 		* Creates the initial render target buffers, depth stencil buffer, MSAA buffers and text buffers.
 		*/
-		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames,
+		DeviceResources(unsigned int width, unsigned int height, HWND windowHandle,
 			bool isMSAAEnabled, bool isTextEnabled);
 
-		unsigned int mNumFrames;
 		unsigned int mCurrentFrameIndex;
 
 		Microsoft::WRL::ComPtr<ID3D12Device> mDirect3DDevice;
@@ -142,10 +138,10 @@ namespace FARender
 
 		Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
 		UINT64 mFenceValue;
-		std::vector<UINT64> mCurrentFrameFenceValue;
+		UINT64 mCurrentFrameFenceValue[NUM_OF_FRAMES];
 
 		Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
-		std::vector<Microsoft::WRL::ComPtr<ID3D12CommandAllocator>> mCommandAllocators;
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCommandAllocators[NUM_OF_FRAMES];
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCommandAllocator;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;
 

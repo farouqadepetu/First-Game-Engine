@@ -7,30 +7,26 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//DEVICE RESOURCES FUNCTION DEFINITIONS
 
-	DeviceResources& DeviceResources::GetInstance(unsigned int width, unsigned int height, HWND windowHandle, unsigned int numFrames,
+	DeviceResources& DeviceResources::GetInstance(unsigned int width, unsigned int height, HWND windowHandle,
 		bool isMSAAEnabled, bool isTextEnabled)
 	{
-		static DeviceResources instance(width, height, windowHandle, numFrames, isMSAAEnabled, isTextEnabled);
+		static DeviceResources instance(width, height, windowHandle, isMSAAEnabled, isTextEnabled);
 
 		return instance;
 	}
 
 	DeviceResources::DeviceResources(unsigned int width, unsigned int height, HWND windowHandle, 
-		unsigned int numFrames, bool isMSAAEnabled, bool isTextEnabled) :
-		mNumFrames{ numFrames }, mCurrentFrameIndex{ 0 }, mFenceValue{ 0 }
+		bool isMSAAEnabled, bool isTextEnabled) : mCurrentFrameIndex{ 0 }, mFenceValue{ 0 }
 	{
 		mEnableDebugLayer();
 		mCreateDirect3DDevice();
 		mCreateDXGIFactory();
 
 		mCreateFence();
-		mCurrentFrameFenceValue.resize(mNumFrames);
 
 		mQueryDescriptorSizes();
 		mCreateRTVHeap();
 		mCreateDSVHeap();
-
-		mCommandAllocators.resize(mNumFrames);
 		mCreateCommandObjects();
 
 		mSwapChain = SwapChain(mDXGIFactory, mCommandQueue, windowHandle);
@@ -70,11 +66,6 @@ namespace FARender
 	unsigned int DeviceResources::GetCBVSize() const
 	{
 		return mCBVSize;
-	}
-
-	unsigned int DeviceResources::GetNumFrames() const
-	{
-		return mNumFrames;
 	}
 
 	unsigned int DeviceResources::GetCurrentFrame() const
@@ -167,7 +158,7 @@ namespace FARender
 		ThrowIfFailed(mDirect3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 			IID_PPV_ARGS(mDirectCommandAllocator.GetAddressOf())));
 
-		for (UINT i = 0; i < mNumFrames; ++i)
+		for (UINT i = 0; i < NUM_OF_FRAMES; ++i)
 		{
 			ThrowIfFailed(mDirect3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 				IID_PPV_ARGS(mCommandAllocators[i].GetAddressOf())));
@@ -377,7 +368,7 @@ namespace FARender
 
 	void DeviceResources::NextFrame()
 	{
-		mCurrentFrameIndex = (mCurrentFrameIndex + 1) % mNumFrames;
+		mCurrentFrameIndex = (mCurrentFrameIndex + 1) % NUM_OF_FRAMES;
 	}
 
 	void DeviceResources::RTBufferTransition(bool isMSAAEnabled, bool isTextEnabled)

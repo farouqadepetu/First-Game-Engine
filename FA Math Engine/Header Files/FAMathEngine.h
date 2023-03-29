@@ -9,6 +9,7 @@
 
 #define EPSILON 1e-6f
 #define PI 3.14159f
+#define PI2 6.28319f
 
 /** @namespace FAMath
 *	@brief Has utility functions, Vector2D, Vector3D, Vector4D, Matrix4x4, and Quaternion classes.

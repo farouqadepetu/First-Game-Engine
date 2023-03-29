@@ -92,101 +92,104 @@ namespace FARender
 		DXGI_FORMAT mDepthStencilFormat;
 	};
 
-
-	/** @class VertexBuffer ""
-	*	@brief This class stores vertices in a Direct3D 12 default buffer.
+	/** @class StaticBuffer ""
+	*	@brief This class stores data in a Direct3D 12 default buffer.
 	*
 	*/
-	class VertexBuffer
+	class StaticBuffer
 	{
 	public:
-		VertexBuffer() = default;
-		VertexBuffer(const VertexBuffer&) = delete;
-		VertexBuffer& operator=(const VertexBuffer&) = delete;
+		StaticBuffer() = default;
+		StaticBuffer(const StaticBuffer&) = delete;
+		StaticBuffer& operator=(const StaticBuffer&) = delete;
 
-		/**@brief Creates the vertex buffer and stores all of the specified vertices in the vertex buffer.
+		/**@brief Creates the static buffer and stores all of the specified data.
 		*/
-		void CreateVertexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		void CreateStaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data, UINT numBytes);
 
 		/**@brief Creates the vertex buffer view and stores it.
 		*/
 		void CreateVertexBufferView(UINT numBytes, UINT stride);
 
+		/**@brief Creates the vertex buffer view and stores it.
+		*/
+		void CreateIndexBufferView(UINT numBytes, DXGI_FORMAT format);
+
 		/**@brief Returns a constant reference to the vertex buffer view.
 		*/
 		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView();
-
-	private:
-		Microsoft::WRL::ComPtr<ID3D12Resource> mVertexDefaultBuffer;
-		Microsoft::WRL::ComPtr<ID3D12Resource> mVertexUploadBuffer;
-		D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
-	};
-
-	/** @class IndexBuffer ""
-	*	@brief This class stores indices in a Direct3D 12 default buffer.
-	*
-	*/
-	class IndexBuffer
-	{
-	public:
-		IndexBuffer() = default;
-		IndexBuffer(const IndexBuffer&) = delete;
-		IndexBuffer& operator=(const IndexBuffer&) = delete;
 
 		/**@brief Returns a constant reference to the vertex buffer view.
 		*/
 		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView();
 
-		/**@brief Creates the vertex buffer and stores all of the specified vertices in the vertex buffer.
+	private:
+		Microsoft::WRL::ComPtr<ID3D12Resource> mStaticDefaultBuffer;
+		Microsoft::WRL::ComPtr<ID3D12Resource> mStaticUploadBuffer;
+
+		union
+		{
+			D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
+			D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
+		};
+	};
+
+	/** @class DynamicBuffer ""
+	*	@brief This class stores data in a Direct3D 12 upload buffer.
+	*
+	*/
+	class DynamicBuffer
+	{
+	public:
+		DynamicBuffer() = default;
+
+		DynamicBuffer(const DynamicBuffer&) = delete;
+		DynamicBuffer& operator=(const DynamicBuffer&) = delete;
+
+		/**@brief Unmaps the pointer to the dynamic buffer.
 		*/
-		void CreateIndexBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data, UINT numBytes);
+		~DynamicBuffer();
+
+		/**@brief Creates and maps the dynamic buffer.
+		*/
+		void CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const UINT& numOfBytes);
+
+		/**@brief Creates and maps the constant buffer view and stores it in the specified descriptor heap.
+		*/
+		void CreateConstantBufferView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& cbvHeap, UINT cbvSize, UINT cbvHeapIndex,
+			UINT cBufferIndex, UINT numBytes);
+
+		/**@brief Creates the vertex buffer view and stores it.
+		*/
+		void CreateVertexBufferView(UINT numBytes, UINT stride);
 
 		/**@brief Creates the vertex buffer view and stores it.
 		*/
 		void CreateIndexBufferView(UINT numBytes, DXGI_FORMAT format);
 
-	private:
-		Microsoft::WRL::ComPtr<ID3D12Resource> mIndexDefaultBuffer;
-		Microsoft::WRL::ComPtr<ID3D12Resource> mIndexUploadBuffer;
-		D3D12_INDEX_BUFFER_VIEW mIndexBufferView{};
-	};
-
-	/** @class ConstantBuffer ""
-	*	@brief This class stores constant data in a Direct3D 12 upload buffer.
-	*
-	*/
-	class ConstantBuffer
-	{
-	public:
-		ConstantBuffer() = default;
-
-		ConstantBuffer(const ConstantBuffer&) = delete;
-		ConstantBuffer& operator=(const ConstantBuffer&) = delete;
-
-		/**@brief Unmaps the pointer to the constant buffer.
+		/**@brief Returns a constant reference to the vertex buffer view.
 		*/
-		~ConstantBuffer();
+		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView();
 
-		/**@brief Creates and maps the constant buffer.
-		* The number of bytes allocated should be a multiple of 256 bytes.
+		/**@brief Returns a constant reference to the vertex buffer view.
 		*/
-		void CreateConstantBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const UINT& numOfBytes);
+		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView();
 
-		/**@brief Creates and maps the constant buffer view and stores it in the specified descriptor heap.
-		*/
-		void CreateConstantBufferView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& cbvHeap, UINT cbvSize, UINT cBufferIndex,
-			UINT cbvHeapIndex, UINT numBytes);
-
-		/**@brief Copies data from the given data into the constant buffer.
+		/**@brief Copies data from the given data into the dynamic buffer.
 		* Uses 0-indexing.
 		*/
-		void CopyData(UINT index, UINT byteSize, const void* data, UINT64 numOfBytes);
+		void CopyData(UINT index, const void* data, UINT64 numOfBytes, UINT stride);
 
 	private:
-		Microsoft::WRL::ComPtr<ID3D12Resource> mConstantBuffer;
+		Microsoft::WRL::ComPtr<ID3D12Resource> mDynamicBuffer;
 		BYTE* mMappedData{ nullptr };
+
+		union
+		{
+			D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
+			D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
+		};
 	};
 }

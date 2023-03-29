@@ -111,17 +111,27 @@ namespace FARender
 		*/
 		void CreateRootSignature(unsigned int drawSettingsIndex);
 
-		/*@brief Creates a vertex buffer with the specified name and stores all of the added vertices.
-		* Also creates a view to the vertex buffer.\n
-		* Execute commands and the flush command queue after calling createVertexBuffer() and createIndexBuffer().
+		/*@brief Creates a static vertex buffer and fills it with the specified data.
+		* Also creates a view to the static vertex buffer.\n
+		* Execute commands and the flush command queue after calling createStaticVertexBuffer() and createStaticIndexBuffer().
 		*/
-		void CreateVertexBuffer();
+		void CreateStaticVertexBuffer(const void* data, unsigned int numBytes, unsigned int stride);
 
-		/**@brief Creates an index buffer with the specified name and stores all of the added indices.
-		* Also creates a view to the index buffer.\n
-		* Execute commands and flush the command queue after calling createVertexBuffer() and createIndexBuffer().
+		/**@brief Creates a static index buffer and fills it with the specified data..
+		* Also creates a view to the static index buffer.\n
+		* Execute commands and flush the command queue after calling createStaticVertexBuffer() and createStaticIndexBuffer().
 		*/
-		void CreateIndexBuffer();
+		void CreateStaticIndexBuffer(const void* data, unsigned int numBytes, DXGI_FORMAT format);
+
+		/*@brief Creates a dynamic vertex buffer.
+		* Also creates a view to the dynamic vertex buffer.\n
+		*/
+		void CreateDynamicVertexBuffer(unsigned int numBytes, unsigned int stride);
+
+		/**@brief Creates a dynamic index buffer.
+		* Also creates a view to the dynamic index buffer.\n
+		*/
+		void CreateDynamicIndexBuffer(unsigned int numBytes, DXGI_FORMAT format);
 
 		/**@brief Creates the CBV heap.
 		*/
@@ -190,30 +200,14 @@ namespace FARender
 		*/
 		void RemoveText(unsigned int textIndex);
 
-		/**@brief Adds the specified vertices to the vertex list.
-		*/
-		void AddVertices(const std::vector<FAShapes::Vertex>& vertices);
-
-		/**@brief Adds the specified vertices to the vertex list.
-		*/
-		void AddVertices(const FAShapes::Vertex* vertices, unsigned int numVertices);
-
-		/**@brief Adds the specified vertices to the index list.
-		*/
-		void AddIndices(const std::vector<unsigned int>& indices);
-
-		/**@brief Adds the specified vertices to the index list.
-		*/
-		void AddIndices(const unsigned int* indices, unsigned int numIndices);
-
 		/**@brief Puts all of the commands needed in the command list before drawing the objects of the scene.
 		* Call before calling the first drawObjects function.
 		*/
 		void BeforeDrawObjects();
 
-		/**@brief Draws all of the objects that use the same PSO, root signature and primitive.
+		/**@brief Draws objects in the static vertex buffer that use the same PSO, root signature and primitive.
 		* Call in between a beforeDrawObjects function and a afterDrawObjects function.\n
-		* 
+		*
 		* Ex.\n
 		* beforeDrawObjects()\n
 		* drawObjects()\n
@@ -222,7 +216,20 @@ namespace FARender
 		*
 		* Throws an out_of_range exception if the index of the specified DrawSettings structure is out of bounds.
 		*/
-		void DrawObjects(unsigned int drawSettingsIndex);
+		void DrawStatic(unsigned int drawSettingsIndex);
+
+		/**@brief Draws objects in the dynamic vertex buffer that use the same PSO, root signature and primitive.
+		* Call in between a beforeDrawObjects function and a afterDrawObjects function.\n
+		*
+		* Ex.\n
+		* beforeDrawObjects()\n
+		* drawObjects()\n
+		* drawObjects()\n
+		* afterDrawObjects()\n
+		*
+		* Throws an out_of_range exception if the index of the specified DrawSettings structure is out of bounds.
+		*/
+		void DrawDynamic(unsigned int drawSettingsIndex);
 
 		/**@brief Transitions the render target buffer to the correct state and excutes commands.
 		*/
@@ -268,9 +275,17 @@ namespace FARender
 		*/
 		void Resize(unsigned int width, unsigned int height, HWND windowHandle);
 
+		/**@brief Copies the specified data into the dyanmic vertex buffer.
+		*/
+		void CopyDataIntoDyanmicVertexBuffer(UINT index, const void* data, UINT64 numOfBytes, UINT stride);
+
+		/**@brief Copies the specified data into the dyanmic index buffer.
+		*/
+		void CopyDataIntoDyanmicIndexBuffer(UINT index, const void* data, UINT64 numOfBytes, UINT stride);
+
 		/**@brief Copies the specified data into the constant buffer.
 		*/
-		void CopyData(UINT index, UINT byteSize, const void* data, UINT64 numOfBytes);
+		void CopyDataIntoConstantBuffer(UINT index,  const void* data, UINT64 numOfBytes, UINT stride);
 
 		/**@brief Returns true if MSAA is enabled, false otherwise.
 		*/
@@ -297,9 +312,6 @@ namespace FARender
 		void EnableText(unsigned int width, unsigned int height, HWND windowHandle);
 
 	private:
-
-		static const unsigned int NUM_OF_FRAMES{ 3 };
-
 		bool mIsMSAAEnabled;
 		bool mIsTextEnabled;
 
@@ -315,22 +327,24 @@ namespace FARender
 		//Stores draw settings that the scene uses.
 		std::vector<DrawSettings> mSceneObjects;
 
+		//The static vertex and index buffer for the scene.
+		StaticBuffer mStaticVertexBuffer;
+		StaticBuffer mStaticIndexBuffer;
+
+		//The dynamic vertex and index buffer for the scene.
+		//Stores all of the vertices and indices this scene uses. We can't update a dynamic buffer until the GPU
+		//is done executing all the commands that reference it, so each frame needs its own constant buffer.
+		DynamicBuffer mDynamicVertexBuffer[DeviceResources::NUM_OF_FRAMES];
+		DynamicBuffer mDynamicIndexBuffer[DeviceResources::NUM_OF_FRAMES];
+
 		//Each scene gets a CBV heap.
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCBVHeap;
 		D3D12_DESCRIPTOR_RANGE mCBVHeapDescription{};
 		D3D12_ROOT_PARAMETER mCBVHeapRootParameter;
 
-		//Stores all of the constant buffers this scene uses. We can't update a constant buffer until the GPU
-		//is done executing all the commands that reference it, so each frame needs its own constant buffer.
-		ConstantBuffer mConstantBuffer[NUM_OF_FRAMES];
-
-		//The vertices and indicies for the scene.
-		std::vector<FAShapes::Vertex> mVertexList;
-		std::vector<unsigned int> mIndexList;
-
-		//The vertex and index buffer for the scene.
-		VertexBuffer mVertexBuffer;
-		IndexBuffer mIndexBuffer;
+		//Stores all of the constant buffers this scene uses. We can't update a dynamic buffer until the GPU
+		//is done executing all the commands that reference it, so each frame needs its own dynamic buffer.
+		DynamicBuffer mConstantBuffer[DeviceResources::NUM_OF_FRAMES];
 
 		//All of the text that is rendered with the scene.
 		std::vector<Text> mTexts;
