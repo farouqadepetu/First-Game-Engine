@@ -29,7 +29,7 @@ namespace FACamera
 		return mN;
 	}
 
-	const mat4& Camera::GetViewTransformationMatrix() const
+	const mat4& Camera::GetViewMatrix() const
 	{
 		return mViewMatrix;
 	}

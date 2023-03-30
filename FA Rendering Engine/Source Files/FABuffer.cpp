@@ -256,8 +256,55 @@ namespace FARender
 		mMappedData = nullptr;
 	}
 
-	void DynamicBuffer::CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const UINT& numOfBytes)
+	D3D12_GPU_VIRTUAL_ADDRESS DynamicBuffer::GetGPUAddress() const
 	{
+		return mDynamicBuffer->GetGPUVirtualAddress();
+	}
+
+	const unsigned int& DynamicBuffer::GetStride() const
+	{
+		return mStride;
+	}
+
+	const DXGI_FORMAT& DynamicBuffer::GetFormat() const
+	{
+		return mFormat;
+	}
+
+	void DynamicBuffer::CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,  UINT numOfBytes, UINT stride)
+	{
+		mStride = stride;
+
+		//describe the constant buffer
+		D3D12_RESOURCE_DESC dynamicBufferDescription{};
+		dynamicBufferDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		dynamicBufferDescription.Alignment = 0;
+		dynamicBufferDescription.Width = numOfBytes;
+		dynamicBufferDescription.Height = 1;
+		dynamicBufferDescription.DepthOrArraySize = 1;
+		dynamicBufferDescription.MipLevels = 1;
+		dynamicBufferDescription.Format = DXGI_FORMAT_UNKNOWN;
+		dynamicBufferDescription.SampleDesc.Count = 1;
+		dynamicBufferDescription.SampleDesc.Quality = 0;
+		dynamicBufferDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		dynamicBufferDescription.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		//Use this class to say which type of heap our buffer will be stored in.
+		CD3DX12_HEAP_PROPERTIES dynamicBufferHeapProp(D3D12_HEAP_TYPE_UPLOAD);
+
+		//allocate memory for the dynamic buffer
+		ThrowIfFailed(device->CreateCommittedResource(&dynamicBufferHeapProp,
+			D3D12_HEAP_FLAG_NONE, &dynamicBufferDescription,
+			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mDynamicBuffer)));
+
+		//Map the dyanmic buffer
+		ThrowIfFailed(mDynamicBuffer->Map(0, nullptr, (void**)&mMappedData));
+	}
+
+	void DynamicBuffer::CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, UINT numOfBytes, DXGI_FORMAT format)
+	{
+		mFormat = format;
+
 		//describe the constant buffer
 		D3D12_RESOURCE_DESC dynamicBufferDescription{};
 		dynamicBufferDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
@@ -286,7 +333,7 @@ namespace FARender
 
 	void DynamicBuffer::CreateConstantBufferView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& cbvHeap, UINT cbvSize, UINT cbvHeapIndex,
-		UINT cBufferIndex, UINT numBytes)
+		UINT cBufferIndex)
 	{
 		//Get the GPU address of the dyanmic buffer.
 		D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ mDynamicBuffer->GetGPUVirtualAddress() };
@@ -295,10 +342,10 @@ namespace FARender
 		D3D12_CONSTANT_BUFFER_VIEW_DESC constBufferViewDescription{};
 
 		//offset to the object's constant data in the consatnt buffer.
-		constBufferViewDescription.BufferLocation = cbAddress + (UINT64)(cBufferIndex * numBytes);
+		constBufferViewDescription.BufferLocation = cbAddress + (UINT64)(cBufferIndex * mStride);
 
 		//number of bytes the object's constant data has
-		constBufferViewDescription.SizeInBytes = numBytes;
+		constBufferViewDescription.SizeInBytes = mStride;
 
 		//Get the address of where we want to store the view in the descriptor heap
 		CD3DX12_CPU_DESCRIPTOR_HANDLE handle =
@@ -309,18 +356,18 @@ namespace FARender
 		device->CreateConstantBufferView(&constBufferViewDescription, handle);
 	}
 
-	void DynamicBuffer::CreateVertexBufferView(UINT numBytes, UINT stride)
+	void DynamicBuffer::CreateVertexBufferView(UINT numBytes)
 	{
 		mVertexBufferView.BufferLocation = mDynamicBuffer->GetGPUVirtualAddress();
 		mVertexBufferView.SizeInBytes = numBytes;
-		mVertexBufferView.StrideInBytes = stride;
+		mVertexBufferView.StrideInBytes = mStride;
 	}
 
-	void DynamicBuffer::CreateIndexBufferView(UINT numBytes, DXGI_FORMAT format)
+	void DynamicBuffer::CreateIndexBufferView(UINT numBytes)
 	{
 		mIndexBufferView.BufferLocation = mDynamicBuffer->GetGPUVirtualAddress();
 		mIndexBufferView.SizeInBytes = numBytes;
-		mIndexBufferView.Format = format;
+		mIndexBufferView.Format = mFormat;
 	}
 
 	const D3D12_VERTEX_BUFFER_VIEW& DynamicBuffer::GetVertexBufferView()
@@ -333,9 +380,9 @@ namespace FARender
 		return mIndexBufferView;
 	}
 
-	void DynamicBuffer::CopyData(UINT index, const void* data, UINT64 numOfBytes, UINT stride)
+	void DynamicBuffer::CopyData(UINT index, const void* data, UINT64 numOfBytes)
 	{
-		memcpy(&mMappedData[index * stride], data, numOfBytes);
+		memcpy(&mMappedData[index * mStride], data, numOfBytes);
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

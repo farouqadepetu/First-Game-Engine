@@ -133,17 +133,15 @@ namespace FARender
 		*/
 		void CreateDynamicIndexBuffer(unsigned int numBytes, DXGI_FORMAT format);
 
-		/**@brief Creates the CBV heap.
+		/**@brief Creates a constant buffer to store constant data that is dependent on objects.
+		* E.g. Model matrices.
 		*/
-		void CreateCBVHeap(UINT numDescriptors, UINT shaderRegister);
+		void CreateObjectConstantBuffer(UINT numOfBytes, UINT stride);
 
-		/**@brief Creates a constant buffer for each frame.
+		/**@brief Creates a constant buffer to store constant data that is not dependent on objects.
+		* E.g. view matrix.
 		*/
-		void CreateConstantBuffer(UINT numOfBytes);
-
-		/**@brief Creates a constant buffer view for each frame and stores it in the CBV heap.
-		*/
-		void CreateConstantBufferView(UINT index, UINT numBytes);
+		void CreatePassConstantBuffer(UINT numOfBytes, UINT stride);
 
 		/**@brief Sets the PSO in the specified DrawSettings structure to the specified pso.
 		* If the index to the specified DrawSettings structure is out of bounds an out_of_range exception is thrown.
@@ -277,15 +275,19 @@ namespace FARender
 
 		/**@brief Copies the specified data into the dyanmic vertex buffer.
 		*/
-		void CopyDataIntoDyanmicVertexBuffer(UINT index, const void* data, UINT64 numOfBytes, UINT stride);
+		void CopyDataIntoDyanmicVertexBuffer(UINT index, const void* data, UINT64 numOfBytes);
 
 		/**@brief Copies the specified data into the dyanmic index buffer.
 		*/
-		void CopyDataIntoDyanmicIndexBuffer(UINT index, const void* data, UINT64 numOfBytes, UINT stride);
+		void CopyDataIntoDyanmicIndexBuffer(UINT index, const void* data, UINT64 numOfBytes);
 
-		/**@brief Copies the specified data into the constant buffer.
+		/**@brief Copies the specified data into the object constant buffer.
 		*/
-		void CopyDataIntoConstantBuffer(UINT index,  const void* data, UINT64 numOfBytes, UINT stride);
+		void CopyDataIntoObjectConstantBuffer(UINT index,  const void* data, UINT64 numOfBytes);
+
+		/**@brief Copies the specified data into the pass constant buffer.
+		*/
+		void CopyDataIntoPassConstantBuffer(UINT index, const void* data, UINT64 numOfBytes);
 
 		/**@brief Returns true if MSAA is enabled, false otherwise.
 		*/
@@ -325,26 +327,34 @@ namespace FARender
 		std::vector<D3D12_INPUT_ELEMENT_DESC> mInputElementDescriptions;
 
 		//Stores draw settings that the scene uses.
-		std::vector<DrawSettings> mSceneObjects;
+		std::vector<DrawSettings> mObjects;
 
 		//The static vertex and index buffer for the scene.
+		//Stores vertices and indices that don't need to be updated after they are stored in the buffers.
 		StaticBuffer mStaticVertexBuffer;
 		StaticBuffer mStaticIndexBuffer;
 
 		//The dynamic vertex and index buffer for the scene.
-		//Stores all of the vertices and indices this scene uses. We can't update a dynamic buffer until the GPU
+		//Stores vertices and indices that are going to be updated on a per-frame basis.
+		// We can't update a dynamic buffer until the GPU
 		//is done executing all the commands that reference it, so each frame needs its own constant buffer.
 		DynamicBuffer mDynamicVertexBuffer[DeviceResources::NUM_OF_FRAMES];
 		DynamicBuffer mDynamicIndexBuffer[DeviceResources::NUM_OF_FRAMES];
 
-		//Each scene gets a CBV heap.
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCBVHeap;
-		D3D12_DESCRIPTOR_RANGE mCBVHeapDescription{};
-		D3D12_ROOT_PARAMETER mCBVHeapRootParameter;
-
-		//Stores all of the constant buffers this scene uses. We can't update a dynamic buffer until the GPU
+		//Stores constant data that is object dependent.
+		//e.g. model matrices.
+		//We can't update a dynamic buffer until the GPU
 		//is done executing all the commands that reference it, so each frame needs its own dynamic buffer.
-		DynamicBuffer mConstantBuffer[DeviceResources::NUM_OF_FRAMES];
+		DynamicBuffer mObjectConstantBuffer[DeviceResources::NUM_OF_FRAMES];
+
+		//Stores constant data that is not object dependent.
+		//e.g. view matrix.
+		//We can't update a dynamic buffer until the GPU
+		//is done executing all the commands that reference it, so each frame needs its own dynamic buffer.
+		DynamicBuffer mPassConstantBuffer[DeviceResources::NUM_OF_FRAMES];
+
+		//Describes all of the constant data that is expected in a shader.
+		D3D12_ROOT_PARAMETER mRootParameters[2];
 
 		//All of the text that is rendered with the scene.
 		std::vector<Text> mTexts;

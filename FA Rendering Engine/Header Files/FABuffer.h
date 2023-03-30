@@ -92,6 +92,7 @@ namespace FARender
 		DXGI_FORMAT mDepthStencilFormat;
 	};
 
+
 	/** @class StaticBuffer ""
 	*	@brief This class stores data in a Direct3D 12 default buffer.
 	*
@@ -151,23 +152,39 @@ namespace FARender
 		*/
 		~DynamicBuffer();
 
+		/**@brief Returns the GPU virtual address of the first byte of the dynamic buffer.
+		*/
+		D3D12_GPU_VIRTUAL_ADDRESS GetGPUAddress() const;
+
+		/**@brief Returns the stride of the dymanic buffer.
+		*/
+		const unsigned int& GetStride() const;
+
+		/**@brief Returns the format of the dymanic buffer.
+		*/
+		const DXGI_FORMAT& GetFormat() const;
+
 		/**@brief Creates and maps the dynamic buffer.
 		*/
-		void CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, const UINT& numOfBytes);
+		void CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, UINT numOfBytes, UINT stride);
+
+		/**@brief Creates and maps the dynamic buffer.
+		*/
+		void CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, UINT numOfBytes, DXGI_FORMAT format);
 
 		/**@brief Creates and maps the constant buffer view and stores it in the specified descriptor heap.
 		*/
 		void CreateConstantBufferView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& cbvHeap, UINT cbvSize, UINT cbvHeapIndex,
-			UINT cBufferIndex, UINT numBytes);
+			UINT cBufferIndex);
 
 		/**@brief Creates the vertex buffer view and stores it.
 		*/
-		void CreateVertexBufferView(UINT numBytes, UINT stride);
+		void CreateVertexBufferView(UINT numBytes);
 
 		/**@brief Creates the vertex buffer view and stores it.
 		*/
-		void CreateIndexBufferView(UINT numBytes, DXGI_FORMAT format);
+		void CreateIndexBufferView(UINT numBytes);
 
 		/**@brief Returns a constant reference to the vertex buffer view.
 		*/
@@ -180,11 +197,17 @@ namespace FARender
 		/**@brief Copies data from the given data into the dynamic buffer.
 		* Uses 0-indexing.
 		*/
-		void CopyData(UINT index, const void* data, UINT64 numOfBytes, UINT stride);
+		void CopyData(UINT index, const void* data, UINT64 numOfBytes);
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> mDynamicBuffer;
 		BYTE* mMappedData{ nullptr };
+
+		union
+		{
+			UINT mStride;
+			DXGI_FORMAT mFormat;
+		};
 
 		union
 		{

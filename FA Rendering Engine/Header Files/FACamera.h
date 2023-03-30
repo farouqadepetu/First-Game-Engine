@@ -64,7 +64,7 @@ namespace FACamera
 
 		/**@brief Returns a constant reference to the view transformation matrix of this camera.
 		*/
-		const mat4& GetViewTransformationMatrix() const;
+		const mat4& GetViewMatrix() const;
 
 		/**@brief Returns the camera's velocity.
 		*/
