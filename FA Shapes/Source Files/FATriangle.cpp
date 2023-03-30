@@ -1,17 +1,12 @@
 #include "FATriangle.h"
 #include <stdexcept>
+#include <sstream>
 
 namespace FAShapes
 {
 	Triangle::Triangle(Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
 		: mVertexList{ vertexList }, mIndexList{ p0Index, p1Index, p2Index }
-	{
-		if (mVertexList != nullptr)
-		{
-			if (IsColinear())
-				throw std::runtime_error("The triangle vertices are colinear");
-		}
-	}
+	{}
 
 	const Vertex& Triangle::GetP0() const
 	{
@@ -72,14 +67,26 @@ namespace FAShapes
 		mVertexList = vertexList;
 	}
 
+	void Triangle::SetP0Index(unsigned int index)
+	{
+		mIndexList[0] = index;
+	}
+
+	void Triangle::SetP1Index(unsigned int index)
+	{
+		mIndexList[1] = index;
+	}
+
+	void Triangle::SetP2Index(unsigned int index)
+	{
+		mIndexList[2] = index;
+	}
+
 	void Triangle::SetTriangleIndices(unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
 	{
 		mIndexList[0] = p0Index;
 		mIndexList[1] = p1Index;
 		mIndexList[2] = p2Index;
-
-		if (IsColinear())
-			throw std::runtime_error("The triangle vertices are colinear");
 	}
 
 	void Triangle::SetTriangle(Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
@@ -88,23 +95,5 @@ namespace FAShapes
 		mIndexList[0] = p0Index;
 		mIndexList[1] = p1Index;
 		mIndexList[2] = p2Index;
-
-		if (IsColinear())
-			throw std::runtime_error("The triangle vertices are colinear");
-	}
-
-	//If the area of th triangle formed by the 3 points isn't zero then they aren't colinear.
-	//The area of a triangle is |((p1 - p0) x (p2 - p0))| / 2
-	bool Triangle::IsColinear()
-	{
-		FAMath::Vector3D p01{ mVertexList[mIndexList[1]].position - mVertexList[mIndexList[0]].position };
-		FAMath::Vector3D p02{ mVertexList[mIndexList[2]].position - mVertexList[mIndexList[0]].position };
-
-		float area = Length(CrossProduct(p01, p02)) / 2.0f;
-
-		if (FAMath::CompareFloats(area, 0.0f, 1e-6f))
-			return true;
-		
-		return false;
 	}
 }

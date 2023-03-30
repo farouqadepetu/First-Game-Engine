@@ -204,26 +204,26 @@ namespace FARender
 		void BeforeDrawObjects();
 
 		/**@brief Draws objects in the static vertex buffer that use the same PSO, root signature and primitive.
-		* Call in between a beforeDrawObjects function and a afterDrawObjects function.\n
+		* Call in between a BeforeDrawObjects function and a AfterDrawObjects function.\n
 		*
 		* Ex.\n
-		* beforeDrawObjects()\n
-		* drawObjects()\n
-		* drawObjects()\n
-		* afterDrawObjects()\n
+		* BeforeDrawObjects()\n
+		* DrawStatic()\n
+		* DrawStatic()\n
+		* AfterDrawObjects()\n
 		*
 		* Throws an out_of_range exception if the index of the specified DrawSettings structure is out of bounds.
 		*/
 		void DrawStatic(unsigned int drawSettingsIndex);
 
 		/**@brief Draws objects in the dynamic vertex buffer that use the same PSO, root signature and primitive.
-		* Call in between a beforeDrawObjects function and a afterDrawObjects function.\n
+		* Call in between a BeforeDrawObjects function and a AfterDrawObjects function.\n
 		*
 		* Ex.\n
-		* beforeDrawObjects()\n
-		* drawObjects()\n
-		* drawObjects()\n
-		* afterDrawObjects()\n
+		* BeforeDrawObjects()\n
+		* DrawDynamic()\n
+		* DrawDynamic()\n
+		* AfterDrawObjects()\n
 		*
 		* Throws an out_of_range exception if the index of the specified DrawSettings structure is out of bounds.
 		*/
@@ -242,10 +242,10 @@ namespace FARender
 		* Call in between a BeforeDrawText function and a AfterDrawText function.\n
 		*
 		* Ex.\n
-		* beforeDrawText()\n
-		* drawText()\n
-		* drawText()\n
-		* afterDrawText()\n
+		* BeforeDrawText()\n
+		* RenderText()\n
+		* RenderText()\n
+		* AfterDrawText()\n
 		*
 		* Throws an out_of_range exception if the specified Text object does not exist.
 		*/
@@ -341,13 +341,13 @@ namespace FARender
 		DynamicBuffer mDynamicVertexBuffer[DeviceResources::NUM_OF_FRAMES];
 		DynamicBuffer mDynamicIndexBuffer[DeviceResources::NUM_OF_FRAMES];
 
-		//Stores constant data that is object dependent.
+		//Stores constant data that is related to objects.
 		//e.g. model matrices.
 		//We can't update a dynamic buffer until the GPU
 		//is done executing all the commands that reference it, so each frame needs its own dynamic buffer.
 		DynamicBuffer mObjectConstantBuffer[DeviceResources::NUM_OF_FRAMES];
 
-		//Stores constant data that is not object dependent.
+		//Stores constant data that is not related to objects.
 		//e.g. view matrix.
 		//We can't update a dynamic buffer until the GPU
 		//is done executing all the commands that reference it, so each frame needs its own dynamic buffer.

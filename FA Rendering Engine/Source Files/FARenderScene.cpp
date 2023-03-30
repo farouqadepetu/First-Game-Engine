@@ -378,7 +378,7 @@ namespace FARender
 			D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ mObjectConstantBuffer[mDeviceResources.GetCurrentFrame()].GetGPUAddress() };
 
 			//Calculate the offset of where the objects constant data is in the constant buffer.
-			UINT64 offset = i.indexOfConstantData * mObjectConstantBuffer[mDeviceResources.GetCurrentFrame()].GetStride();
+			UINT64 offset = (UINT64)(i.indexOfConstantData * mObjectConstantBuffer[mDeviceResources.GetCurrentFrame()].GetStride());
 			cbAddress += offset;
 
 			//Set the GPU address of the objects constant data.

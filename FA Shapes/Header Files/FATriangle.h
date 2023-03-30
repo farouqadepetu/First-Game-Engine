@@ -56,6 +56,18 @@ namespace FAShapes
 		*/
 		void SetVertexList(Vertex* vertexList);
 
+		/**@brief Sets the P0 index to the specified index.
+		*/
+		void SetP0Index(unsigned int index);
+
+		/**@brief Sets the P1 index to the specified index.
+		*/
+		void SetP1Index(unsigned int index);
+
+		/**@brief Sets the P2 index to the specified index.
+		*/
+		void SetP2Index(unsigned int index);
+
 		/**@brief Sets the indices of the vertices that make up the triangle to the specified vertices.
 		* If the 3 vertices that make up the triangle are colinear, a runtime_exception is thrown.
 		*/
@@ -70,6 +82,5 @@ namespace FAShapes
 	private:
 		Vertex* mVertexList; //pointer to a vertex list
 		unsigned int mIndexList[3]; //indices into a vertex list
-		bool IsColinear();
 	};
 }
