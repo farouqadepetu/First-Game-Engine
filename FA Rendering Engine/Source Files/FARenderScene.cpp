@@ -20,21 +20,6 @@ namespace FARender
 		mCamera.SetAspectRatio((float)width / height);
 	}
 
-	const DeviceResources& RenderScene::GetDeviceResources() const
-	{
-		return mDeviceResources;
-	}
-
-	FAShapes::DrawArguments& RenderScene::GetDrawArguments(unsigned int drawSettingsIndex, unsigned int drawArgsIndex)
-	{
-		return mObjects.at(drawSettingsIndex).drawArgs.at(drawArgsIndex);
-	}
-
-	const FAShapes::DrawArguments& RenderScene::GetDrawArguments(unsigned int drawSettingsIndex, unsigned int drawArgsIndex) const
-	{
-		return mObjects.at(drawSettingsIndex).drawArgs.at(drawArgsIndex);
-	}
-
 	FACamera::Camera& RenderScene::GetCamera()
 	{
 		return mCamera;
@@ -57,7 +42,7 @@ namespace FARender
 
 	void RenderScene::LoadShader(const std::wstring& filename)
 	{
-		//opens the file
+		//opens the shader file.
 		std::ifstream fin(filename, std::ios::binary);
 
 		//put the read pointer at the end of the file
@@ -70,37 +55,38 @@ namespace FARender
 		fin.seekg(0, std::ios_base::beg);
 
 		//create a buffer
-		Microsoft::WRL::ComPtr<ID3DBlob> blob;
-		ThrowIfFailed(D3DCreateBlob(size, blob.GetAddressOf()));
+		Microsoft::WRL::ComPtr<ID3DBlob> bytecode;
+		ThrowIfFailed(D3DCreateBlob(size, bytecode.GetAddressOf()));
 
 		//read the bytes and store the bytes in the buffer
-		fin.read((char*)blob->GetBufferPointer(), size);
-		
-		mShaders.push_back(blob);
+		fin.read((char*)bytecode->GetBufferPointer(), size);
+
+		//Store the shader bytecode.
+		mShaders.push_back(bytecode);
 	}
 
-	void RenderScene::LoadShaderAndCompile(const std::wstring& filename, const std::string& entryPointName, 
-		const std::string& target)
+	void RenderScene::CompileShader(const std::wstring& filename, const std::string& entryPointName, const std::string& target)
 	{
 		unsigned int compileFlags{ 0 };
 #if defined(_DEBUG)
 		compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
-		Microsoft::WRL::ComPtr<ID3DBlob> byteCode{ nullptr };
+		Microsoft::WRL::ComPtr<ID3DBlob> bytecode{ nullptr };
 		Microsoft::WRL::ComPtr<ID3DBlob> errors{ nullptr };
 		
 		//Compile shader.
 		HRESULT compileErrorCode{ D3DCompileFromFile(filename.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, 
-			entryPointName.c_str(),target.c_str(), compileFlags, 0, &byteCode, &errors) };
+			entryPointName.c_str(), target.c_str(), compileFlags, 0, &bytecode, &errors) };
 
 		//If there was an error compiling the shader, display debug message in debug window if in debug mode.
 		if (errors != nullptr)
 			OutputDebugStringA((char*)errors->GetBufferPointer());
-		else
-			mShaders.push_back(byteCode);
 		
 		ThrowIfFailed(compileErrorCode);
+
+		//Store the shader bytecode.
+		mShaders.push_back(bytecode);
 	}
 
 	void RenderScene::RemoveShader(unsigned int index)
@@ -111,7 +97,7 @@ namespace FARender
 		mShaders.erase(mShaders.begin() + index);
 	}
 
-	void RenderScene::CreateInputElementDescription(const char* semanticName, unsigned int semanticIndex,
+	void RenderScene::CreateInputElementDescription(unsigned int index, const char* semanticName, unsigned int semanticIndex,
 		DXGI_FORMAT format, unsigned int inputSlot, unsigned int byteOffset,
 		D3D12_INPUT_CLASSIFICATION inputSlotClassifcation,
 		unsigned int instanceStepRate)
@@ -125,99 +111,7 @@ namespace FARender
 		inputElementDescription.InputSlotClass = inputSlotClassifcation;
 		inputElementDescription.InstanceDataStepRate = instanceStepRate;
 
-		mInputElementDescriptions.push_back(inputElementDescription);
-	}
-
-	void RenderScene::RemoveInputElementDescription(unsigned int index)
-	{
-		if (index>= mInputElementDescriptions.size())
-			throw std::out_of_range("Index is out of bounds");
-		
-		mInputElementDescriptions.erase(mInputElementDescriptions.begin() + index);
-	}
-
-	void RenderScene::CreatePSO(unsigned int drawSettingsIndex, D3D12_FILL_MODE fillMode, BOOL enableMultisample,
-		unsigned int vsIndex, unsigned int psIndex, const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, UINT sampleCount)
-	{
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC pState{};
-		ZeroMemory(&pState, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC)); //fills the block of memory with zeros
-
-		pState.pRootSignature = mObjects.at(drawSettingsIndex).rootSig.Get();
-
-		pState.VS.pShaderBytecode = (BYTE*)mShaders.at(vsIndex)->GetBufferPointer();
-		pState.VS.BytecodeLength = mShaders.at(vsIndex)->GetBufferSize();
-
-		pState.PS.pShaderBytecode = (BYTE*)mShaders.at(psIndex)->GetBufferPointer();
-		pState.PS.BytecodeLength = mShaders.at(psIndex)->GetBufferSize();
-
-		pState.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-
-		pState.SampleMask = UINT_MAX;
-
-		D3D12_RASTERIZER_DESC rDescription{};
-		rDescription.FillMode = fillMode;
-		rDescription.CullMode = D3D12_CULL_MODE_BACK;
-		rDescription.FrontCounterClockwise = FALSE;
-		rDescription.DepthBias = 0;
-		rDescription.DepthBiasClamp = 0.0f;
-		rDescription.SlopeScaledDepthBias = 0.0f;
-		rDescription.DepthClipEnable = TRUE;
-		rDescription.MultisampleEnable = enableMultisample;
-		rDescription.AntialiasedLineEnable = FALSE;
-		rDescription.ForcedSampleCount = 0;
-		rDescription.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
-
-		pState.RasterizerState = rDescription;
-
-		pState.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-
-		pState.InputLayout.pInputElementDescs = mInputElementDescriptions.data();
-		pState.InputLayout.NumElements = (UINT)mInputElementDescriptions.size();
-
-		pState.PrimitiveTopologyType = primitiveType;
-
-		pState.NumRenderTargets = 1;
-		pState.RTVFormats[0] = mDeviceResources.GetBackBufferFormat();
-
-		pState.DSVFormat = mDeviceResources.GetDepthStencilFormat();
-
-		pState.SampleDesc.Count = sampleCount;
-		pState.SampleDesc.Quality = 0;
-
-		Microsoft::WRL::ComPtr<ID3D12PipelineState> tempPSO;
-		ThrowIfFailed(mDeviceResources.GetDevice()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&tempPSO)));
-		mObjects.at(drawSettingsIndex).pipelineState = tempPSO;
-	}
-
-	void RenderScene::CreateRootSignature(unsigned int drawSettingsIndex)
-	{
-		//Describe a root signature to store all our root parameters.
-		D3D12_ROOT_SIGNATURE_DESC rootSignatureDescription{};
-		rootSignatureDescription.NumParameters = 2; //number of root paramters
-		rootSignatureDescription.pParameters = mRootParameters; //the array of root parameters
-		rootSignatureDescription.NumStaticSamplers = 0;
-		rootSignatureDescription.pStaticSamplers = nullptr;
-		rootSignatureDescription.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-		//serializes the root signature
-		Microsoft::WRL::ComPtr<ID3DBlob> seralizedRootSignature;
-		Microsoft::WRL::ComPtr<ID3DBlob> seralizedRootSignatureError;
-		HRESULT e = D3D12SerializeRootSignature(&rootSignatureDescription, D3D_ROOT_SIGNATURE_VERSION_1,
-			seralizedRootSignature.GetAddressOf(), seralizedRootSignatureError.GetAddressOf());
-
-		//error message will be stored in seralizedRootSignatureError if D3D12SerializeRootSignature fails.
-		if (seralizedRootSignatureError != nullptr)
-		{
-			//sends a string to the debugger to be displayed
-			::OutputDebugStringA((char*)seralizedRootSignatureError->GetBufferPointer());
-		}
-		ThrowIfFailed(e);
-
-		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;
-		ThrowIfFailed(mDeviceResources.GetDevice()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
-			seralizedRootSignature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
-
-		mObjects.at(drawSettingsIndex).rootSig = rootSignature;
+		mInputElementDescriptions[index].push_back(inputElementDescription);
 	}
 
 	void RenderScene::CreateStaticVertexBuffer(const void* data, unsigned int numBytes, unsigned int stride)
@@ -286,54 +180,105 @@ namespace FARender
 		mRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	}
 
-	void RenderScene::SetPSO(unsigned int drawSettingsIndex,
-		const Microsoft::WRL::ComPtr<ID3D12PipelineState>& pso)
+	void RenderScene::CreateRootSignature()
 	{
-		mObjects.at(drawSettingsIndex).pipelineState = pso;
+		//Describe a root signature to store all our root parameters.
+		D3D12_ROOT_SIGNATURE_DESC rootSignatureDescription{};
+		rootSignatureDescription.NumParameters = 2; //number of root paramters
+		rootSignatureDescription.pParameters = mRootParameters; //the array of root parameters
+		rootSignatureDescription.NumStaticSamplers = 0;
+		rootSignatureDescription.pStaticSamplers = nullptr;
+		rootSignatureDescription.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+		//serializes the root signature
+		Microsoft::WRL::ComPtr<ID3DBlob> seralizedRootSignature;
+		Microsoft::WRL::ComPtr<ID3DBlob> seralizedRootSignatureError;
+		HRESULT e = D3D12SerializeRootSignature(&rootSignatureDescription, D3D_ROOT_SIGNATURE_VERSION_1,
+			seralizedRootSignature.GetAddressOf(), seralizedRootSignatureError.GetAddressOf());
+
+		//error message will be stored in seralizedRootSignatureError if D3D12SerializeRootSignature fails.
+		if (seralizedRootSignatureError != nullptr)
+		{
+			//sends a string to the debugger to be displayed
+			::OutputDebugStringA((char*)seralizedRootSignatureError->GetBufferPointer());
+		}
+		ThrowIfFailed(e);
+
+		ThrowIfFailed(mDeviceResources.GetDevice()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
+			seralizedRootSignature->GetBufferSize(), IID_PPV_ARGS(&mRootSignature)));
 	}
 
-	void RenderScene::SetRootSignature(unsigned int drawSettingsIndex,
-		const Microsoft::WRL::ComPtr<ID3D12RootSignature>& rootSignature)
+	void RenderScene::CreatePSO(D3D12_FILL_MODE fillMode, BOOL enableMultisample,
+		unsigned int vsIndex, unsigned int psIndex, unsigned int inputElementDescriptionsIndex,
+		const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, UINT sampleCount)
 	{
-		mObjects.at(drawSettingsIndex).rootSig = rootSignature;
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC pState{};
+		ZeroMemory(&pState, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC)); //fills the block of memory with zeros
+
+		pState.pRootSignature = mRootSignature.Get();
+
+		pState.VS.pShaderBytecode = mShaders.at(vsIndex)->GetBufferPointer();
+		pState.VS.BytecodeLength = mShaders.at(vsIndex)->GetBufferSize();
+
+		pState.PS.pShaderBytecode = mShaders.at(psIndex)->GetBufferPointer();
+		pState.PS.BytecodeLength = mShaders.at(psIndex)->GetBufferSize();
+
+		pState.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+
+		pState.SampleMask = UINT_MAX;
+
+		D3D12_RASTERIZER_DESC rDescription{};
+		rDescription.FillMode = fillMode;
+		rDescription.CullMode = D3D12_CULL_MODE_BACK;
+		rDescription.FrontCounterClockwise = FALSE;
+		rDescription.DepthBias = 0;
+		rDescription.DepthBiasClamp = 0.0f;
+		rDescription.SlopeScaledDepthBias = 0.0f;
+		rDescription.DepthClipEnable = TRUE;
+		rDescription.MultisampleEnable = enableMultisample;
+		rDescription.AntialiasedLineEnable = FALSE;
+		rDescription.ForcedSampleCount = 0;
+		rDescription.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+		pState.RasterizerState = rDescription;
+
+		pState.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+
+		pState.InputLayout.pInputElementDescs = mInputElementDescriptions[inputElementDescriptionsIndex].data();
+		pState.InputLayout.NumElements = (UINT)mInputElementDescriptions[inputElementDescriptionsIndex].size();
+
+		pState.PrimitiveTopologyType = primitiveType;
+
+		pState.NumRenderTargets = 1;
+		pState.RTVFormats[0] = mDeviceResources.GetBackBufferFormat();
+
+		pState.DSVFormat = mDeviceResources.GetDepthStencilFormat();
+
+		pState.SampleDesc.Count = sampleCount;
+		pState.SampleDesc.Quality = 0;
+
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> tempPSO;
+		ThrowIfFailed(mDeviceResources.GetDevice()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&tempPSO)));
+		mPSOs.push_back(tempPSO);
 	}
 
-	void RenderScene::SetPrimitive(unsigned int drawSettingsIndex,
-		const D3D_PRIMITIVE_TOPOLOGY& primitive)
-	{
-		mObjects.at(drawSettingsIndex).prim = primitive;
-	}
-
-	void RenderScene::AddDrawArgument(unsigned int drawSettingsIndex,
+	void RenderScene::AddDrawArgument(unsigned int index,
 		const FAShapes::DrawArguments& drawArg)
 	{
-		mObjects.at(drawSettingsIndex).drawArgs.push_back(drawArg);
+		mObjects[index].push_back(drawArg);
 	}
 
-	void RenderScene::CreateDrawArgument(unsigned int drawSettingsIndex,
+	void RenderScene::CreateDrawArgument(unsigned int index,
 		unsigned int indexCount, unsigned int locationOfFirstIndex, int indexOfFirstVertex, int indexOfConstantData)
 	{
 		FAShapes::DrawArguments drawArgs{ indexCount, locationOfFirstIndex, indexOfFirstVertex, indexOfConstantData };
-		mObjects.at(drawSettingsIndex).drawArgs.push_back(drawArgs);
+		mObjects[index].push_back(drawArgs);
 	}
 
-	void RenderScene::RemoveDrawArgument(unsigned int drawSettingsIndex, unsigned int drawArgIndex)
+	void RenderScene::RemoveDrawArgument(unsigned int index, unsigned int drawArgIndex)
 	{
-		std::vector<FAShapes::DrawArguments>::iterator it = mObjects.at(drawSettingsIndex).drawArgs.begin();
-		mObjects.at(drawSettingsIndex).drawArgs.erase(it + drawArgIndex);
-	}
-
-	void RenderScene::CreateDrawSettings()
-	{
-		mObjects.push_back(DrawSettings());
-	}
-
-	void RenderScene::RemoveDrawSettings(unsigned int drawSettingsIndex)
-	{
-		if(drawSettingsIndex >= mObjects.size())
-			throw std::out_of_range("Index is out of bounds");
-
-		mObjects.erase(mObjects.begin() + drawSettingsIndex);
+		std::vector<FAShapes::DrawArguments>::iterator it = mObjects.at(index).begin();
+		mObjects.at(index).erase(it + drawArgIndex);
 	}
 
 	void RenderScene::CreateText(FAMath::Vector4D textLocation, const std::wstring& textString,
@@ -355,24 +300,24 @@ namespace FARender
 		mDeviceResources.Draw(mIsMSAAEnabled);
 	}
 
-	void RenderScene::DrawStatic(unsigned int drawSettingsIndex)
+	void RenderScene::DrawStatic(unsigned int psoIndex, unsigned int drawArgsIndex, D3D_PRIMITIVE_TOPOLOGY primitive)
 	{
 		mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, &mStaticVertexBuffer.GetVertexBufferView());
 
 		mDeviceResources.GetCommandList()->IASetIndexBuffer(&mStaticIndexBuffer.GetIndexBufferView());
 
-		mDeviceResources.GetCommandList()->SetPipelineState(mObjects.at(drawSettingsIndex).pipelineState.Get());
+		mDeviceResources.GetCommandList()->SetPipelineState(mPSOs[psoIndex].Get());
 
-		mDeviceResources.GetCommandList()->SetGraphicsRootSignature(mObjects.at(drawSettingsIndex).rootSig.Get());
+		mDeviceResources.GetCommandList()->SetGraphicsRootSignature(mRootSignature.Get());
 
 		//Set the GPU address of the pass constants data.
 		mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(1,
 			mPassConstantBuffer[mDeviceResources.GetCurrentFrame()].GetGPUAddress());
 
-		mDeviceResources.GetCommandList()->IASetPrimitiveTopology(mObjects.at(drawSettingsIndex).prim);
+		mDeviceResources.GetCommandList()->IASetPrimitiveTopology(primitive);
 
 		//draw all the objects the share the same PSO, root signature and primitive
-		for (const FAShapes::DrawArguments& i : mObjects.at(drawSettingsIndex).drawArgs)
+		for (const FAShapes::DrawArguments& i : mObjects.at(drawArgsIndex))
 		{
 			//Get the GPU address of the first byte of the object constant buffer.
 			D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ mObjectConstantBuffer[mDeviceResources.GetCurrentFrame()].GetGPUAddress() };
@@ -390,7 +335,7 @@ namespace FARender
 		}
 	}
 
-	void RenderScene::DrawDynamic(unsigned int drawSettingsIndex)
+	void RenderScene::DrawDynamic(unsigned int psoIndex, unsigned int drawArgsIndex, D3D_PRIMITIVE_TOPOLOGY primitive)
 	{
 		mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, 
 			&mDynamicVertexBuffer[mDeviceResources.GetCurrentFrame()].GetVertexBufferView());
@@ -398,18 +343,18 @@ namespace FARender
 		mDeviceResources.GetCommandList()->IASetIndexBuffer(
 			&mDynamicIndexBuffer[mDeviceResources.GetCurrentFrame()].GetIndexBufferView());
 
-		mDeviceResources.GetCommandList()->SetPipelineState(mObjects.at(drawSettingsIndex).pipelineState.Get());
+		mDeviceResources.GetCommandList()->SetPipelineState(mPSOs[psoIndex].Get());
 
-		mDeviceResources.GetCommandList()->SetGraphicsRootSignature(mObjects.at(drawSettingsIndex).rootSig.Get());
+		mDeviceResources.GetCommandList()->SetGraphicsRootSignature(mRootSignature.Get());
 
 		//Set the GPU address of the pass constants data.
 		mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(1,
 			mPassConstantBuffer[mDeviceResources.GetCurrentFrame()].GetGPUAddress());
 
-		mDeviceResources.GetCommandList()->IASetPrimitiveTopology(mObjects.at(drawSettingsIndex).prim);
+		mDeviceResources.GetCommandList()->IASetPrimitiveTopology(primitive);
 
 		//draw all the objects the share the same PSO, root signature and primitive
-		for (const FAShapes::DrawArguments& i : mObjects.at(drawSettingsIndex).drawArgs)
+		for (const FAShapes::DrawArguments& i : mObjects.at(drawArgsIndex))
 		{
 			//Get the GPU address of the first byte of the object constant buffer.
 			D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ mObjectConstantBuffer[mDeviceResources.GetCurrentFrame()].GetGPUAddress() };
@@ -500,12 +445,6 @@ namespace FARender
 	{
 		mDeviceResources.Execute();
 		mDeviceResources.FlushCommandQueue();
-	}
-
-	void RenderScene::NextFrame()
-	{
-		mDeviceResources.NextFrame();
-		mDeviceResources.WaitForGPU();
 	}
 
 	void RenderScene::Resize(unsigned int width, unsigned int height, HWND windowHandle)
