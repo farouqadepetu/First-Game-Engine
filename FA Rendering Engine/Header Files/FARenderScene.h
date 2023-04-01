@@ -25,7 +25,7 @@ namespace FARender
 		* *Initializes all necessary resources.
 		* Sets the cameras aspect ratio the given width / height.
 		*/
-		RenderScene(unsigned int width, unsigned int height, HWND windowHandle);
+		RenderScene(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled = false, bool isTextEnabled = false);
 
 		RenderScene(const RenderScene&) = delete;
 		RenderScene& operator=(const RenderScene&) = delete;
@@ -140,7 +140,7 @@ namespace FARender
 		/**@brief Puts all of the commands needed in the command list before drawing the objects of the scene.
 		* Call before calling the first drawObjects function.
 		*/
-		void BeforeDrawObjects();
+		void BeforeDrawObjects(bool isMSAAEnabled = false);
 
 		/**@brief Draws objects in the static vertex buffer that use the same PSO, root signature and primitive.
 		* Call in between a BeforeDrawObjects function and a AfterDrawObjects function.\n
@@ -170,7 +170,7 @@ namespace FARender
 
 		/**@brief Transitions the render target buffer to the correct state and excutes commands.
 		*/
-		void AfterDrawObjects();
+		void AfterDrawObjects(bool isMSAAEnabled = false, bool isTextEnabled = false);
 		
 		/**@brief Puts all of the commands needed in the command list before drawing the text of the scene.
 		* Call before calling the first RenderText function.
@@ -206,7 +206,7 @@ namespace FARender
 
 		/**@brief Resizes the DeviceResources resources when the window gets resized.
 		*/
-		void Resize(unsigned int width, unsigned int height, HWND windowHandle);
+		void Resize(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled = false, bool isTextEnabled = false);
 
 		/**@brief Copies the specified data into the dyanmic vertex buffer.
 		*/
@@ -224,34 +224,7 @@ namespace FARender
 		*/
 		void CopyDataIntoPassConstantBuffer(UINT index, const void* data, UINT64 numOfBytes);
 
-		/**@brief Returns true if MSAA is enabled, false otherwise.
-		*/
-		bool IsMSAAEnabled() const;
-
-		/**@brief Disables MSAA.
-		*/
-		void DisableMSAA(unsigned int width, unsigned int height, HWND windowHandle);
-
-		/**@brief Enables MSAA.
-		*/
-		void EnableMSAA(unsigned int width, unsigned int height, HWND windowHandle);
-
-		/**@brief Returns true if text is enabled, false otherwise.
-		*/
-		bool IsTextEnabled() const;
-
-		/**@brief Disables text.
-		*/
-		void DisableText(unsigned int width, unsigned int height, HWND windowHandle);
-
-		/**@brief Enables text.
-		*/
-		void EnableText(unsigned int width, unsigned int height, HWND windowHandle);
-
 	private:
-		bool mIsMSAAEnabled;
-		bool mIsTextEnabled;
-
 		//The device resources object that all RenderScene objects share.
 		DeviceResources& mDeviceResources;
 

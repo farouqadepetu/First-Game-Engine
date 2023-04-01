@@ -8,9 +8,8 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//RENDER SCENE FUNCITON DEFINTIONS
 
-	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND windowHandle) :
-		mIsMSAAEnabled{ false }, mIsTextEnabled{ false },
-		mDeviceResources{ DeviceResources::GetInstance(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled) }
+	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled, bool isTextEnabled) :
+		mDeviceResources{ DeviceResources::GetInstance(width, height, windowHandle, isMSAAEnabled, isTextEnabled) }
 
 	{
 		D3D12_ROOT_PARAMETER root{};
@@ -295,9 +294,9 @@ namespace FARender
 		mTexts.erase(mTexts.begin() + textIndex);
 	}
 
-	void RenderScene::BeforeDrawObjects()
+	void RenderScene::BeforeDrawObjects(bool isMSAAEnabled)
 	{
-		mDeviceResources.Draw(mIsMSAAEnabled);
+		mDeviceResources.Draw(isMSAAEnabled);
 	}
 
 	void RenderScene::DrawStatic(unsigned int psoIndex, unsigned int drawArgsIndex, D3D_PRIMITIVE_TOPOLOGY primitive)
@@ -371,60 +370,56 @@ namespace FARender
 		}
 	}
 
-	void RenderScene::AfterDrawObjects()
+	void RenderScene::AfterDrawObjects(bool isMSAAEnabled, bool isTextEnabled)
 	{
-		mDeviceResources.RTBufferTransition(mIsMSAAEnabled, mIsTextEnabled);
+		mDeviceResources.RTBufferTransition(isMSAAEnabled, isTextEnabled);
 
 		mDeviceResources.Execute();
 	}
 
 	void RenderScene::BeforeDrawText()
 	{
-		if(mIsTextEnabled)
-			mDeviceResources.BeforeTextDraw();
+		mDeviceResources.BeforeTextDraw();
 	}
 
 	void RenderScene::RenderText(unsigned int textIndex)
 	{
-		if (mIsTextEnabled)
-		{
-			Text* textToRender{ &mTexts.at(textIndex) };
+		Text* textToRender{ &mTexts.at(textIndex) };
 
-			D2D_RECT_F textLocation{ textToRender->GetTextLocation().GetX(), textToRender->GetTextLocation().GetY(),
-				textToRender->GetTextLocation().GetZ(), textToRender->GetTextLocation().GetW() };
+		D2D_RECT_F textLocation{ textToRender->GetTextLocation().GetX(), textToRender->GetTextLocation().GetY(),
+			textToRender->GetTextLocation().GetZ(), textToRender->GetTextLocation().GetW() };
 
-			D2D1_COLOR_F textColor{ textToRender->GetTextColor().GetRed(), textToRender->GetTextColor().GetGreen(),
-				textToRender->GetTextColor().GetBlue(), textToRender->GetTextColor().GetAlpha() };
+		D2D1_COLOR_F textColor{ textToRender->GetTextColor().GetRed(), textToRender->GetTextColor().GetGreen(),
+			textToRender->GetTextColor().GetBlue(), textToRender->GetTextColor().GetAlpha() };
 
-			Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mDirect2DBrush;
-			Microsoft::WRL::ComPtr<IDWriteTextFormat> mDirectWriteFormat;
+		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mDirect2DBrush;
+		Microsoft::WRL::ComPtr<IDWriteTextFormat> mDirectWriteFormat;
 
-			ThrowIfFailed(mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->CreateSolidColorBrush(textColor,
-				mDirect2DBrush.GetAddressOf()));
+		ThrowIfFailed(mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->CreateSolidColorBrush(textColor,
+			mDirect2DBrush.GetAddressOf()));
 
-			ThrowIfFailed(mDeviceResources.GetTextResources().GetDirectWriteFactory()->CreateTextFormat(
-				L"Verdana",
-				nullptr,
-				DWRITE_FONT_WEIGHT_NORMAL,
-				DWRITE_FONT_STYLE_NORMAL,
-				DWRITE_FONT_STRETCH_NORMAL,
-				textToRender->GetTextSize(),
-				L"en-us",
-				&mDirectWriteFormat));
+		ThrowIfFailed(mDeviceResources.GetTextResources().GetDirectWriteFactory()->CreateTextFormat(
+			L"Verdana",
+			nullptr,
+			DWRITE_FONT_WEIGHT_NORMAL,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			textToRender->GetTextSize(),
+			L"en-us",
+			&mDirectWriteFormat));
 
-			ThrowIfFailed(mDirectWriteFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING));
-			ThrowIfFailed(mDirectWriteFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
+		ThrowIfFailed(mDirectWriteFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING));
+		ThrowIfFailed(mDirectWriteFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
 
-			mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->DrawTextW(textToRender->GetTextString().c_str(),
-				(UINT32)textToRender->GetTextString().size(), mDirectWriteFormat.Get(),
-				&textLocation, mDirect2DBrush.Get());
-		}
+		mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->DrawTextW(textToRender->GetTextString().c_str(),
+			(UINT32)textToRender->GetTextString().size(), mDirectWriteFormat.Get(),
+			&textLocation, mDirect2DBrush.Get());
+		
 	}
 
 	void RenderScene::AfterDrawText()
 	{
-		if (mIsTextEnabled)
-			mDeviceResources.AfterTextDraw();
+		mDeviceResources.AfterTextDraw();
 	}
 
 	void RenderScene::AfterDraw()
@@ -447,9 +442,9 @@ namespace FARender
 		mDeviceResources.FlushCommandQueue();
 	}
 
-	void RenderScene::Resize(unsigned int width, unsigned int height, HWND windowHandle)
+	void RenderScene::Resize(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled, bool isTextEnabled)
 	{
-		mDeviceResources.Resize(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled);
+		mDeviceResources.Resize(width, height, windowHandle, isMSAAEnabled, isTextEnabled);
 
 		mCamera.SetAspectRatio((float)width / height);
 	}
@@ -472,40 +467,6 @@ namespace FARender
 	void RenderScene::CopyDataIntoPassConstantBuffer(UINT index, const void* data, UINT64 numOfBytes)
 	{
 		mPassConstantBuffer[mDeviceResources.GetCurrentFrame()].CopyData(index, data, numOfBytes);
-	}
-
-	bool RenderScene::IsMSAAEnabled() const
-	{
-		return mIsMSAAEnabled;
-	}
-
-	void RenderScene::DisableMSAA(unsigned int width, unsigned int height, HWND windowHandle)
-	{
-		mIsMSAAEnabled = false;
-		mDeviceResources.Resize(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled);
-	}
-
-	void RenderScene::EnableMSAA(unsigned int width, unsigned int height, HWND windowHandle)
-	{
-		mIsMSAAEnabled = true;
-		mDeviceResources.Resize(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled);
-	}
-
-	bool RenderScene::IsTextEnabled() const
-	{
-		return mIsTextEnabled;
-	}
-
-	void RenderScene::DisableText(unsigned int width, unsigned int height, HWND windowHandle)
-	{
-		mIsTextEnabled = false;
-		mDeviceResources.Resize(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled);
-	}
-
-	void RenderScene::EnableText(unsigned int width, unsigned int height, HWND windowHandle)
-	{
-		mIsTextEnabled = true;
-		mDeviceResources.Resize(width, height, windowHandle, mIsMSAAEnabled, mIsTextEnabled);
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------
