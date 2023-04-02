@@ -104,6 +104,8 @@ namespace FARender
 		StaticBuffer(const StaticBuffer&) = delete;
 		StaticBuffer& operator=(const StaticBuffer&) = delete;
 
+		StaticBuffer(StaticBuffer&&) = default;
+
 		/**@brief Creates the static buffer and stores all of the specified data.
 		*/
 		void CreateStaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
@@ -147,6 +149,8 @@ namespace FARender
 
 		DynamicBuffer(const DynamicBuffer&) = delete;
 		DynamicBuffer& operator=(const DynamicBuffer&) = delete;
+
+		DynamicBuffer(DynamicBuffer&&) = default;
 
 		/**@brief Unmaps the pointer to the dynamic buffer.
 		*/

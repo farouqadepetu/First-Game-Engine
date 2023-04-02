@@ -12,10 +12,6 @@ namespace FARender
 		mDeviceResources{ DeviceResources::GetInstance(width, height, windowHandle, isMSAAEnabled, isTextEnabled) }
 
 	{
-		D3D12_ROOT_PARAMETER root{};
-		mRootParameters[0] = root;
-		mRootParameters[1] = root;
-
 		mCamera.SetAspectRatio((float)width / height);
 	}
 
@@ -39,7 +35,7 @@ namespace FARender
 		return mTexts.at(textIndex);
 	}
 
-	void RenderScene::LoadShader(const std::wstring& filename)
+	void RenderScene::LoadShader(unsigned int shaderKey, const std::wstring& filename)
 	{
 		//opens the shader file.
 		std::ifstream fin(filename, std::ios::binary);
@@ -54,49 +50,39 @@ namespace FARender
 		fin.seekg(0, std::ios_base::beg);
 
 		//create a buffer
-		Microsoft::WRL::ComPtr<ID3DBlob> bytecode;
-		ThrowIfFailed(D3DCreateBlob(size, bytecode.GetAddressOf()));
+		ThrowIfFailed(D3DCreateBlob(size, &mShaders[shaderKey]));
 
-		//read the bytes and store the bytes in the buffer
-		fin.read((char*)bytecode->GetBufferPointer(), size);
-
-		//Store the shader bytecode.
-		mShaders.push_back(bytecode);
+		//read the bytes and store the bytes in the buffer.
+		fin.read((char*)mShaders[shaderKey]->GetBufferPointer(), size);
 	}
 
-	void RenderScene::CompileShader(const std::wstring& filename, const std::string& entryPointName, const std::string& target)
+	void RenderScene::CompileShader(unsigned int shaderKey,
+		const std::wstring& filename, const std::string& entryPointName, const std::string& target)
 	{
 		unsigned int compileFlags{ 0 };
 #if defined(_DEBUG)
 		compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
-		Microsoft::WRL::ComPtr<ID3DBlob> bytecode{ nullptr };
 		Microsoft::WRL::ComPtr<ID3DBlob> errors{ nullptr };
 		
-		//Compile shader.
+		//Compile shader and store the bytecode.
 		HRESULT compileErrorCode{ D3DCompileFromFile(filename.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, 
-			entryPointName.c_str(), target.c_str(), compileFlags, 0, &bytecode, &errors) };
+			entryPointName.c_str(), target.c_str(), compileFlags, 0, &mShaders[shaderKey], &errors) };
 
 		//If there was an error compiling the shader, display debug message in debug window if in debug mode.
 		if (errors != nullptr)
 			OutputDebugStringA((char*)errors->GetBufferPointer());
 		
 		ThrowIfFailed(compileErrorCode);
-
-		//Store the shader bytecode.
-		mShaders.push_back(bytecode);
 	}
 
-	void RenderScene::RemoveShader(unsigned int index)
+	void RenderScene::RemoveShader(unsigned int shaderKey)
 	{
-		if (index >= mShaders.size())
-			throw std::out_of_range("Index is out of bounds");
-
-		mShaders.erase(mShaders.begin() + index);
+		mShaders.erase(shaderKey);
 	}
 
-	void RenderScene::CreateInputElementDescription(unsigned int index, const char* semanticName, unsigned int semanticIndex,
+	void RenderScene::CreateInputElementDescription(unsigned int key, const char* semanticName, unsigned int semanticIndex,
 		DXGI_FORMAT format, unsigned int inputSlot, unsigned int byteOffset,
 		D3D12_INPUT_CLASSIFICATION inputSlotClassifcation,
 		unsigned int instanceStepRate)
@@ -110,81 +96,90 @@ namespace FARender
 		inputElementDescription.InputSlotClass = inputSlotClassifcation;
 		inputElementDescription.InstanceDataStepRate = instanceStepRate;
 
-		mInputElementDescriptions[index].push_back(inputElementDescription);
+		mInputElementDescriptions[key].emplace_back(inputElementDescription);
 	}
 
-	void RenderScene::CreateStaticVertexBuffer(const void* data, unsigned int numBytes, unsigned int stride)
+	void  RenderScene::CreateStaticBuffer(unsigned int bufferType, unsigned int staticBufferKey,
+		const void* data, unsigned numBytes, unsigned int stride, DXGI_FORMAT format)
 	{
-		mStaticVertexBuffer.CreateStaticBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), data, numBytes);
+		if (bufferType != 0 && bufferType != 1)
+			throw std::runtime_error("The buffer type for creating a static buffer is not 0 or 1");
 
-		mStaticVertexBuffer.CreateVertexBufferView(numBytes, stride);
-	}
-
-	void RenderScene::CreateStaticIndexBuffer(const void* data, unsigned int numBytes, DXGI_FORMAT format)
-	{
-		mStaticIndexBuffer.CreateStaticBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), data, numBytes);
-
-		mStaticIndexBuffer.CreateIndexBufferView(numBytes, format);
-	}
-
-	void RenderScene::CreateDynamicVertexBuffer(unsigned int numBytes, unsigned int stride)
-	{
-		for (int i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
+		if (bufferType == 0) //create a vertex buffer
 		{
-			mDynamicVertexBuffer[i].CreateDynamicBuffer(mDeviceResources.GetDevice(), numBytes, stride);
-			mDynamicVertexBuffer[i].CreateVertexBufferView(numBytes);
+			mStaticBuffers[staticBufferKey].CreateStaticBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(), 
+				data, numBytes);
+
+			mStaticBuffers[staticBufferKey].CreateVertexBufferView(numBytes, stride);
+		}
+		else if (bufferType == 1)//create an index buffer
+		{
+			mStaticBuffers[staticBufferKey].CreateStaticBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(),
+				data, numBytes);
+
+			mStaticBuffers[staticBufferKey].CreateIndexBufferView(numBytes, format);
 		}
 	}
 
-	void RenderScene::CreateDynamicIndexBuffer(unsigned int numBytes, DXGI_FORMAT format)
+	void RenderScene::CreateDynamicBuffer(unsigned int bufferType, unsigned int dynamicBufferKey,
+		unsigned numBytes, unsigned int stride, DXGI_FORMAT format)
 	{
-		for (int i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
+		if (bufferType != 0 && bufferType != 1 && bufferType != 2)
+			throw std::runtime_error("The buffer type for creating a dynamic buffer is not 0, 1 or 2");
+
+		mDynamicBuffers[dynamicBufferKey].reserve(DeviceResources::NUM_OF_FRAMES);
+
+		//Each frame needs its own dynamic buffer.
+		if (bufferType == 0) //create a vertex buffer
 		{
-			mDynamicIndexBuffer[i].CreateDynamicBuffer(mDeviceResources.GetDevice(), numBytes, format);
-			mDynamicIndexBuffer[i].CreateIndexBufferView(numBytes);
+			for (unsigned int i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
+			{
+				mDynamicBuffers[dynamicBufferKey].emplace_back();
+				mDynamicBuffers[dynamicBufferKey].at(i).CreateDynamicBuffer(mDeviceResources.GetDevice(), numBytes, stride);
+				mDynamicBuffers[dynamicBufferKey].at(i).CreateVertexBufferView(numBytes);
+			}
+		}
+		else if (bufferType == 1) //create an index buffer
+		{
+			for (unsigned int i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
+			{
+				mDynamicBuffers[dynamicBufferKey].emplace_back();
+				mDynamicBuffers[dynamicBufferKey].at(i).CreateDynamicBuffer(mDeviceResources.GetDevice(), numBytes, stride);
+				mDynamicBuffers[dynamicBufferKey].at(i).CreateIndexBufferView(numBytes);
+			}
+		}
+		else if (bufferType == 2) //create a constant buffer
+		{
+			for (unsigned int i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
+			{
+				mDynamicBuffers[dynamicBufferKey].emplace_back();
+				mDynamicBuffers[dynamicBufferKey].at(i).CreateDynamicBuffer(mDeviceResources.GetDevice(), numBytes, stride);
+			}
 		}
 	}
 
-	void RenderScene::CreateObjectConstantBuffer(UINT numOfBytes, UINT stride)
+	void RenderScene::CreateRootParameter(unsigned int rootParameterKey, unsigned int shaderRegister)
 	{
-		for (UINT i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
-		{
-			mObjectConstantBuffer[i].CreateDynamicBuffer(mDeviceResources.GetDevice(), numOfBytes, stride);
-		}
-
-		D3D12_ROOT_DESCRIPTOR objectCBDescription{};
-		objectCBDescription.ShaderRegister = 0; //the register where the scenes objects constant data will be stored.
-		objectCBDescription.RegisterSpace = 0;
+		D3D12_ROOT_DESCRIPTOR description{};
+		description.ShaderRegister = shaderRegister; //the register where the constant data will be stored in.
+		description.RegisterSpace = 0;
 
 		//This root paramter is a root descriptor.
-		mRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-		mRootParameters[0].Descriptor = objectCBDescription;
-		mRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+		D3D12_ROOT_PARAMETER rootParameter{};
+		rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+		rootParameter.Descriptor = description;
+		rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+		mRootParameters[rootParameterKey].emplace_back(rootParameter);
+
 	}
 
-	void RenderScene::CreatePassConstantBuffer(UINT numOfBytes, UINT stride)
-	{
-		for (UINT i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
-		{
-			mPassConstantBuffer[i].CreateDynamicBuffer(mDeviceResources.GetDevice(), numOfBytes, stride);
-		}
-
-		D3D12_ROOT_DESCRIPTOR passCBDescription{};
-		passCBDescription.ShaderRegister = 1; //the register where the scenes objects constant data will be stored.
-		passCBDescription.RegisterSpace = 0;
-
-		//This root paramter is a root descriptor.
-		mRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-		mRootParameters[1].Descriptor = passCBDescription;
-		mRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	}
-
-	void RenderScene::CreateRootSignature()
+	void RenderScene::CreateRootSignature(unsigned int rootSigKey, unsigned int rootParametersKey)
 	{
 		//Describe a root signature to store all our root parameters.
 		D3D12_ROOT_SIGNATURE_DESC rootSignatureDescription{};
-		rootSignatureDescription.NumParameters = 2; //number of root paramters
-		rootSignatureDescription.pParameters = mRootParameters; //the array of root parameters
+		rootSignatureDescription.NumParameters = mRootParameters.at(rootParametersKey).size(); //number of root paramters
+		rootSignatureDescription.pParameters = mRootParameters.at(rootParametersKey).data(); //the array of root parameters
 		rootSignatureDescription.NumStaticSamplers = 0;
 		rootSignatureDescription.pStaticSamplers = nullptr;
 		rootSignatureDescription.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -204,23 +199,24 @@ namespace FARender
 		ThrowIfFailed(e);
 
 		ThrowIfFailed(mDeviceResources.GetDevice()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
-			seralizedRootSignature->GetBufferSize(), IID_PPV_ARGS(&mRootSignature)));
+			seralizedRootSignature->GetBufferSize(), IID_PPV_ARGS(&mRootSignatures[rootSigKey])));
 	}
 
-	void RenderScene::CreatePSO(D3D12_FILL_MODE fillMode, BOOL enableMultisample,
-		unsigned int vsIndex, unsigned int psIndex, unsigned int inputElementDescriptionsIndex,
+	void RenderScene::CreatePSO(unsigned int psoKey, D3D12_FILL_MODE fillMode, BOOL enableMultisample,
+		unsigned int vsKey, unsigned int psKey, unsigned int inputElementDescriptionsKey, 
+		unsigned int rootSigKey,
 		const D3D12_PRIMITIVE_TOPOLOGY_TYPE& primitiveType, UINT sampleCount)
 	{
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC pState{};
 		ZeroMemory(&pState, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC)); //fills the block of memory with zeros
 
-		pState.pRootSignature = mRootSignature.Get();
+		pState.pRootSignature = mRootSignatures.at(rootSigKey).Get();
 
-		pState.VS.pShaderBytecode = mShaders.at(vsIndex)->GetBufferPointer();
-		pState.VS.BytecodeLength = mShaders.at(vsIndex)->GetBufferSize();
+		pState.VS.pShaderBytecode = mShaders.at(vsKey)->GetBufferPointer();
+		pState.VS.BytecodeLength = mShaders.at(vsKey)->GetBufferSize();
 
-		pState.PS.pShaderBytecode = mShaders.at(psIndex)->GetBufferPointer();
-		pState.PS.BytecodeLength = mShaders.at(psIndex)->GetBufferSize();
+		pState.PS.pShaderBytecode = mShaders.at(psKey)->GetBufferPointer();
+		pState.PS.BytecodeLength = mShaders.at(psKey)->GetBufferSize();
 
 		pState.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 
@@ -243,8 +239,8 @@ namespace FARender
 
 		pState.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 
-		pState.InputLayout.pInputElementDescs = mInputElementDescriptions[inputElementDescriptionsIndex].data();
-		pState.InputLayout.NumElements = (UINT)mInputElementDescriptions[inputElementDescriptionsIndex].size();
+		pState.InputLayout.pInputElementDescs = mInputElementDescriptions[inputElementDescriptionsKey].data();
+		pState.InputLayout.NumElements = (UINT)mInputElementDescriptions[inputElementDescriptionsKey].size();
 
 		pState.PrimitiveTopologyType = primitiveType;
 
@@ -256,9 +252,7 @@ namespace FARender
 		pState.SampleDesc.Count = sampleCount;
 		pState.SampleDesc.Quality = 0;
 
-		Microsoft::WRL::ComPtr<ID3D12PipelineState> tempPSO;
-		ThrowIfFailed(mDeviceResources.GetDevice()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&tempPSO)));
-		mPSOs.push_back(tempPSO);
+		ThrowIfFailed(mDeviceResources.GetDevice()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&mPSOs[psoKey])));
 	}
 
 	void RenderScene::AddDrawArgument(unsigned int index,
@@ -280,111 +274,100 @@ namespace FARender
 		mObjects.at(index).erase(it + drawArgIndex);
 	}
 
-	void RenderScene::CreateText(FAMath::Vector4D textLocation, const std::wstring& textString,
+	void RenderScene::CreateText(unsigned int textKey, FAMath::Vector4D textLocation, const std::wstring& textString,
 		float textSize, const FAColor::Color textColor)
 	{
-		mTexts.push_back(Text(textLocation, textString, textSize, textColor));
+		mTexts[textKey] = Text(textLocation, textString, textSize, textColor);
 	}
 
-	void RenderScene::RemoveText(unsigned int textIndex)
+	void RenderScene::RemoveText(unsigned int textKey)
 	{
-		if(textIndex >= mTexts.size())
-			throw std::out_of_range("Index is out of bounds");
-
-		mTexts.erase(mTexts.begin() + textIndex);
+		mTexts.erase(textKey);
 	}
 
-	void RenderScene::BeforeDrawObjects(bool isMSAAEnabled)
+	void RenderScene::BeforeRenderObjects(bool isMSAAEnabled)
 	{
 		mDeviceResources.Draw(isMSAAEnabled);
 	}
 
-	void RenderScene::DrawStatic(unsigned int psoIndex, unsigned int drawArgsIndex, D3D_PRIMITIVE_TOPOLOGY primitive)
+	void RenderScene::SetPSOAndRootSignature(unsigned int psoKey, unsigned int rootSigKey)
 	{
-		mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, &mStaticVertexBuffer.GetVertexBufferView());
+		mDeviceResources.GetCommandList()->SetPipelineState(mPSOs.at(psoKey).Get());
 
-		mDeviceResources.GetCommandList()->IASetIndexBuffer(&mStaticIndexBuffer.GetIndexBufferView());
-
-		mDeviceResources.GetCommandList()->SetPipelineState(mPSOs[psoIndex].Get());
-
-		mDeviceResources.GetCommandList()->SetGraphicsRootSignature(mRootSignature.Get());
-
-		//Set the GPU address of the pass constants data.
-		mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(1,
-			mPassConstantBuffer[mDeviceResources.GetCurrentFrame()].GetGPUAddress());
-
-		mDeviceResources.GetCommandList()->IASetPrimitiveTopology(primitive);
-
-		//draw all the objects the share the same PSO, root signature and primitive
-		for (const FAShapes::DrawArguments& i : mObjects.at(drawArgsIndex))
-		{
-			//Get the GPU address of the first byte of the object constant buffer.
-			D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ mObjectConstantBuffer[mDeviceResources.GetCurrentFrame()].GetGPUAddress() };
-
-			//Calculate the offset of where the objects constant data is in the constant buffer.
-			UINT64 offset = (UINT64)(i.indexOfConstantData * mObjectConstantBuffer[mDeviceResources.GetCurrentFrame()].GetStride());
-			cbAddress += offset;
-
-			//Set the GPU address of the objects constant data.
-			mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(0, cbAddress);
-
-			//Draw object
-			mDeviceResources.GetCommandList()->DrawIndexedInstanced(i.indexCount, 1,
-				i.locationOfFirstIndex, i.indexOfFirstVertex, 0);
-		}
+		mDeviceResources.GetCommandList()->SetGraphicsRootSignature(mRootSignatures.at(rootSigKey).Get());
 	}
 
-	void RenderScene::DrawDynamic(unsigned int psoIndex, unsigned int drawArgsIndex, D3D_PRIMITIVE_TOPOLOGY primitive)
+	void RenderScene::SetStaticBuffer(unsigned int bufferType, unsigned int staticBufferKey)
 	{
-		mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, 
-			&mDynamicVertexBuffer[mDeviceResources.GetCurrentFrame()].GetVertexBufferView());
+		if (bufferType != 0 && bufferType != 1)
+			throw std::runtime_error("The buffer type for linking a static buffer is not 0 or 1");
 
-		mDeviceResources.GetCommandList()->IASetIndexBuffer(
-			&mDynamicIndexBuffer[mDeviceResources.GetCurrentFrame()].GetIndexBufferView());
+		if(bufferType == 0) //link a vertex buffer.
+			mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, &mStaticBuffers.at(staticBufferKey).GetVertexBufferView());
+		else if(bufferType == 1) //link a index buffer.
+			mDeviceResources.GetCommandList()->IASetIndexBuffer(&mStaticBuffers.at(staticBufferKey).GetIndexBufferView());
+	}
 
-		mDeviceResources.GetCommandList()->SetPipelineState(mPSOs[psoIndex].Get());
+	void RenderScene::SetDynamicBuffer(unsigned int bufferType, unsigned int dynamicBufferKey, unsigned int rootParameterIndex)
+	{
+		if (bufferType != 0 && bufferType != 1 && bufferType != 2)
+			throw std::runtime_error("The buffer type for linking a dynamic buffer is not 0, 1 or 2");
 
-		mDeviceResources.GetCommandList()->SetGraphicsRootSignature(mRootSignature.Get());
+		if (bufferType == 0) //link a vertex buffer.
+		{
+			mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, &mStaticBuffers.at(dynamicBufferKey).GetVertexBufferView());
+		}
+		else if (bufferType == 1) //link a index buffer.
+		{
+			mDeviceResources.GetCommandList()->IASetIndexBuffer(&mStaticBuffers.at(dynamicBufferKey).GetIndexBufferView());
+		}
+		else if (bufferType == 2) //link a constant buffer.
+		{
+			mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(rootParameterIndex,
+				mDynamicBuffers.at(dynamicBufferKey)[mDeviceResources.GetCurrentFrame()].GetGPUAddress());
+		}
 
-		//Set the GPU address of the pass constants data.
-		mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(1,
-			mPassConstantBuffer[mDeviceResources.GetCurrentFrame()].GetGPUAddress());
+	}
 
+	void RenderScene::RenderObjects(unsigned int drawArgsKey, unsigned int objectconstantBufferKey, unsigned int rootParamterIndex,
+		D3D_PRIMITIVE_TOPOLOGY primitive)
+	{
 		mDeviceResources.GetCommandList()->IASetPrimitiveTopology(primitive);
 
-		//draw all the objects the share the same PSO, root signature and primitive
-		for (const FAShapes::DrawArguments& i : mObjects.at(drawArgsIndex))
+		for (const FAShapes::DrawArguments& i : mObjects.at(drawArgsKey))
 		{
 			//Get the GPU address of the first byte of the object constant buffer.
-			D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ mObjectConstantBuffer[mDeviceResources.GetCurrentFrame()].GetGPUAddress() };
+			D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ 
+				mDynamicBuffers.at(objectconstantBufferKey)[mDeviceResources.GetCurrentFrame()].GetGPUAddress() };
 
 			//Calculate the offset of where the objects constant data is in the constant buffer.
-			UINT64 offset = i.indexOfConstantData * mObjectConstantBuffer[mDeviceResources.GetCurrentFrame()].GetStride();
+			UINT64 offset = (UINT64)i.indexOfConstantData * 
+				mDynamicBuffers.at(objectconstantBufferKey)[mDeviceResources.GetCurrentFrame()].GetStride();
 			cbAddress += offset;
 
 			//Set the GPU address of the objects constant data.
-			mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(0, cbAddress);
+			mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(rootParamterIndex, cbAddress);
 
 			mDeviceResources.GetCommandList()->DrawIndexedInstanced(i.indexCount, 1,
 				i.locationOfFirstIndex, i.indexOfFirstVertex, 0);
 		}
 	}
 
-	void RenderScene::AfterDrawObjects(bool isMSAAEnabled, bool isTextEnabled)
+	void RenderScene::AfterRenderObjects(bool isMSAAEnabled, bool isTextEnabled)
 	{
 		mDeviceResources.RTBufferTransition(isMSAAEnabled, isTextEnabled);
 
 		mDeviceResources.Execute();
 	}
 
-	void RenderScene::BeforeDrawText()
+	void RenderScene::BeforeRenderText()
 	{
 		mDeviceResources.BeforeTextDraw();
 	}
 
-	void RenderScene::RenderText(unsigned int textIndex)
+	void RenderScene::RenderText(unsigned int textKey)
 	{
-		Text* textToRender{ &mTexts.at(textIndex) };
+		Text* textToRender{ &mTexts.at(textKey) };
 
 		D2D_RECT_F textLocation{ textToRender->GetTextLocation().GetX(), textToRender->GetTextLocation().GetY(),
 			textToRender->GetTextLocation().GetZ(), textToRender->GetTextLocation().GetW() };
@@ -417,12 +400,12 @@ namespace FARender
 		
 	}
 
-	void RenderScene::AfterDrawText()
+	void RenderScene::AfterRenderText()
 	{
 		mDeviceResources.AfterTextDraw();
 	}
 
-	void RenderScene::AfterDraw()
+	void RenderScene::AfterRender()
 	{
 		mDeviceResources.Present();
 
@@ -449,24 +432,9 @@ namespace FARender
 		mCamera.SetAspectRatio((float)width / height);
 	}
 
-	void RenderScene::CopyDataIntoDyanmicVertexBuffer(UINT index, const void* data, UINT64 numOfBytes)
+	void RenderScene::CopyDataIntoDynamicBuffer(unsigned int dynamicBufferKey, unsigned int index, const void* data, UINT64 numOfBytes)
 	{
-		mDynamicVertexBuffer[mDeviceResources.GetCurrentFrame()].CopyData(index, data, numOfBytes);
-	}
-
-	void RenderScene::CopyDataIntoDyanmicIndexBuffer(UINT index,  const void* data, UINT64 numOfBytes)
-	{
-		mDynamicIndexBuffer[mDeviceResources.GetCurrentFrame()].CopyData(index, data, numOfBytes);
-	}
-
-	void RenderScene::CopyDataIntoObjectConstantBuffer(UINT index, const void* data, UINT64 numOfBytes)
-	{
-		mObjectConstantBuffer[mDeviceResources.GetCurrentFrame()].CopyData(index, data, numOfBytes);
-	}
-
-	void RenderScene::CopyDataIntoPassConstantBuffer(UINT index, const void* data, UINT64 numOfBytes)
-	{
-		mPassConstantBuffer[mDeviceResources.GetCurrentFrame()].CopyData(index, data, numOfBytes);
+		mDynamicBuffers.at(dynamicBufferKey)[mDeviceResources.GetCurrentFrame()].CopyData(index, data, numOfBytes);
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------
