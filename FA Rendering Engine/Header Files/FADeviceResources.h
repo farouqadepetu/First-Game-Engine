@@ -20,10 +20,22 @@ namespace FARender
 	{
 	public:
 
+		/**@brief The number of frames in the ciruclar array.
+		* 
+		* Allows the CPU to produce the commands for future frames as the GPU is executing the commands for the current frame.
+		*/
 		static const unsigned int NUM_OF_FRAMES{ 3 };
 
 		/**@brief Call to make an object of DeviceResources.
-		* This only allows one instance to exist.
+		* 
+		* Only one instance of DeviceResources can exist in a program.
+		* 
+		* @param[in] width The width of a window.
+		* @param[in] height The height of a window.
+		* @param[in] windowHandle A handle to a window.
+		* @param[in] isMSAAEnabled Pass in true if you want to have MSAA enabled for the initial frame, false otherwise.
+		* @param[in] isTextEnabled Pass in true if you want to have text enabled for the initial frame, false otherwise.
+		* 
 		*/
 		static DeviceResources& GetInstance(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled, bool isTextEnabled);
 
@@ -67,12 +79,14 @@ namespace FARender
 		void UpdateCurrentFrameFenceValue();
 
 		/**@brief Synchronizes the CPU and GPU.
+		* 
 		*	Use this function to make sure all of the commands in command list are executed by the GPU
 		*	before the CPU writes in new commands.
 		*/
 		void FlushCommandQueue();
 
 		/**@brief Waits for the GPU to execute all of the commands of the current frame.
+		* 
 		* Signal should have been called before this function is called.
 		*/
 		void WaitForGPU() const;
@@ -82,11 +96,21 @@ namespace FARender
 		void Signal();
 
 		/**@brief Call when the window gets resized.
-		*	Call when you initialize your program.
+		* 
+		* Call when you initialize your program.
+		* 
+		* @param[in] width The width of a window.
+		* @param[in] height The height of a window.
+		* @param[in] handle A handle to a window.
+		* @param[in] isMSAAEnabled Pass in true if MSAA enabled, false otherwise.
+		* @param[in] isTextEnabled Pass in true if text enabled, false otherwise.
 		*/
 		void Resize(int width, int height, const HWND& handle, bool isMSAAEnabled, bool isTextEnabled);
 
 		/**@brief Transistions the render target buffer.
+		* 
+		* @param[in] isMSAAEnabled Pass in true if MSAA enabled, false otherwise.
+		* @param[in] isTextEnabled Pass in true if text enabled, false otherwise.
 		*/
 		void RTBufferTransition(bool isMSAAEnabled, bool isTextEnabled);
 
@@ -107,6 +131,8 @@ namespace FARender
 		void Present();
 
 		/*@brief Calls the necessary functions to let the user draw their objects.
+		* 
+		*  @param[in] isMSAAEnabled Pass in true if MSAA enabled, false otherwise.
 		*/
 		void Draw(bool isMSAAEnabled);
 
@@ -117,6 +143,7 @@ namespace FARender
 	private:
 
 		/**@brief Initializes Direct3D.
+		* 
 		* Enables the debug layer if in debug mode.\n
 		* Creates a Direct3D 12 device.\n
 		* Creates a DXGI factory object.\n

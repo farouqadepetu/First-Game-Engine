@@ -1,5 +1,9 @@
 #pragma once
 
+/** @file FAThreeDimensional.h
+*	@brief File has the abstract class ThreeDimensionalShapeAbstract under the namespace FAShapes.
+*/
+
 #include "FATriangle.h"
 #include <vector>
 
@@ -12,7 +16,9 @@ namespace FAShapes
 	{
 	public:
 
-		/**@brief Constructor.
+		/**@brief Constructs a 3D shape.
+		* 
+		* @param[in] color The color if the 3D shape.
 		*/
 		ThreeDimensionalShapeAbstract(const FAColor::Color& color);
 
@@ -64,7 +70,7 @@ namespace FAShapes
 		*/
 		size_t GetNumVertices() const;
 
-		/**@brief Sets the center of the 3D shape to the specified vector.
+		/**@brief Sets the center of the 3D shape to the specified vector \a center.
 		*/
 		void SetCenter(const FAMath::Vector3D& center);
 
@@ -72,45 +78,47 @@ namespace FAShapes
 		*/
 		void SetCenter(float x, float y, float z);
 
-		/**@brief Sets the color of the sphere to the specified color.
+		/**@brief Sets the color of the sphere to the specified \a color.
 		*/
 		void SetColor(const FAColor::Color& color);
 
-		/**@brief Sets the color of the sphere to the specified RBBA values.
+		/**@brief Sets the color of the 3D shape to the specified RGBA values.
 		*/
 		void SetColor(float r, float g, float b, float a);
 
-		/**@brief Sets the draw arguments of the sphere to the specifed draw arguments.
+		/**@brief Sets the draw arguments of the 3D shape to the specifed draw arguments \a sphereDrawArgs.
 		*/
-		void SetDrawArguments(const DrawArguments& sphereDrawArgs);
+		void SetDrawArguments(const DrawArguments& drawArgs);
 
-		/**@brief Sets the draw arguments of the sphere to the specifed draw arguments.
+		/**@brief Sets the draw arguments of the 3D shape to the specifed draw arguments.
 		*/
 		void SetDrawArguments(unsigned int indexCount, unsigned int locationOfFirstIndex,
 			int indexOfFirstVertex, int indexOfConstantData);
 
-		/**@brief Rotates the local axis of the sphere by the specified rotation matrix.
+		/**@brief Rotates the local axis of the 3D shape by the specified rotation matrix \a rot.
 		*/
 		void RotateAxes(const FAMath::Matrix4x4& rot);
 
-		/**@brief Rotates the local axis of the sphere by the specified rotation quaternion.
+		/**@brief Rotates the local axis of the 3D shape by the specified rotation quaternion \a rotQuaternion.
 		*/
 		void RotateAxes(const FAMath::Quaternion& rotQuaternion);
 
-		/**@brief Rotates the local axis of the sphere by the specified angle around the specified axis.
+		/**@brief Rotates the local axis of the 3D shape by the specified \a angle around the specified \a axis.
+		* 
 		* Uses a quaternion to rotate.
 		*/
 		void RotateAxes(float angle, const FAMath::Vector3D axis);
 
-		/**@brief Rotates the center of the sphere by the specified rotation matrix.
+		/**@brief Rotates the center of the 3D shape by the specified rotation matrix \a rot.
 		*/
 		void RotateCenter(const FAMath::Matrix4x4& rot);
 
-		/**@brief Rotates the center of the sphere by the specified rotation quaternion.
+		/**@brief Rotates the center of the 3D shape by the specified rotation quaternion \a rotQuaternion.
 		*/
 		void RotateCenter(const FAMath::Quaternion& rotQuaternion);
 
-		/**@brief Rotates the center of the sphere by the specified angle around the specified axis.
+		/**@brief Rotates the center of the 3D shape by the specified \a angle around the specified \a axis.
+		* 
 		* Uses a quaternion to rotate.
 		*/
 		void RotateCenter(float angle, const FAMath::Vector3D axis);
@@ -119,12 +127,17 @@ namespace FAShapes
 		*/
 		void TranslateCenter(float x, float y, float z);
 
-		/**@brief Translates the center by the specified vector.
+		/**@brief Translates the center by the specified vector \a v.
 		*/
 		void TranslateCenter(const FAMath::Vector3D& v);
 
-	
+		/**@brief Updates the local to world matrix for the 3D shape.
+		*/
 		virtual void UpdateLocalToWorldMatrix() = 0;
+
+		/**@brief Returns the volume of the 3D shape.
+		*/
+		virtual float Volume() = 0;
 
 	protected:
 		//Center of the 3D shape.
@@ -139,7 +152,7 @@ namespace FAShapes
 		FAColor::Color mColor;
 
 		//If true, updates the local to world matrix.
-		bool mUpdateModelMatrix;
+		bool mUpdateLocalToWorldlMatrix;
 
 		//Local to world matrix of the 3D shape.
 		FAMath::Matrix4x4 mLocalToWorld;

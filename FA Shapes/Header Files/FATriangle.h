@@ -15,8 +15,12 @@ namespace FAShapes
 	{
 	public:
 
-		/**@brief Constructor.
-		* If the 3 vertices that make up the triangle are colinear, a runtime_exception is thrown.
+		/**@brief Constructs a triangle.
+		* 
+		* @param[in] vertexList A pointer to a vertex list.
+		* @param[in] p0Index The index of the first point of the triangle.
+		* @param[in] p1Index The index of the second point of the triangle.
+		* @param[in] p2Index The index of the third point of the triangle.
 		*/
 		Triangle(Vertex* vertexList = nullptr, unsigned int p0Index = 0, unsigned int p1Index = 0, unsigned int p2Index = 0);
 
@@ -56,26 +60,32 @@ namespace FAShapes
 		*/
 		void SetVertexList(Vertex* vertexList);
 
-		/**@brief Sets the P0 index to the specified index.
+		/**@brief Sets the P0 index to the specified \a index.
 		*/
 		void SetP0Index(unsigned int index);
 
-		/**@brief Sets the P1 index to the specified index.
+		/**@brief Sets the P1 index to the specified \a index.
 		*/
 		void SetP1Index(unsigned int index);
 
-		/**@brief Sets the P2 index to the specified index.
+		/**@brief Sets the P2 index to the specified \a index.
 		*/
 		void SetP2Index(unsigned int index);
 
 		/**@brief Sets the indices of the vertices that make up the triangle to the specified vertices.
-		* If the 3 vertices that make up the triangle are colinear, a runtime_exception is thrown.
+		* 
+		* @param[in] p0Index The index of the first point of the triangle.
+		* @param[in] p1Index The index of the second point of the triangle.
+		* @param[in] p2Index The index of the third point of the triangle.
 		*/
 		void SetTriangleIndices(unsigned int p0Index, unsigned int p1Index, unsigned int p2Index);
 
-		/**@brief Sets the pointer to a vertex list to the specified pointers and
-		*	sets the indices of the vertices that make up the triangle to the specified vertices.
-		* If the 3 vertices that make up the triangle are colinear, a runtime_exception is thrown.
+		/**@brief Sets the triangle variables.
+		*	
+		* @param[in] vertexList A pointer to a vertex list.
+		* @param[in] p0Index The index of the first point of the triangle.
+		* @param[in] p1Index The index of the second point of the triangle.
+		* @param[in] p2Index The index of the third point of the triangle.
 		*/
 		void SetTriangle(Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index);
 

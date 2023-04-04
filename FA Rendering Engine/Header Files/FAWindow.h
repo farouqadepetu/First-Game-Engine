@@ -19,16 +19,30 @@ namespace FAWindow
 	class Window
 	{
 	public:
-		//Window();
+
+		Window() = default;
 
 		/**@brief Creates and displays a window.
-		*  Registers a default window class with the OS with the specified instance, class name and window procdure.
+		* 
+		* @param[in] hInstance The handle to a module used to identify the executable.
+		* @param[in] windowClassName The name of the window class.
+		* @param[in] windowName The name of the window.
+		* @param[in] winProcFunction The window procedure.
+		* @param[in] width The width of the window.
+		* @param[in] height The height of the window.
+		* @param[in, optional] additionalData A pointer to data to access in the window procedure.
 		*/
 		Window(const HINSTANCE& hInstance, const std::wstring& windowClassName, const std::wstring& windowName,
 			WNDPROC winProcFunction, unsigned int width, unsigned int height, void* additionalData = nullptr);
 
 		/**@brief Creates and displays a window.
-		*  Registers the specified window class with the OS.
+		* 
+		* @param[in] hInstance The handle to a module used to identify the executable.
+		* @param[in] windowClass The window class for this window.
+		* @param[in] windowName The name of the window.
+		* @param[in] width The width of the window.
+		* @param[in] height The height of the window.
+		* @param[in, optional] additionalData A pointer to data to access in the window procedure.
 		*/
 		Window(const HINSTANCE& hInstance, const WNDCLASSEX& windowClass, const std::wstring& windowName,
 			unsigned int width, unsigned int height, void* additionalData = nullptr);
@@ -45,11 +59,11 @@ namespace FAWindow
 		*/
 		unsigned int GetHeight() const;
 
-		/**@brief Sets the width of the window to the specified width.
+		/**@brief Sets the width of the window to the specified \a width.
 		*/
 		void SetWidth(unsigned int width);
 
-		/**@brief Sets the height of the window o the specified height.
+		/**@brief Sets the height of the window o the specified \a height.
 		*/
 		void SetHeight(unsigned int height);
 

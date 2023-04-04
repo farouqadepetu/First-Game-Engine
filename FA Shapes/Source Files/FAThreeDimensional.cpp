@@ -6,7 +6,7 @@ namespace FAShapes
 		mCenter{ 0.0f, 0.0f, 0.0f },
 		mX{ 1.0f, 0.0f, 0.0f }, mY{ 0.0f, 1.0f, 0.0f }, mZ{ 0.0f, 0.0f, 1.0f }, 
 		mColor{ color },
-		mUpdateModelMatrix{ true }
+		mUpdateLocalToWorldlMatrix{ true }
 	{}
 
 
@@ -92,7 +92,7 @@ namespace FAShapes
 	void ThreeDimensionalShapeAbstract::SetCenter(const FAMath::Vector3D& center)
 	{
 		mCenter = center;
-		mUpdateModelMatrix = true;
+		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void ThreeDimensionalShapeAbstract::SetCenter(float x, float y, float z)
@@ -100,7 +100,7 @@ namespace FAShapes
 		mCenter.SetX(x);
 		mCenter.SetY(y);
 		mCenter.SetZ(z);
-		mUpdateModelMatrix = true;
+		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void ThreeDimensionalShapeAbstract::SetColor(const FAColor::Color& color)
@@ -130,9 +130,9 @@ namespace FAShapes
 		}
 	}
 
-	void ThreeDimensionalShapeAbstract::SetDrawArguments(const DrawArguments& sphereDrawArgs)
+	void ThreeDimensionalShapeAbstract::SetDrawArguments(const DrawArguments& drawArgs)
 	{
-		mSphereDrawArguments = sphereDrawArgs;
+		mSphereDrawArguments = drawArgs;
 	}
 
 	void ThreeDimensionalShapeAbstract::SetDrawArguments(unsigned int indexCount, unsigned int locationOfFirstIndex,
@@ -158,7 +158,7 @@ namespace FAShapes
 		//orthonormalize the boxs local axes.
 		Orthonormalize(mX, mY, mZ);
 
-		mUpdateModelMatrix = true;
+		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void ThreeDimensionalShapeAbstract::RotateAxes(const FAMath::Quaternion& rotQuaternion)
@@ -179,7 +179,7 @@ namespace FAShapes
 		//orthonormalize the boxs local axes.
 		Orthonormalize(mX, mY, mZ);
 
-		mUpdateModelMatrix = true;
+		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void ThreeDimensionalShapeAbstract::RotateAxes(float angle, const FAMath::Vector3D axis)
@@ -201,7 +201,7 @@ namespace FAShapes
 		//orthonormalize the boxs local axes.
 		Orthonormalize(mX, mY, mZ);
 
-		mUpdateModelMatrix = true;
+		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void ThreeDimensionalShapeAbstract::RotateCenter(const FAMath::Matrix4x4& rot)
@@ -212,7 +212,7 @@ namespace FAShapes
 
 		mCenter = FAMath::Vector3D(center.GetX(), center.GetY(), center.GetZ());
 
-		mUpdateModelMatrix = true;
+		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void ThreeDimensionalShapeAbstract::RotateCenter(const FAMath::Quaternion& rotQuaternion)
@@ -224,7 +224,7 @@ namespace FAShapes
 
 		mCenter = FAMath::Vector3D(center.GetX(), center.GetY(), center.GetZ());
 
-		mUpdateModelMatrix = true;
+		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void ThreeDimensionalShapeAbstract::RotateCenter(float angle, const FAMath::Vector3D axis)
@@ -236,7 +236,7 @@ namespace FAShapes
 
 		mCenter = FAMath::Vector3D(center.GetX(), center.GetY(), center.GetZ());
 
-		mUpdateModelMatrix = true;
+		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void ThreeDimensionalShapeAbstract::TranslateCenter(float x, float y, float z)
@@ -245,13 +245,13 @@ namespace FAShapes
 		mCenter.SetY(mCenter.GetY() + y);
 		mCenter.SetZ(mCenter.GetZ() + x);
 
-		mUpdateModelMatrix = true;
+		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void ThreeDimensionalShapeAbstract::TranslateCenter(const FAMath::Vector3D& v)
 	{
 		mCenter += v;
 
-		mUpdateModelMatrix = true;
+		mUpdateLocalToWorldlMatrix = true;
 	}
 }

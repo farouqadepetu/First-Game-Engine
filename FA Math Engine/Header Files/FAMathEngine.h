@@ -17,7 +17,9 @@
 namespace FAMath
 {
 
-	/*@brief Checks if the two specified floats are equal using exact epsilion and adaptive epsilion.
+	/**@brief Returns true if \a x and \a y are equal.
+	* 
+	* Uses exact \a epsilion and adaptive \a epsilion to compare.
 	*/
 	inline bool CompareFloats(float x, float y, float epsilon)
 	{
@@ -32,7 +34,9 @@ namespace FAMath
 		return diff <= epsilon * (((fabs(x)) >(fabs(y))) ? (fabs(x)) : (fabs(y)));
 	}
 
-	/*@brief Checks if the two specified doubles are equal using exact epsilion and adaptive epsilion.
+	/**@brief Returns true if \a x and \a y are equal.
+	* 
+	* Uses exact \a epsilion and adaptive \a epsilion to compare.
 	*/
 	inline bool CompareDoubles(double x, double y, double epsilon)
 	{
@@ -57,28 +61,19 @@ namespace FAMath
 	class Vector2D
 	{
 	public:
-
-		/**@brief Default Constructor.
-		*
-		*	Creates a new 2D vector/point with the components initialized to 0.0.
+		/**@brief Creates a new 2D vector/point with the components initialized to the arguments.
 		*/
-		Vector2D();
-
-		/**@brief Overloaded Constructor.
-		*
-		*	Creates a new 2D vector/point with the components initialized to the arguments.
-		*/
-		Vector2D(float x, float y);
+		Vector2D(float x = 0.0f, float y = 0.0f);
 
 		/**@brief Returns the x component.
 		*/
 		float GetX() const;
 
-		/**@brief Returns y component.
+		/**@brief Returns the y component.
 		*/
 		float GetY() const;
 
-		/**@brief Sets the x component to the specified value.
+		/**@brief Sets the x component of the vector to the specified value.
 		*/
 		void SetX(float x);
 
@@ -86,21 +81,21 @@ namespace FAMath
 		*/
 		void SetY(float y);
 
-		/**@brief 2D vector addition through overloading operator +=.
+		/**@brief Adds this vector to vector \a b and stores the result in this vector.
 		*/
 		Vector2D& operator+=(const Vector2D& b);
 
-		/**@brief 2D vector subtraction through overloading operator -=.
+		/**@brief Subtracts the vector \a b from this vector and stores the result in this vector.
 		*/
 		Vector2D& operator-=(const Vector2D& b);
 
-		/**@brief 2D vector scalar multiplication through overloading operator *=.
+		/**@brief Multiplies this vector by \a k and stores the result in this vector.
 		*/
 		Vector2D& operator*=(float k);
 
-		/**@brief 2D vector scalar division through overloading operator /=.
+		/**@brief Divides this vector by \a k and stores the result in this vector.
 		*
-		* If k is zero, the vector is unchanged.
+		* If \a k is zero, the vector is unchanged.
 		*/
 		Vector2D& operator/=(float k);
 
@@ -112,9 +107,6 @@ namespace FAMath
 
 	//--------------------------------------------------------------------------------------
 	//Vector2D Constructors
-
-	inline Vector2D::Vector2D() : mX{ 0.0f }, mY{ 0.0f }
-	{}
 
 	inline Vector2D::Vector2D(float x, float y) : mX{ x }, mY{ y }
 	{}
@@ -192,7 +184,7 @@ namespace FAMath
 	//-------------------------------------------------------------------------------------
 	//Vector2D Non-member functions
 
-	/**@brief Returns true if a is the zero vector.
+	/**@brief Returns true if \a a is the zero vector.
 	*/
 	inline bool ZeroVector(const Vector2D& a)
 	{
@@ -204,46 +196,43 @@ namespace FAMath
 		return false;
 	}
 
-	/**@brief 2D vector addition.
+	/**@brief Adds \a a with \a b and returns the result.
 	*/
 	inline Vector2D operator+(const Vector2D& a, const Vector2D& b)
 	{
 		return Vector2D(a.GetX() + b.GetX(), a.GetY() + b.GetY());
 	}
 
-	/**@brief 2D vector negation.
+	/**@brief Negates the vector \a v and returns the result.
 	*/
 	inline Vector2D operator-(const Vector2D& v)
 	{
 		return Vector2D(-v.GetX(), -v.GetY());
 	}
 
-	/**@brief 2D vector subtraction.
+	/**@brief Subtracts \a b from \a a and returns the result.
 	*/
 	inline Vector2D operator-(const Vector2D& a, const Vector2D& b)
 	{
 		return Vector2D(a.GetX() - b.GetX(), a.GetY() - b.GetY());
 	}
 
-	/**@brief 2D vector scalar multiplication.
-	* Returns a * k, where a is a vector and k is a scalar(float)
+	/**@brief Returns \a a * \a k.
 	*/
 	inline Vector2D operator*(const Vector2D& a, float k)
 	{
 		return Vector2D(a.GetX() * k, a.GetY() * k);
 	}
 
-	/**@brief 2D vector scalar multiplication.
-	* Returns k * a,  where a is a vector and k is a scalar(float)
+	/**@brief Returns \a k * \a a.
 	*/
 	inline Vector2D operator*(float k, const Vector2D& a)
 	{
 		return Vector2D(k * a.GetX(), k * a.GetY());
 	}
 
-	/**@brief 2D vector scalar division.
-	* Returns a / k,  where a is a vector and k is a scalar(float)
-	* If k = 0 the returned vector is the zero vector.
+	/**@brief Returns \a a / \a k.
+	* If \a k = 0 the returned vector is the zero vector.
 	*/
 	inline Vector2D operator/(const Vector2D& a, const float& k)
 	{
@@ -255,22 +244,22 @@ namespace FAMath
 		return Vector2D(a.GetX() / k, a.GetY() / k);
 	}
 
-	/**@brief Returns the dot product between two 2D vectors.
+	/**@brief Returns the dot product between \a a and \a b.
 	*/
 	inline float DotProduct(const Vector2D& a, const Vector2D& b)
 	{
 		return a.GetX() * b.GetX() + a.GetY() * b.GetY();
 	}
 
-	/**@brief Returns the length(magnitude) of the 2D vector v.
+	/**@brief Returns the length(magnitude) of the 2D vector \a v.
 	*/
 	inline float Length(const Vector2D& v)
 	{
 		return sqrt(v.GetX() * v.GetX() + v.GetY() * v.GetY());
 	}
 
-	/**@brief Normalizes the 2D vector v.
-	* If the 2D vector is the zero vector v is returned.
+	/**@brief Normalizes the 2D vector \a v.
+	* If the 2D vector is the zero vector \a v is returned.
 	*/
 	inline Vector2D Norm(const Vector2D& v)
 	{
@@ -287,8 +276,8 @@ namespace FAMath
 		return Vector2D(v.GetX() / mag, v.GetY() / mag);
 	}
 
-	/**@brief Converts the 2D vector v from polar coordinates to cartesian coordinates.
-	* v should = (r, theta(degrees))
+	/**@brief Converts the 2D vector \a v from polar coordinates to cartesian coordinates.
+	* \a v should = (r, theta(degrees))
 	* The returned 2D vector = (x, y)
 	*/
 	inline Vector2D PolarToCartesian(const Vector2D& v)
@@ -301,9 +290,9 @@ namespace FAMath
 		return Vector2D(v.GetX() * cos(angle), v.GetX() * sin(angle));
 	}
 
-	/**@brief Converts the 2D vector v from cartesian coordinates to polar coordinates.
-	* v should = (x, y, z)
-	* If vx is zero then no conversion happens and v is returned.\n
+	/**@brief Converts the 2D vector \a v from cartesian coordinates to polar coordinates.
+	* \a v should = (x, y)
+	* If \a vx is zero then no conversion happens and \a v is returned.\n
 	* The returned 2D vector = (r, theta(degrees)).
 	*/
 	inline Vector2D CartesianToPolar(const Vector2D& v)
@@ -321,8 +310,8 @@ namespace FAMath
 		return Vector2D(Length(v), theta);
 	}
 
-	/**@brief Returns a 2D vector that is the projection of a onto b.
-	* If b is the zero vector a is returned.
+	/**@brief Returns a 2D vector that is the projection of \a a onto \a b.
+	* If \a b is the zero vector \a a is returned.
 	*/
 	inline Vector2D Projection(const Vector2D& a, const Vector2D& b)
 	{
@@ -356,17 +345,9 @@ namespace FAMath
 	{
 	public:
 
-		/**@brief Default Constructor.
-		*
-		*	Creates a new 3D vector/point with the components initialized to 0.0.
+		/**@brief Creates a new 3D vector/point with the components initialized to the arguments.
 		*/
-		Vector3D();
-
-		/**@brief Overloaded Constructor.
-		*
-		*	Creates a new 3D vector/point with the components initialized to the arguments.
-		*/
-		Vector3D(float x, float y, float z);
+		Vector3D(float x = 0.0f, float y = 0.0f, float z = 0.0f);
 
 		/**@brief Returns the x component.
 		*/
@@ -392,21 +373,21 @@ namespace FAMath
 		*/
 		void SetZ(float z);
 
-		/**@brief 3D vector addition through overloading operator +=.
+		/**@brief Adds this vector to vector \a b and stores the result in this vector.
 		*/
 		Vector3D& operator+=(const Vector3D& b);
 
-		/**@brief 3D vector subtraction through overloading operator -=.
+		/**@brief Subtracts \a b from this vector and stores the result in this vector.
 		*/
 		Vector3D& operator-=(const Vector3D& b);
 
-		/**@brief 3D vector scalar multiplication through overloading operator *=.
+		/**@brief Multiplies this vector by \a k and stores the result in this vector.
 		*/
 		Vector3D& operator*=(float k);
 
-		/**@brief 3D vector scalar division through overloading operator /=.
+		/**@brief Divides this vector by \a k and stores the result in this vector.
 		*
-		* If k is zero, the vector is unchanged.
+		* If \a k is zero, the vector is unchanged.
 		*/
 		Vector3D& operator/=(float k);
 
@@ -418,9 +399,6 @@ namespace FAMath
 
 	//--------------------------------------------------------------------------------------
 	//Vector3D Constructors
-
-	inline Vector3D::Vector3D() : mX{ 0.0f }, mY{ 0.0f }, mZ{ 0.0f }
-	{}
 
 	inline Vector3D::Vector3D(float x, float y, float z) : mX{ x }, mY{ y }, mZ{ z }
 	{}
@@ -511,7 +489,7 @@ namespace FAMath
 	//-------------------------------------------------------------------------------------
 	//Vector3D Non-member functions
 
-	/**@brief Returns true if a is the zero vector.
+	/**@brief Returns true if \a a is the zero vector.
 	*/
 	inline bool ZeroVector(const Vector3D& a)
 	{
@@ -524,46 +502,44 @@ namespace FAMath
 		return false;
 	}
 
-	/**@brief 3D vector addition.
+	/**@brief Adds \a a and \a b and returns the result.
 	*/
 	inline Vector3D operator+(const Vector3D& a, const Vector3D& b)
 	{
 		return Vector3D(a.GetX() + b.GetX(), a.GetY() + b.GetY(), a.GetZ() + b.GetZ());
 	}
 
-	/**@brief 3D vector negeation.
+	/**@brief Negates the vector \a v and returns the result.
 	*/
 	inline Vector3D operator-(const Vector3D& v)
 	{
 		return Vector3D(-v.GetX(), -v.GetY(), -v.GetZ());
 	}
 
-	/**@brief 3D vector subtraction.
+	/**@brief Subtracts \a b from \a a and returns the result.
 	*/
 	inline Vector3D operator-(const Vector3D& a, const Vector3D& b)
 	{
 		return Vector3D(a.GetX() - b.GetX(), a.GetY() - b.GetY(), a.GetZ() - b.GetZ());
 	}
 
-	/**@brief 3D vector scalar multiplication.
-	* Returns a * k, where a is a vector and k is a scalar(float)
+	/**@brief Returns \a a * \a k.
 	*/
 	inline Vector3D operator*(const Vector3D& a, float k)
 	{
 		return Vector3D(a.GetX() * k, a.GetY() * k, a.GetZ() * k);
 	}
 
-	/**@brief 3D vector scalar multiplication.
-	* Returns k * a,  where a is a vector and k is a scalar(float)
+	/**@brief Returns \a k * \a a.
 	*/
 	inline Vector3D operator*(float k, const Vector3D& a)
 	{
 		return Vector3D(k * a.GetX(), k * a.GetY(), k * a.GetZ());
 	}
 
-	/**@brief 3D vector scalar division.
-	* Returns a / k,  where a is a vector and k is a scalar(float)
-	* If k = 0 the returned vector is the zero vector.
+	/**@brief Returns \a a / \a k.
+	* 
+	* If \a k = 0 the returned vector is the zero vector.
 	*/
 	inline Vector3D operator/(const Vector3D& a, float k)
 	{
@@ -575,7 +551,7 @@ namespace FAMath
 		return Vector3D(a.GetX() / k, a.GetY() / k, a.GetZ() / k);
 	}
 
-	/**@brief Returns the dot product between two 3D vectors.
+	/**@brief Returns the dot product between \a a and \a b.
 	*/
 	inline float DotProduct(const Vector3D& a, const Vector3D& b)
 	{
@@ -583,7 +559,7 @@ namespace FAMath
 		return a.GetX() * b.GetX() + a.GetY() * b.GetY() + a.GetZ() * b.GetZ();
 	}
 
-	/**@brief Returns the cross product between two 3D vectors.
+	/**@brief Returns the cross product between \a a and \a b.
 	*/
 	inline Vector3D CrossProduct(const Vector3D& a, const Vector3D& b)
 	{
@@ -594,7 +570,7 @@ namespace FAMath
 			a.GetX() * b.GetY() - a.GetY() * b.GetX());
 	}
 
-	/**@brief Returns the length(magnitude) of the 3D vector v.
+	/**@brief Returns the length(magnitude) of the 3D vector \a v.
 	*/
 	inline float Length(const Vector3D& v)
 	{
@@ -603,8 +579,9 @@ namespace FAMath
 		return sqrt(v.GetX() * v.GetX() + v.GetY() * v.GetY() + v.GetZ() * v.GetZ());
 	}
 
-	/**@brief Normalizes the 3D vector v.
-	* If the 3D vector is the zero vector v is returned.
+	/**@brief Normalizes the 3D vector \a v.
+	* 
+	* If the 3D vector is the zero vector \a v is returned.
 	*/
 	inline Vector3D Norm(const Vector3D& v)
 	{
@@ -620,8 +597,9 @@ namespace FAMath
 		return Vector3D(v.GetX() / mag, v.GetY() / mag, v.GetZ() / mag);
 	}
 
-	/**@brief Converts the 3D vector v from cylindrical coordinates to cartesian coordinates.
-	* v should = (r, theta(degrees), z).\n
+	/**@brief Converts the 3D vector \a v from cylindrical coordinates to cartesian coordinates.
+	* 
+	* \a v should = (r, theta(degrees), z).\n
 	* The returned 3D vector = (x, y ,z).
 	*/
 	inline Vector3D CylindricalToCartesian(const Vector3D& v)
@@ -635,9 +613,10 @@ namespace FAMath
 		return Vector3D(v.GetX() * cos(angle), v.GetX() * sin(angle), v.GetZ());
 	}
 
-	/**@brief Converts the 3D vector v from cartesian coordinates to cylindrical coordinates.
-	* v should = (x, y, z).\n
-	* If vx is zero then no conversion happens and v is returned.\n
+	/**@brief Converts the 3D vector \a v from cartesian coordinates to cylindrical coordinates.
+	* 
+	* \a v should = (x, y, z).\n
+	* If \a vx is zero then no conversion happens and \a v is returned.\n
 	* The returned 3D vector = (r, theta(degrees), z).
 	*/
 	inline Vector3D CartesianToCylindrical(const Vector3D& v)
@@ -655,8 +634,9 @@ namespace FAMath
 		return Vector3D(Length(v), theta, v.GetZ());
 	}
 
-	/**@brief Converts the 3D vector v from spherical coordinates to cartesian coordinates.
-	* v should = (pho, phi(degrees), theta(degrees)).\n
+	/**@brief Converts the 3D vector \a v from spherical coordinates to cartesian coordinates.
+	* 
+	* \a v should = (pho, phi(degrees), theta(degrees)).\n
 	* The returned 3D vector = (x, y, z)
 	*/
 	inline Vector3D SphericalToCartesian(const Vector3D& v)
@@ -672,8 +652,9 @@ namespace FAMath
 		return Vector3D(v.GetX() * sin(phi) * cos(theta), v.GetX() * sin(phi) * sin(theta), v.GetX() * cos(theta));
 	}
 
-	/**@brief Converts the 3D vector v from cartesian coordinates to spherical coordinates.
-	* If v is the zero vector or if vx is zero then no conversion happens and v is returned.\n
+	/**@brief Converts the 3D vector \a v from cartesian coordinates to spherical coordinates.
+	* 
+	* If \a v is the zero vector or if \a vx is zero then no conversion happens and \a v is returned.\n
 	* The returned 3D vector = (r, phi(degrees), theta(degrees)).
 	*/
 	inline Vector3D CartesianToSpherical(const Vector3D& v)
@@ -695,8 +676,9 @@ namespace FAMath
 		return Vector3D(pho, phi, theta);
 	}
 
-	/**@brief Returns a 3D vector that is the projection of a onto b.
-	* If b is the zero vector a is returned.
+	/**@brief Returns a 3D vector that is the projection of \a a onto \a b.
+	* 
+	* If \a b is the zero vector a is returned.
 	*/
 	inline Vector3D Projection(const Vector3D& a, const Vector3D& b)
 	{
@@ -708,6 +690,7 @@ namespace FAMath
 	}
 
 	/**@brief Orthonormalizes the specified vectors.
+	* 
 	* Uses Classical Gram-Schmidt.
 	*/
 	inline void Orthonormalize(Vector3D& x, Vector3D& y, Vector3D& z)
@@ -739,17 +722,9 @@ namespace FAMath
 	class Vector4D
 	{
 	public:
-		/**@brief Default Constructor.
-		*
-		*	Creates a new 4D vector/point with the components initialized to 0.0.
+		/**@brief Creates a new 4D vector/point with the components initialized to the arguments.
 		*/
-		Vector4D();
-
-		/**@brief Overloaded Constructor.
-		*
-		*	Creates a new 4D vector/point with the components initialized to the arguments.
-		*/
-		Vector4D(float x, float y, float z, float w);
+		Vector4D(float x = 0.0f, float y = 0.0f, float z = 0.0f, float w = 0.0f);
 
 		/**@brief Returns the x component.
 		*/
@@ -783,21 +758,21 @@ namespace FAMath
 		*/
 		void SetW(float w);
 
-		/**@brief 4D vector addition through overloading operator +=.
+		/**@brief Adds this vector to vector \a b and stores the result in this vector. 
 		*/
 		Vector4D& operator+=(const Vector4D& b);
 
-		/**@brief 4D vector subtraction through overloading operator -=.
+		/**@brief Subtracts the vector \a b from this vector and stores the result in this vector. 
 		*/
 		Vector4D& operator-=(const Vector4D& b);
 
-		/**@brief 4D vector scalar multiplication through overloading operator *=.
+		/**@brief Multiplies this vector by \a k and stores the result in this vector. 
 		*/
 		Vector4D& operator*=(float k);
 
-		/**@brief 4D vector scalar division through overloading operator /=.
+		/**@brief Divides this vector by \a k and stores the result in this vector. 
 		*
-		* If k is zero, the vector is unchanged.
+		* If \a k is zero, the vector is unchanged.
 		*/
 		Vector4D& operator/=(float k);
 
@@ -810,9 +785,6 @@ namespace FAMath
 
 	//--------------------------------------------------------------------------------------
 	//Vector4D Constructors
-
-	inline Vector4D::Vector4D() : mX{ 0.0f }, mY{ 0.0f }, mZ{ 0.0f }, mW{ 0.0f }
-	{}
 
 	inline Vector4D::Vector4D(float x, float y, float z, float w) : mX{ x }, mY{ y }, mZ{ z }, mW{ w }
 	{}
@@ -917,7 +889,7 @@ namespace FAMath
 	//-------------------------------------------------------------------------------------
 	//Vector4D Non-member functions
 
-	/**@brief Returns true if a is the zero vector.
+	/**@brief Returns true if \a a is the zero vector.
 	*/
 	inline bool ZeroVector(const Vector4D& a)
 	{
@@ -930,46 +902,44 @@ namespace FAMath
 		return false;
 	}
 
-	/**@brief 4D vector addition.
+	/**@brief Adds \a a with \a b and returns the result.
 	*/
 	inline Vector4D operator+(const Vector4D& a, const Vector4D& b)
 	{
 		return Vector4D(a.GetX() + b.GetX(), a.GetY() + b.GetY(), a.GetZ() + b.GetZ(), a.GetW() + b.GetW());
 	}
 
-	/**@brief 4D vector negation.
+	/**@brief Negatives \a v and returns the result.
 	*/
 	inline Vector4D operator-(const Vector4D& v)
 	{
 		return Vector4D(-v.GetX(), -v.GetY(), -v.GetZ(), -v.GetW());
 	}
 
-	/**@brief 4D vector subtraction.
+	/**@brief Subtracts \a b from \a a and returns the result.
 	*/
 	inline Vector4D operator-(const Vector4D& a, const Vector4D& b)
 	{
 		return Vector4D(a.GetX() - b.GetX(), a.GetY() - b.GetY(), a.GetZ() - b.GetZ(), a.GetW() - b.GetW());
 	}
 
-	/**@brief 4D vector scalar multiplication.
-	* Returns a * k, where a is a vector and k is a scalar(float)
+	/**@brief  Returns \a a * \a k.
 	*/
 	inline Vector4D operator*(const Vector4D& a, float k)
 	{
 		return Vector4D(a.GetX() * k, a.GetY() * k, a.GetZ() * k, a.GetW() * k);
 	}
 
-	/**@brief 4D vector scalar multiplication.
-	* Returns k * a,  where a is a vector and k is a scalar(float)
+	/**@brief Returns \a k * \a a.
 	*/
 	inline Vector4D operator*(float k, const Vector4D& a)
 	{
 		return Vector4D(k * a.GetX(), k * a.GetY(), k * a.GetZ(), k * a.GetW());
 	}
 
-	/**@brief 4D vector scalar division.
-	* Returns a / k,  where a is a vector and k is a scalar(float)
-	* If k = 0 the returned vector is the zero vector.
+	/**@brief Returns \a a / \a k.
+	* 
+	* If \a k = 0 the returned vector is the zero vector.
 	*/
 	inline Vector4D operator/(const Vector4D& a, float k)
 	{
@@ -981,7 +951,7 @@ namespace FAMath
 		return Vector4D(a.GetX() / k, a.GetY() / k, a.GetZ() / k, a.GetW() / k);
 	}
 
-	/**@brief Returns the dot product between two 4D vectors.
+	/**@brief Returns the dot product between \a a and \a b.
 	*/
 	inline float DotProduct(const Vector4D& a, const Vector4D& b)
 	{
@@ -989,7 +959,7 @@ namespace FAMath
 		return a.GetX() * b.GetX() + a.GetY() * b.GetY() + a.GetZ() * b.GetZ() + a.GetW() * b.GetW();
 	}
 
-	/**@brief Returns the length(magnitude) of the 4D vector v.
+	/**@brief Returns the length(magnitude) of the 4D vector \a v.
 	*/
 	inline float Length(const Vector4D& v)
 	{
@@ -997,8 +967,9 @@ namespace FAMath
 		return sqrt(v.GetX() * v.GetX() + v.GetY() * v.GetY() + v.GetZ() * v.GetZ() + v.GetW() * v.GetW());
 	}
 
-	/**@brief Normalizes the 4D vector v.
-	* If the 4D vector is the zero vector v is returned.
+	/**@brief Normalizes the 4D vector \a v.
+	* 
+	* If the 4D vector is the zero vector \a v is returned.
 	*/
 	inline Vector4D Norm(const Vector4D& v)
 	{
@@ -1014,8 +985,9 @@ namespace FAMath
 		return Vector4D(v.GetX() / mag, v.GetY() / mag, v.GetZ() / mag, v.GetW() / mag);
 	}
 
-	/**@brief Returns a 4D vector that is the projection of a onto b.
-	* If b is the zero vector a is returned.
+	/**@brief Returns a 4D vector that is the projection of \a a onto \a b.
+	* 
+	* If \a b is the zero vector a is returned.
 	*/
 	inline Vector4D Projection(const Vector4D& a, const Vector4D& b)
 	{
@@ -1049,21 +1021,17 @@ namespace FAMath
 	{
 	public:
 
-		/**@brief Default Constructor.
-		*
-		*	Creates a new 4x4 identity matrix.
+		/**@brief Creates a new 4x4 identity matrix.
 		*/
 		Matrix4x4();
 
-		/**@brief Overloaded Constructor.
-		*
-		*	Creates a new 4x4 matrix with elements initialized to the given 2D array.\n
-		*	If the passed in 2D array isn't a 4x4 matrix, the behavior is undefined.
+		/**@brief Creates a new 4x4 matrix with elements initialized to the given 2D array.
+		* 
+		*	If \a a isn't a 4x4 matrix, the behavior is undefined.
 		*/
 		Matrix4x4(float a[][4]);
 
-		/**@brief Overloaded Constructor.
-		*	Creates a new 4x4 matrix with each row being set to the specified rows.
+		/**@brief Creates a new 4x4 matrix with each row being set to the specified rows.
 		*/
 		Matrix4x4(const Vector4D& r1, const Vector4D& r2, const Vector4D& r3, const Vector4D& r4);
 
@@ -1075,49 +1043,55 @@ namespace FAMath
 		*/
 		const float* Data() const;
 
-		/**@brief Returns a constant reference to the element at the given (row, col).
-		* The row and col values should be between [0,3]. If any of them are out of that range, the first element will be returned.
+		/**@brief Returns a constant reference to the element at the given (\a row, \a col).
+		* 
+		* The \a row and \a col values should be between [0,3]. If any of them are out of that range, the first element will be returned.
 		*/
 		const float& operator()(unsigned int row, unsigned int col) const;
 
-		/**@brief Returns a reference to the element at the given (row, col).
-		* The row and col values should be between [0,3]. If any of them are out of that range, the first element will be returned.
+		/**@brief Returns a reference to the element at the given (\a row, \a col).
+		* 
+		* The \a row and \a col values should be between [0,3]. If any of them are out of that range, the first element will be returned.
 		*/
 		float& operator()(unsigned int row, unsigned int col);
 
-		/**@brief Returns specified row.
-		*  Row should be between [0,3]. If it is out of range the first row will be returned.
+		/**@brief Returns the specified \a row.
+		* 
+		*  \a Row should be between [0,3]. If it is out of range the first row will be returned.
 		*/
 		Vector4D GetRow(unsigned int row) const;
 
-		/**@brief Returns specified col.
-		*  Col should be between [0,3]. If it is out of range the first col will be returned.
+		/**@brief Returns the specified \a col.
+		* 
+		* \a Col should be between [0,3]. If it is out of range the first col will be returned.
 		*/
 		Vector4D GetCol(unsigned int col) const;
 
-		/**@brief Sets each element in the given row to the components of vector v.
-		* Row should be between [0,3]. If it is out of range the first row will be set.
+		/**@brief Sets each element in the given \a row to the components of vector \a v.
+		* 
+		* \a Row should be between [0,3]. If it is out of range the first row will be set.
 		*/
 		void SetRow(unsigned int row, Vector4D v);
 
-		/**@brief Sets each element in the given col to the components of vector v.
-		* Col should be between [0,3]. If it is out of range the first col will be set.
+		/**@brief Sets each element in the given \a col to the components of vector \a v.
+		* 
+		* \a Col should be between [0,3]. If it is out of range the first col will be set.
 		*/
 		void SetCol(unsigned int col, Vector4D v);
 
-		/**@brief Adds this 4x4 matrix with given matrix m and stores the result in this 4x4 matrix.
+		/**@brief Adds this 4x4 matrix with given matrix \a m and stores the result in this 4x4 matrix.
 		*/
 		Matrix4x4& operator+=(const Matrix4x4& m);
 
-		/**@brief Subtracts this 4x4 matrix with given matrix m and stores the result in this 4x4 matrix.
+		/**@brief Subtracts \a m from this 4x4 matrix stores the result in this 4x4 matrix.
 		*/
 		Matrix4x4& operator-=(const Matrix4x4& m);
 
-		/**@brief Multiplies this 4x4 matrix with given scalar k and stores the result in this 4x4 matrix.
+		/**@brief Multiplies this 4x4 matrix with \a k and stores the result in this 4x4 matrix.
 		*/
 		Matrix4x4& operator*=(float k);
 
-		/**@brief Multiplies this 4x4 matrix with given matrix m and stores the result in this 4x4 matrix.
+		/**@brief Multiplies this 4x4 matrix with given matrix \a m and stores the result in this 4x4 matrix.
 		*/
 		Matrix4x4& operator*=(const Matrix4x4& m);
 
@@ -1244,7 +1218,7 @@ namespace FAMath
 
 	inline void Matrix4x4::SetRow(unsigned int row, Vector4D v)
 	{
-		if (row < 0 || row > 3)
+		if (row > 3)
 		{
 			mMat[0][0] = v.GetX();
 			mMat[0][1] = v.GetY();
@@ -1262,7 +1236,7 @@ namespace FAMath
 
 	inline void Matrix4x4::SetCol(unsigned int col, Vector4D v)
 	{
-		if (col < 0 || col > 3)
+		if (col > 3)
 		{
 			mMat[0][0] = v.GetX();
 			mMat[1][0] = v.GetY();
@@ -1355,7 +1329,7 @@ namespace FAMath
 		return *this;
 	}
 
-	/**@brief Adds the two given 4x4 matrices and returns a Matrix4x4 object with the result.
+	/**@brief Adds \a m1 with \a m2 and returns the result.
 	*/
 	inline Matrix4x4 operator+(const Matrix4x4& m1, const Matrix4x4& m2)
 	{
@@ -1371,7 +1345,7 @@ namespace FAMath
 		return res;
 	}
 
-	/**@brief Negates the 4x4 matrix m.
+	/**@brief Negates the 4x4 matrix \a m.
 	*/
 	inline Matrix4x4 operator-(const Matrix4x4& m)
 	{
@@ -1387,7 +1361,7 @@ namespace FAMath
 		return res;
 	}
 
-	/**@brief Subtracts the two given 4x4 matrices and returns a Matrix4x4 object with the result.
+	/**@brief Subtracts \a m2 from \a m1 and returns the result.
 	*/
 	inline Matrix4x4 operator-(const Matrix4x4& m1, const Matrix4x4& m2)
 	{
@@ -1403,7 +1377,7 @@ namespace FAMath
 		return res;
 	}
 
-	/**@brief Multiplies the given 4x4 matrix with the given scalar and returns a Matrix4x4 object with the result.
+	/**@brief Multiplies \a m with \a k and returns the result.
 	*/
 	inline Matrix4x4 operator*(const Matrix4x4& m, const float& k)
 	{
@@ -1419,7 +1393,7 @@ namespace FAMath
 		return res;
 	}
 
-	/**@brief Multiplies the the given scalar with the given 4x4 matrix and returns a Matrix4x4 object with the result.
+	/**@brief Multiplies \a k with \m and returns the result.
 	*/
 	inline Matrix4x4 operator*(const float& k, const Matrix4x4& m)
 	{
@@ -1435,7 +1409,9 @@ namespace FAMath
 		return res;
 	}
 
-	/**@brief Multiplies the two given 4x4 matrices and returns a Matrix4x4 object with the result.
+	/**@brief Multiplies \a m1 with \m2 and returns the result.
+	* 
+	* Does \a m1 * \a m2 in that order.
 	*/
 	inline Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2)
 	{
@@ -1467,8 +1443,9 @@ namespace FAMath
 		return res;
 	}
 
-	/**@brief Multiplies the given 4x4 matrix with the given 4D vector and returns a Vector4D object with the result.
-	* The vector is a column vector.
+	/**@brief Multiplies \a m with \a v and returns the result.
+	* 
+	* The vector \a v is a column vector.
 	*/
 	inline Vector4D operator*(const Matrix4x4& m, const Vector4D& v)
 	{
@@ -1485,8 +1462,9 @@ namespace FAMath
 		return res;
 	}
 
-	/**@brief Multiplies the given 4D vector with the given 4x4 matrix and returns a Vector4D object with the result.
-	* The vector is a row vector.
+	/**@brief Multiplies \a v with \a m and returns the result.
+	*
+	* The vector \a v is a row vector.
 	*/
 	inline Vector4D operator*(const Vector4D& v, const Matrix4x4& m)
 	{
@@ -1503,7 +1481,7 @@ namespace FAMath
 		return res;
 	}
 
-	/**@brief Sets the given matrix to the identity matrix.
+	/**@brief Sets \a m to the identity matrix.
 	*/
 	inline void SetToIdentity(Matrix4x4& m)
 	{
@@ -1534,7 +1512,7 @@ namespace FAMath
 		m(3, 3) = 1.0f;
 	}
 
-	/**@brief Returns true if the given matrix is the identity matrix, false otherwise.
+	/**@brief Returns true if \a m is the identity matrix, false otherwise.
 	*/
 	inline bool IsIdentity(const Matrix4x4& m)
 	{
@@ -1560,7 +1538,7 @@ namespace FAMath
 		}
 	}
 
-	/**@brief Returns the tranpose of the given matrix m.
+	/**@brief Returns the tranpose of the given matrix \a m.
 	*/
 	inline Matrix4x4 Transpose(const Matrix4x4& m)
 	{
@@ -1595,8 +1573,9 @@ namespace FAMath
 		return res;
 	}
 
-	/**@brief Construct a 4x4 translation matrix with the given floats and post-multiply's it by the given matrix.
-	* cm = cm * translate
+	/**@brief Constructs a 4x4 translation matrix with \a x, \a y, \a z and multiplies it by \a cm.
+	* 
+	* Returns cm * translate.
 	*/
 	inline Matrix4x4 Translate(const Matrix4x4& cm, float x, float y, float z)
 	{
@@ -1613,8 +1592,9 @@ namespace FAMath
 		return cm * t;
 	}
 
-	/**@brief Construct a 4x4 scaling matrix with the given floats and post-multiply's it by the given matrix.
-	* cm = cm * scale
+	/**@brief Construct a 4x4 scaling matrix with \a x, \a y, \a z and it by the \a cm.
+	* 
+	*  Returns cm * scale.
 	*/
 	inline Matrix4x4 Scale(const Matrix4x4& cm, float x, float y, float z)
 	{
@@ -1631,8 +1611,9 @@ namespace FAMath
 		return cm * s;
 	}
 
-	/**@brief Construct a 4x4 rotation matrix with the given angle (in degrees) and axis (x, y, z) and post-multiply's it by the given matrix.
-	* cm = cm * rotate.\n
+	/**@brief Construct a 4x4 rotation matrix with \a angle (in degrees) and axis (\a x, \a y, \a z) and post-multiply's it by \a cm.
+	* 
+	* Returns cm * rotate.
 	*/
 	inline Matrix4x4 Rotate(const Matrix4x4& cm, float angle, float x, float y, float z)
 	{
@@ -1667,7 +1648,7 @@ namespace FAMath
 		return cm * r;
 	}
 
-	/**@brief Returns the determinant of the given matrix.
+	/**@brief Returns the determinant \a m.
 	*/
 	inline double Det(const Matrix4x4& m)
 	{
@@ -1710,7 +1691,7 @@ namespace FAMath
 		return (c1 + c2 + c3) - (c4 + c5 + c6) + (c7 + c8 + c9) - (c10 + c11 + c12);
 	}
 
-	/**@brief Returns the cofactor of the given row and col using the given matrix.
+	/**@brief Returns the cofactor of the \a row and \a col in \a m.
 	*/
 	inline double Cofactor(const Matrix4x4& m, unsigned int row, unsigned int col)
 	{
@@ -1746,7 +1727,7 @@ namespace FAMath
 		return pow(-1, row + col) * det3x3;
 	}
 
-	/**@brief Returns the adjoint of the given matrix.
+	/**@brief Returns the adjoint of \a m.
 	*/
 	inline Matrix4x4 Adjoint(const Matrix4x4& m)
 	{
@@ -1764,8 +1745,9 @@ namespace FAMath
 		return Transpose(cA);
 	}
 
-	/**@brief Returns the inverse of the given matrix.
-	* If the matrix is noninvertible/singular, the identity matrix is returned.
+	/**@brief Returns the inverse of \a m.
+	* 
+	* If \a m is noninvertible/singular, the identity matrix is returned.
 	*/
 	inline Matrix4x4 Inverse(const Matrix4x4& m)
 	{
@@ -1799,34 +1781,34 @@ namespace FAMath
 
 //------------------------------------------------------------------------------------------------------------------------------------
 
-	/** @class Quaternion ""
+	/** @class Matrix4x4 ""
+	*	@brief A matrix class used for 4x4 matrices and their manipulations.
+	*
 	*	The datatype for the components is float.\n
+	*	The 4x4 matrix is treated as a row-major matrix.
+	*
+	*/
+
+	/** @class Quaternion ""
+	*	@brief A quaternion class used for quaternions and their manipulations.
+	* 
+	*	The datatype for the components is float.
 	*/
 	class Quaternion
 	{
 	public:
-
-		/**@brief Default Constructor.
-		*
-		*	Constructs an identity quaternion.
+		/**@brief Constructs a quaternion with the specified values.
+		* 
+		* If no values are specified the identity quaternion is constructed.
 		*/
-		Quaternion();
+		Quaternion(float scalar = 1.0f, float x = 0.0f, float y = 0.0f, float z = 0.0f);
 
-		/**@brief Overloaded Constructor.
-		*
-		*	Constructs a quaternion with the given values.
-		*/
-		Quaternion(float scalar, float x, float y, float z);
-
-		/**@brief Overloaded Constructor.
-		*
-		*	Constructs a quaternion with the given values.
+		/**@brief Constructs a quaternion with the specified values.
 		*/
 		Quaternion(float scalar, const Vector3D& v);
 
-		/**@brief Overloaded Constructor.
-		*
-		*	Constructs a quaternion with the given values in the 4D vector.\n
+		/**@brief Constructs a quaternion with the given values in the 4D vector \a v.
+		* 
 		*	The x value in the 4D vector should be the scalar.
 		*	The y, z and w value in the 4D vector should be the axis.
 		*/
@@ -1872,19 +1854,19 @@ namespace FAMath
 		*/
 		void SetVector(const Vector3D& v);
 
-		/**@brief Adds this quaternion to quaterion q and stores the result in this quaternion.
+		/**@brief Adds this quaternion to /a q and stores the result in this quaternion.
 		*/
 		Quaternion& operator+=(const Quaternion& q);
 
-		/**@brief Subtracts this quaternion by quaterion q and stores the result in this quaternion.
+		/**@brief Subtracts the quaternion \a q from this and stores the result in this quaternion.
 		*/
 		Quaternion& operator-=(const Quaternion& q);
 
-		/**@brief Multiplies this quaternion by flaot k and stores the result in this quaternion.
+		/**@brief Multiplies this quaternion by \a k and stores the result in this quaternion.
 		*/
 		Quaternion& operator*=(float k);
 
-		/**@brief Multiplies this quaternion by quaterion q and stores the result in this quaternion.
+		/**@brief Multiplies this quaternion by \a q and stores the result in this quaternion.
 		*/
 		Quaternion& operator*=(const Quaternion& q);
 
@@ -1896,10 +1878,6 @@ namespace FAMath
 	};
 
 	//-------------------------------------------------------------------------------------
-	inline Quaternion::Quaternion() : mScalar{ 1.0f }, mX{ 0.0f }, mY{ 0.0f }, mZ{ 0.0f }
-	{
-	}
-
 	inline Quaternion::Quaternion(float scalar, float x, float y, float z) : 
 		mScalar{ scalar }, mX{ x }, mY{ y }, mZ{ z }
 	{
@@ -2019,21 +1997,21 @@ namespace FAMath
 		return *this;
 	}
 
-	/**@brief Returns a quaternion that has the result of q1 + q2.
+	/**@brief Returns a quaternion that has the result of \a q1 + \a q2.
 	*/
 	inline Quaternion operator+(const Quaternion& q1, const Quaternion& q2)
 	{
 		return Quaternion(q1.GetScalar() + q2.GetScalar(), q1.GetX() + q2.GetX(), q1.GetY() + q2.GetY(), q1.GetZ() + q2.GetZ());
 	}
 
-	/**@brief Returns a quaternion that has the result of -q.
+	/**@brief Returns a quaternion that has the result of \a -q.
 	*/
 	inline Quaternion operator-(const Quaternion& q)
 	{
 		return Quaternion(-q.GetScalar(), -q.GetX(), -q.GetY(), -q.GetZ());
 	}
 
-	/**@brief Returns a quaternion that has the result of q1 - q2.
+	/**@brief Returns a quaternion that has the result of \a q1 - \a q2.
 	*/
 	inline Quaternion operator-(const Quaternion& q1, const Quaternion& q2)
 	{
@@ -2041,21 +2019,21 @@ namespace FAMath
 			q1.GetX() - q2.GetX(), q1.GetY() - q2.GetY(), q1.GetZ() - q2.GetZ());
 	}
 
-	/**@brief Returns a quaternion that has the result of k * q.
+	/**@brief Returns a quaternion that has the result of \a k * \a q.
 	*/
 	inline Quaternion operator*(float k, const Quaternion& q)
 	{
 		return Quaternion(k * q.GetScalar(), k * q.GetX(), k * q.GetY(), k * q.GetZ());
 	}
 
-	/**@brief Returns a quaternion that has the result of q * k.
+	/**@brief Returns a quaternion that has the result of \a q * \a k.
 	*/
 	inline Quaternion operator*(const Quaternion& q, float k)
 	{
 		return Quaternion(q.GetScalar() * k, q.GetX() * k, q.GetY() * k, q.GetZ() * k);
 	}
 
-	/**@brief Returns a quaternion that has the result of q1 * q2.
+	/**@brief Returns a quaternion that has the result of \a q1 * \a q2.
 	*/
 	inline Quaternion operator*(const Quaternion& q1, const Quaternion& q2)
 	{
@@ -2077,7 +2055,7 @@ namespace FAMath
 		return Quaternion(resultScalar, resultVector);
 	}
 
-	/**@brief Returns true if quaternion q is a zero quaternion, false otherwise.
+	/**@brief Returns true if quaternion \a q is a zero quaternion, false otherwise.
 	*/
 	inline bool IsZeroQuaternion(const Quaternion& q)
 	{
@@ -2086,7 +2064,7 @@ namespace FAMath
 			CompareFloats(q.GetY(), 0.0f, EPSILON) && CompareFloats(q.GetZ(), 0.0f, EPSILON);
 	}
 
-	/**@brief Returns true if quaternion q is an identity quaternion, false otherwise.
+	/**@brief Returns true if quaternion \a q is an identity quaternion, false otherwise.
 	*/
 	inline bool IsIdentity(const Quaternion& q)
 	{
@@ -2095,7 +2073,7 @@ namespace FAMath
 			CompareFloats(q.GetY(), 0.0f, EPSILON) && CompareFloats(q.GetZ(), 0.0f, EPSILON);
 	}
 
-	/**@brief Returns the conjugate of quaternion q.
+	/**@brief Returns the conjugate of quaternion \a q.
 	*/
 	inline Quaternion Conjugate(const Quaternion& q)
 	{
@@ -2103,7 +2081,7 @@ namespace FAMath
 		return Quaternion(q.GetScalar(), -q.GetX(), -q.GetY(), -q.GetZ());
 	}
 
-	/**@brief Returns the length of quaternion q.
+	/**@brief Returns the length of quaternion \a q.
 	*/
 	inline float Length(const Quaternion& q)
 	{
@@ -2111,8 +2089,9 @@ namespace FAMath
 		return sqrt(q.GetScalar() * q.GetScalar() + q.GetX() * q.GetX() + q.GetY() * q.GetY() + q.GetZ() * q.GetZ());
 	}
 
-	/**@brief Normalizes quaternion q and returns the normalized quaternion.
-	* If q is the zero quaternion then q is returned.
+	/**@brief Normalizes \a q and returns the normalized quaternion.
+	* 
+	* If \a q is the zero quaternion then \a q is returned.
 	*/
 	inline Quaternion Normalize(const Quaternion& q)
 	{
@@ -2126,8 +2105,9 @@ namespace FAMath
 		return Quaternion(q.GetScalar() / d, q.GetX() / d, q.GetY() / d, q.GetZ() / d);
 	}
 
-	/**@brief Returns the invese of quaternion q.
-	*  If q is the zero quaternion then q is returned.
+	/**@brief Returns the invese of \a q.
+	* 
+	*  If \a q is the zero quaternion then \a q is returned.
 	*/
 	inline Quaternion Inverse(const Quaternion& q)
 	{
@@ -2145,8 +2125,9 @@ namespace FAMath
 			conjugateOfQ.GetY() / d, conjugateOfQ.GetZ() / d);
 	}
 
-	/**@brief Returns a quaternion from the axis-angle rotation representation.
-	*  The angle should be given in degrees.
+	/**@brief Returns a rotation quaternion from the axis-angle rotation representation.
+	* 
+	*  The \a angle should be given in degrees.
 	*/
 	inline Quaternion RotationQuaternion(float angle, float x, float y, float z)
 	{
@@ -2166,7 +2147,8 @@ namespace FAMath
 	}
 
 	/**@brief Returns a quaternion from the axis-angle rotation representation.
-	* The angle should be given in degrees.
+	* 
+	* The \a angle should be given in degrees.
 	*/
 	inline Quaternion RotationQuaternion(float angle, const Vector3D& axis)
 	{
@@ -2185,8 +2167,9 @@ namespace FAMath
 	}
 
 	/**@brief Returns a quaternion from the axis-angle rotation representation.
-	* The x value in the 4D vector should be the angle(in degrees).\n
-	* The y, z and w value in the 4D vector should be the axis.
+	* 
+	* The x value in the 4D vector \a v should be the angle(in degrees).\n
+	* The y, z and w value in the 4D vector \a v should be the axis.
 	*/
 	inline Quaternion RotationQuaternion(const Vector4D& angAxis)
 	{
@@ -2205,8 +2188,9 @@ namespace FAMath
 		return Quaternion(c, s * axis.GetX(), s * axis.GetY(), s * axis.GetZ());
 	}
 
-	/**@brief Returns a matrix from the given quaterion for column vector-matrix multiplication.
-	* Quaternion q should be a unit quaternion.
+	/**@brief Transforms \a q into a column-major matrix.
+	* 
+	* \a q should be a unit quaternion.
 	*/
 	inline Matrix4x4 QuaternionToRotationMatrixCol(const Quaternion& q)
 	{
@@ -2244,8 +2228,9 @@ namespace FAMath
 		return Matrix4x4(colMat);
 	}
 
-	/**@brief Returns a matrix from the given quaterion for row vector-matrix multiplication.
-	* Quaternion q should be a unit quaternion.
+	/**@brief Transforms \a q into a row-major matrix.
+	* 
+	* \a q should be a unit quaternion.
 	*/
 	inline Matrix4x4 QuaternionToRotationMatrixRow(const Quaternion& q)
 	{

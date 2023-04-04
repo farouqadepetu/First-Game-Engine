@@ -19,10 +19,15 @@ namespace FARender
 
 		Text() = default;
 
-		/**@brief Overloaded Constructor.
-		* Initializes the format of the text.\n
+		/**@brief Constructs a Text object.
+		* 
 		* For text location the first two values in the vector is the top-left location of the rectangle and
 		* the last two values are the bottom-right location of the rectangle.
+		* 
+		* @param[in] textLocation The location of the text on the window.
+		* @param[in] textString The text to render.
+		* @param[in] textSize How big the text is.
+		* @param[in] textColor The color of the text.
 		*/
 		Text(const FAMath::Vector4D& textLocation, const std::wstring& textString, float textSize, const FAColor::Color& textColor);
 
@@ -42,19 +47,19 @@ namespace FARender
 		*/
 		const FAColor::Color& GetTextColor() const;
 
-		/**@brief Changes the text size to the specified size.
+		/**@brief Changes the text size to the specified \a textSize.
 		*/
 		void SetTextSize(float textSize);
 
-		/**@brief Changes the text color to the specified color.
+		/**@brief Changes the text color to the specified \a textColor.
 		*/
 		void SetTextColor(const FAColor::Color& textColor);
 
-		/**@brief Changes the text string to the specified string.
+		/**@brief Changes the text string to the specified \a textString.
 		*/
 		void SetTextString(const std::wstring& textString);
 
-		/**@brief Changes the text location to the specified location.
+		/**@brief Changes the text location to the specified \a textLocation.
 		*/
 		void SetTextLocation(const FAMath::Vector4D& textLocation);
 

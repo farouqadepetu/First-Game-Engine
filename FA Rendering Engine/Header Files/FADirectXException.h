@@ -1,5 +1,9 @@
 #pragma once
 
+/** @file FADirectXExcepetion.h
+*	@brief File has class DirectXExcepetion, ANsiToWString function and ThrowIfFailed macro function.
+*/
+
 #include <wrl.h>
 #include <dxgidebug.h>
 #include <comdef.h>
@@ -7,6 +11,10 @@
 #include <sstream>
 #include <vector>
 
+/**@brief Converts a ansi string to a unicode string.
+* 
+* @param[in] str The string to convert.
+*/
 inline std::wstring AnsiToWString(const std::string& str)
 {
 	WCHAR buffer[1024];
@@ -14,11 +22,24 @@ inline std::wstring AnsiToWString(const std::string& str)
 	return std::wstring(buffer);
 }
 
+/** @class DirectXException ""
+*	@brief A class for handling Direct3D and DXGI errors from functions that return a HRESULT value.
+*/
 class DirectXException
 {
 public:
+
+	/**@brief Constructs a DirectXException object.
+	*
+	* @param[in] hr The HRESULT value of a function.
+	* @param[in] functionName The name of the function.
+	* @param[in] fileName The name of the file where the function was called.
+	* @param[in] lineNumber The line number of the function call.
+	*/
 	DirectXException(HRESULT hr, const std::wstring& functionName, const std::wstring& fileName, int lineNumber);
 
+	/**@brief Returns a message describing the error.
+	*/
 	std::wstring ErrorMsg() const;
 
 private:
@@ -29,7 +50,8 @@ private:
 	Microsoft::WRL::ComPtr<IDXGIInfoQueue> mInfoQueue;
 };
 
-//use when calling Direct3D or DXGI function to check if the function failed or not.
+/**@brief Use when calling a Direct3D or DXGI function that returns a HRESULT value to check if the function failed or not.
+*/
 #ifndef ThrowIfFailed
 #define ThrowIfFailed(x)														\
 {																				\

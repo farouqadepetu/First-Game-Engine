@@ -1,11 +1,10 @@
-#include "FABox.h"
+#include "FAPyramid.h"
 #include <unordered_map>
-#include <vector>
-#include <stdexcept>
 
 namespace FAShapes
 {
-	Box::Box(float width, float height, float depth, const FAColor::Color& color) :
+	Pyramid::Pyramid(float width, float height, float depth,
+		const FAColor::Color& color) : 
 		ThreeDimensionalShapeAbstract(color), mWidth{ width }, mHeight{ height }, mDepth{ depth }
 	{
 		CreateVertices();
@@ -13,33 +12,32 @@ namespace FAShapes
 		CreateNormals();
 	}
 
-	//strores the local vertices of box
-	void Box::CreateVertices()
+	void Pyramid::CreateVertices()
 	{
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, 0.5f, -0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, 0.5f, -0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, -0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, -0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, 0.5f, 0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, 0.5f, 0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, 0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, 0.5f), mColor });
+		//top vertex
+		mLocalVertices.push_back({ FAMath::Vector3D(0.0f, 0.5f, 0.0f), mColor });
+
+		//base vertices
+		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, 0.5f), mColor }); //0
+		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, 0.5f), mColor }); //1
+		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, -0.5f), mColor }); //2
+		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, -0.5f), mColor }); //3
+
 	}
 
-	//creates the triangles from the local vertices
-	void Box::CreateTriangles()
+	void Pyramid::CreateTriangles()
 	{
-		//the indices of the vertices that make up each face of the box
-		Quad(0, 1, 2, 3); //back face
-		Quad(5, 4, 7, 6); //front face
-		Quad(4, 5, 1, 0); //top face
-		Quad(3, 2, 6, 7); //bottom face
-		Quad(4, 0, 3, 7); //left face
-		Quad(1, 5, 6, 2); //right face
+		mTriangles.push_back(Triangle(mLocalVertices.data(), 0, 1, 2)); //front triangle
+		mTriangles.push_back(Triangle(mLocalVertices.data(), 0, 3, 4)); //back triangle
+		mTriangles.push_back(Triangle(mLocalVertices.data(), 0, 2, 3)); //right triangle
+		mTriangles.push_back(Triangle(mLocalVertices.data(), 0, 4, 1)); //left triangle
+
+		//Base
+		Quad(1, 4, 3, 2);
+
 	}
 
-	//creates the normals from the triangles
-	void Box::CreateNormals()
+	void Pyramid::CreateNormals()
 	{
 		//Each vertex has a normal assoicated with it. Each triangle has a normal. A vertex can be a part of multiple triangles.
 		//Get the average of all the triangle normals each vertex is a part of.
@@ -69,40 +67,40 @@ namespace FAShapes
 		}
 	}
 
-	float Box::GetWidth() const
+	float Pyramid::GetWidth() const
 	{
 		return mWidth;
 	}
 
-	float Box::GetHeight() const
+	float Pyramid::GetHeight() const
 	{
 		return mHeight;
 	}
 
-	float Box::GetDepth() const
+	float Pyramid::GetDepth() const
 	{
 		return mDepth;
 	}
 
-	void Box::SetWidth(float width)
+	void Pyramid::SetWidth(float width)
 	{
 		mWidth = width;
 		mUpdateLocalToWorldlMatrix = true;
 	}
 
-	void Box::SetHeight(float height)
+	void Pyramid::SetHeight(float height)
 	{
 		mHeight = height;
 		mUpdateLocalToWorldlMatrix = true;
 	}
 
-	void Box::SetDepth(float depth)
+	void Pyramid::SetDepth(float depth)
 	{
 		mDepth = depth;
 		mUpdateLocalToWorldlMatrix = true;
 	}
 
-	void Box::UpdateLocalToWorldMatrix()
+	void Pyramid::UpdateLocalToWorldMatrix()
 	{
 		if (mUpdateLocalToWorldlMatrix)
 		{
@@ -121,8 +119,8 @@ namespace FAShapes
 		}
 	}
 
-	float Box::Volume()
+	float Pyramid::Volume()
 	{
-		return mWidth * mHeight * mDepth;
+		return (mWidth * mHeight * mDepth) / 3.0f;
 	}
 }

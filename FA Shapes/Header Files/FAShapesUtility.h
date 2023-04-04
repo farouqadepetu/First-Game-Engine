@@ -1,13 +1,20 @@
 #pragma once
 
-//#include "FAVector3D.h"
+/** @file FAShapesUtility.h
+*	@brief File has structures DrawArguments and Vertex under the namespace FAShapes.
+*/
+
+
 #include "FAMathEngine.h"
 #include "FAColor.h"
 
+/** @namespace FAShapes
+*	@brief Has classes that are used for creating 3D shapes.
+*/
 namespace FAShapes
 {
 	/** @struct DrawArguments ""
-	*	@brief Has all the data that are used as parameters to draw an object.
+	*	@brief Data that are used as parameters to draw an object.
 	*/
 	struct DrawArguments
 	{
@@ -19,7 +26,7 @@ namespace FAShapes
 
 
 	/** @struct Vertex ""
-	*	@brief Has all the data that describes a vertex.
+	*	@brief Data that describes a vertex.
 	*/
 	struct Vertex
 	{

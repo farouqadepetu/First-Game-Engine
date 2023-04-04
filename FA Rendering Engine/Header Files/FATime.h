@@ -6,16 +6,18 @@
 
 #include <Windows.h>
 
-/** @class Time ""
-*	@brief This class is used to get the time between each frame. You can stop start, reset and get the total time.
+/** @namespace FATime
+*	@brief Has Time class.
 */
 namespace FATime
 {
+	/** @class Time ""
+	*	@brief This class is used to get the time between each frame. You can stop start, reset and get the total time.
+	*/
 	class Time
 	{
 	public:
-		/**@brief Default Constructor.
-		* Gets and stores the seconds per count.
+		/**@brief Gets and stores the seconds per count.
 		*/
 		Time();
 

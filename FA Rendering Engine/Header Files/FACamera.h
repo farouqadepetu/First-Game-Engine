@@ -30,16 +30,18 @@ namespace FACamera
 	class Camera
 	{
 	public:
-		/**@brief Constructor.
+		/**@brief Creates a new camera.
 		*
-		*	Creates a new camera.\n
-		*	Sets the origin of the camera space to the given cameraPosition.\n
-		*	Sets the axis of the camera space to the given x, y and z vectors.\n
-		*	The origin and basis vectors of the camera space should be relative to world space.\n
-		*	Sets the frustum properties for perspective projection to the given znear, zar, aspectRatio and fov values.\n
-		*	vFov should be in degrees.\n
-		*	The constant velocity of the camera when moved is set to the given cameraVelocity;
-		*	The angular velocity of the camera is set the to specified angularVelocity.
+		* @param[in] camerPosition The position of the camera.
+		* @param[in] x The x axis of the local coordinate system of the camera.
+		* @param[in] y The y axis of the local coordinate system of the camera.
+		* @param[in] z The z axis of the local coordinate system of the camera.
+		* @param[in] znear The distance of the near plane from the camera.
+		* @param[in] zfar The distance of the far plane from the camera.
+		* @param[in] aspectRatio The aspect ratio of the view plane.
+		* @param[in] vFov The vertical field of view of the frustrum.
+		* @param[in] cameraVelocity The translational velocity of the camera.
+		* @param[in] angularVelocity The angular velocity of the camera.
 		*/
 		Camera(vec3 cameraPosition = vec3(0.0f, 0.0f, 0.0f), 
 			vec3 x = vec3(1.0f, 0.0f, 0.0f), vec3 y = vec3(0.0f, 1.0f, 0.0f), vec3 z = vec3(0.0f, 0.0f, 1.0f),
@@ -75,6 +77,10 @@ namespace FACamera
 		float GetAngularVelocity() const;
 		
 		/**@brief Defines the camera space using UVN.
+		* 
+		* @param[in] camerPosition The position of the camera.
+		* @param[in] target The point the camera is looking at.
+		* @param[in] up The up direction of the world.
 		*/
 		void LookAt(vec3 cameraPosition, vec3 target, vec3 up);
 
@@ -98,31 +104,31 @@ namespace FACamera
 		*/
 		void SetCameraPosition(const vec3& position);
 
-		/**@brief Sets the camera's x-axis to the specified vector.
+		/**@brief Sets the camera's x-axis to the specified vector \a x.
 		*/
 		void SetX(const vec3& x);
 
-		/**@brief Sets the camera's y-axis to the specified vector.
+		/**@brief Sets the camera's y-axis to the specified vector \a y.
 		*/
 		void SetY(const vec3& y);
 
-		/**@brief Sets the camera's z-axis to the specified vector.
+		/**@brief Sets the camera's z-axis to the specified vector \a z.
 		*/
 		void SetZ(const vec3& z);
 
-		/**@brief Sets the camera's velocity to the specified velocity.
+		/**@brief Sets the camera's velocity to the specified \a velocity.
 		*/
 		void SetCameraVelocity(float velocity);
 
-		/**@brief Sets the camera's angular velocity to the specified angular velocity.
+		/**@brief Sets the camera's angular velocity to the specified \a angular \a velocity.
 		*/
 		void SetAngularVelocity(float velcoity);
 
-		/**@brief Sets the camera's near plane z value to the specified value.
+		/**@brief Sets the camera's near plane value to the specified value.
 		*/
 		void SetZNear(float znear);
 
-		/**@brief Sets the camera's far plane z value to the specified value.
+		/**@brief Sets the camera's far plane value to the specified value.
 		*/
 		void SetZFar(float zfar);
 
@@ -150,51 +156,69 @@ namespace FACamera
 		*/
 		void UpdatePerspectiveProjectionMatrix();
 
-		/**@brief After modifying view and/or perspective projection transformation matrix, 
-		*	call this to rebuild the view perspective projection transformation matrix.
+		/**@brief Updates the camera's view perspective projection matrix.
+		* 
+		* Call this to rebuild the view perspective projection transformation matrix.
 		*/
 		void UpdateViewPerspectiveProjectionMatrix();
 
-		/**@brief Moves the camera left along the camera's x-axis
+		/**@brief Moves the camera left along the camera's x-axis.
 		*/
 		void Left(float dt);
 
-		/**@brief Moves the camera right along the camera's x-axis
+		/**@brief Moves the camera right along the camera's x-axis.
+		* 
+		*  @param[in] dt The time between frames.
 		*/
 		void Right(float dt);
 
-		/**@brief Moves the camera foward along the camera's z-axis
+		/**@brief Moves the camera foward along the camera's z-axis.
+		* 
+		* @param[in] dt The time between frames.
 		*/
 		void Foward(float dt);
 
-		/**@brief Moves the camera backward along the camera's z-axis
+		/**@brief Moves the camera backward along the camera's z-axis.
+		* 
+		* @param[in] dt The time between frames.
 		*/
 		void Backward(float dt);
 
-		/**@brief Moves the camera up along the camera's y-axis
+		/**@brief Moves the camera up along the camera's y-axis.
+		* 
+		* @param[in] dt The time between frames.
 		*/
 		void Up(float dt);
 
-		/**@brief Moves the camera down along the camera's y-axis
+		/**@brief Moves the camera down along the camera's y-axis.
+		* 
+		* @param[in] dt The time between frames.
 		*/
 		void Down(float dt);
 
 		/**@brief Rotates the camera to look left and right.
+		* 
+		* @param[in] xDiff How many degrees to rotate.
 		*/
 		void RotateCameraLeftRight(float xDiff);
 
 		/**@brief Rotates the camera to look up and down.
+		* 
+		*  @param[in] yDiff How many degrees to rotate.
 		*/
 		void RotateCameraUpDown(float yDiff);
 
 		/**@brief Polls keyboard input and moves the camera.
-		* Moves the camera foward/backward if w/s or up/down arrow was pressed.
-		* Moves the camera left/right if a/d or left/right arrow was pressed.
-		* Moves the camera up/down if space/crtl was pressed.
+		* 
+		* Moves the camera foward/backward if w/s or up/down arrow was pressed.\n
+		* Moves the camera left/right if a/d or left/right arrow was pressed.\n
+		* Moves the camera up/down if space/crtl was pressed.\n
+		* 
+		* @param[in] dt The time between frames.
 		*/
 		void KeyboardInput(float dt);
 
-		/**@brief Rotates camera on mouse movement.
+		/**@brief Polls mouse input and rotates the camera.
 		*/
 		void MouseInput();
 

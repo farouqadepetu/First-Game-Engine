@@ -6,6 +6,9 @@
 *	@brief File has class Color under namespace FAColor.
 */
 
+/** @namespace FAColor
+*	@brief Has the Color class.
+*/
 namespace FAColor
 {
 	/** @class Color""
@@ -17,13 +20,11 @@ namespace FAColor
 	{
 	public:
 
-		/**@brief Default Constructor.
-		* Initializes the color to the specified RGBA values.
+		/**@brief Initializes the color to the specified RGBA values.
 		*/
 		Color(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 1.0f);
 
-		/**@brief Overloaded Constructor.
-		* Initializes the color to the specified color.
+		/**@brief Initializes the color to the specified \a color.
 		*/
 		Color(const FAMath::Vector4D& color);
 
@@ -67,25 +68,29 @@ namespace FAColor
 		*/
 		void SetAlpha(float a);
 
-		/**@brief Adds this objects color to the specified color and stores the result in this object.
+		/**@brief Adds this objects color to the specified color \a c and stores the result in this object.
+		* 
 		* Does component-wise addtion. If any of the resultant components are > 1.0f, they are set to 1.0f.
 		*/
 		Color& operator+=(const Color& c);
 
-		/**@brief Subtracts the specified color from this objects color and stores the result in this object.
+		/**@brief Subtracts the specified color \a c from this objects color and stores the result in this object.
+		* 
 		* Does component-wise subtraction. If any of the resultant components are < 0.0f, they are set to 0.0f.
 		*/
 		Color& operator-=(const Color& c);
 
-		/**@brief Multiplies this objects color by the specified float value k and stores the result in this object.
-		*	If k < 0.0f, no multiplication happens and this objects color does not get modified.\n
+		/**@brief Multiplies this objects color by the specified value \a k and stores the result in this object.
+		* 
+		*	If \a k < 0.0f, no multiplication happens and this objects color does not get modified.\n
 		*	If any of the resultant components are > 1.0f, they are set to 1.0f.\n
 		*/
 		Color& operator*=(float k);
 
-		/**@brief Multiplies this objects color by the specified color c and stores the result in this object.
+		/**@brief Multiplies this objects color by the specified color \a c and stores the result in this object.
+		* 
 		*  If any of the resultant components are > 1.0f, they are set to 1.0f.\n
-		*	Does component-wise multiplication.
+		*  Does component-wise multiplication.
 		*/
 		Color& operator*=(const Color& c);
 
@@ -93,29 +98,35 @@ namespace FAColor
 		FAMath::Vector4D mColor;
 	};
 
-	/**@brief Returns the result of c1 + c2.
+	/**@brief Returns the result of \a c1 + \a c2.
+	* 
 	* Does component-wise addtion. If any of the resultant components are > 1.0f, they are set to 1.0f.
 	*/
 	Color operator+(const Color& c1, const Color& c2);
 
-	/**@brief Returns the result of c1 - c2.
+	/**@brief Returns the result of \a c1 - \a c2.
+	* 
 	* Does component-wise subtraction. If any of the resultant components are < 0.0f, they are set to 0.0f.
 	*/
 	Color operator-(const Color& c1, const Color& c2);
 
-	/**@brief Returns the result of c * k.
-	*	If k < 0.0f, no multiplication happens and Color c is returned.\n
+	/**@brief Returns the result of \a c * \a k.
+	* 
+	*	If \ak < 0.0f, no multiplication happens and Color \a c is returned.\n
 	*	If any of the resultant components are > 1.0f, they are set to 1.0f.\n
 	*/
 	Color operator*(const Color& c, float k);
 
-	/**@brief Returns the result of k * c.
-	*	If k < 0.0f, no multiplication happens and Color c is returned.\n
+	/**@brief Returns the result of \a k * \a c.
+	* 
+	*	If \a k < 0.0f, no multiplication happens and Color \a c is returned.\n
+	* 
 	*	If any of the resultant components are > 1.0f, they are set to 1.0f.\n
 	*/
 	Color operator*(float k, const Color& c);
 
-	/**@brief Returns the result of c1 * c2.
+	/**@brief Returns the result of \a c1 * \a c2.
+	* 
 	*	If any of the resultant components are > 1.0f, they are set to 1.0f.\n
 	*/
 	Color operator*(const Color& c1, const Color& c2);

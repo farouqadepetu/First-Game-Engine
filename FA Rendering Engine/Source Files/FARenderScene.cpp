@@ -25,14 +25,14 @@ namespace FARender
 		return mCamera;
 	}
 
-	FARender::Text& RenderScene::GetText(unsigned int textIndex)
+	FARender::Text& RenderScene::GetText(unsigned int textKey)
 	{
-		return mTexts.at(textIndex);
+		return mTexts.at(textKey);
 	}
 
-	const FARender::Text& RenderScene::GetText(unsigned int textIndex) const
+	const FARender::Text& RenderScene::GetText(unsigned int textKey) const
 	{
-		return mTexts.at(textIndex);
+		return mTexts.at(textKey);
 	}
 
 	void RenderScene::LoadShader(unsigned int shaderKey, const std::wstring& filename)
@@ -84,7 +84,7 @@ namespace FARender
 
 	void RenderScene::CreateInputElementDescription(unsigned int key, const char* semanticName, unsigned int semanticIndex,
 		DXGI_FORMAT format, unsigned int inputSlot, unsigned int byteOffset,
-		D3D12_INPUT_CLASSIFICATION inputSlotClassifcation,
+		D3D12_INPUT_CLASSIFICATION inputSlotClass,
 		unsigned int instanceStepRate)
 	{
 		D3D12_INPUT_ELEMENT_DESC inputElementDescription{};
@@ -93,7 +93,7 @@ namespace FARender
 		inputElementDescription.Format = format;
 		inputElementDescription.InputSlot = inputSlot;
 		inputElementDescription.AlignedByteOffset = byteOffset;
-		inputElementDescription.InputSlotClass = inputSlotClassifcation;
+		inputElementDescription.InputSlotClass = inputSlotClass;
 		inputElementDescription.InstanceDataStepRate = instanceStepRate;
 
 		mInputElementDescriptions[key].emplace_back(inputElementDescription);
@@ -329,7 +329,7 @@ namespace FARender
 
 	}
 
-	void RenderScene::RenderObjects(unsigned int drawArgsKey, unsigned int objectconstantBufferKey, unsigned int rootParamterIndex,
+	void RenderScene::RenderObjects(unsigned int drawArgsKey, unsigned int objectConstantBufferKey, unsigned int rootParamterIndex,
 		D3D_PRIMITIVE_TOPOLOGY primitive)
 	{
 		mDeviceResources.GetCommandList()->IASetPrimitiveTopology(primitive);
@@ -338,11 +338,11 @@ namespace FARender
 		{
 			//Get the GPU address of the first byte of the object constant buffer.
 			D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ 
-				mDynamicBuffers.at(objectconstantBufferKey)[mDeviceResources.GetCurrentFrame()].GetGPUAddress() };
+				mDynamicBuffers.at(objectConstantBufferKey)[mDeviceResources.GetCurrentFrame()].GetGPUAddress() };
 
 			//Calculate the offset of where the objects constant data is in the constant buffer.
 			UINT64 offset = (UINT64)i.indexOfConstantData * 
-				mDynamicBuffers.at(objectconstantBufferKey)[mDeviceResources.GetCurrentFrame()].GetStride();
+				mDynamicBuffers.at(objectConstantBufferKey)[mDeviceResources.GetCurrentFrame()].GetStride();
 			cbAddress += offset;
 
 			//Set the GPU address of the objects constant data.

@@ -17,8 +17,14 @@ namespace FARender
 
 		SwapChain() = default;
 
-		/**@brief Constructor.
-		* Creates a swap chain.
+		/**@brief Creates a swap chain.
+		* 
+		* @param[in] dxgiFactory A DXGIFactory4 object.
+		* @param[in] A Direct3D 12 command queue.
+		* @param[in] windowHandle A handle to a window.
+		* @param[in, optional] rtFormat The format of the render target buffer.
+		* @param[in, optional] dsFormat The format of the depth stencil buffer.
+		* @param[in, optional] numRenderTargetBuffers The number of render target buffers the swap chain has.
 		*/
 		SwapChain(const Microsoft::WRL::ComPtr<IDXGIFactory4>& dxgiFactory,
 			const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& commandQueue, HWND windowHandle, 
@@ -54,34 +60,67 @@ namespace FARender
 		void ResetBuffers();
 
 		/**@brief Resizes the swap chain.
+		* 
+		* @param[in] width The width to resize the render target buffers to.
+		* @param[in] height The height to resize the render target buffers to.
 		*/
 		void ResizeSwapChain(unsigned width, unsigned height);
 
 		/**@brief Creates the render target buffers and views to them.
+		* 
+		* @param[in] device A Direct3D 12 device.
+		* @param[in] rtvHeap A descriptor heap for storing render target descriptors.
+		* @param[in] indexOfWhereToStoreView The index of where to store the created descriptor in the descriptor heap.
+		* @param[in] rtvSize The size of a render target descriptor.
 		*/
 		void CreateRenderTargetBuffersAndViews(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int indexOfWhereToStoreFirstView, 
 			unsigned int rtvSize);
 
 		/**@brief Creates the swap chains depth stencil buffer and view to it.
+		* 
+		* @param[in] device A Direct3D 12 device.
+		* @param[in] dsvHeap A descriptor heap for storing depth stencil descriptors.
+		* @param[in] index The index of where to store the created descriptor in the descriptor heap.
+		* @param[in] dsvSize The size of a depth stenicl descriptor.
+		* @param[in] width The width of the depth stenicl buffer.
+		* @param[in] height The height of the depth stenicl buffer.
 		*/
 		void CreateDepthStencilBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvHeap, unsigned int index, unsigned int dsvSize,
 			unsigned int width, unsigned int height);
 
 		/**@brief Clears the current render target buffer.
+		* 
+		* @param[in] commadList A Direct3D 12 graphics command list.
+		* @param[in] rtvHeap A render target descriptor heap.
+		* @param[in] indexOfFirstView The index of where the render target descriptor 
+		* of the first render target buffer is stored in the descriptor heap.
+		* 
+		* @param[in] rtvSize The size of a render target descriptor.
+		* @param[in] backBufferClearValue The RGBA values of what to set every element in the current render target buffer to.
 		*/
 		void ClearCurrentBackBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
 			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int indexOfFirstView, unsigned int rtvSize,
 			const float* backBufferClearValue);
 
 		/**@brief Clears the swap chains depth stencil buffer with the specified clear value.
+		* 
+		* @param[in] commadList A Direct3D 12 graphics command list.
+		* @param[in] dsvHeap A depth stencil descriptor heap.
+		* @param[in] indexOfView The index of where the depth stencil descriptor of the  
+		* depth stencil buffer is stored in the descriptor heap.
+		* 
+		* @param[in] dsvSize The size of a depth stencil descriptor.
+		* @param[in] clearValue The value of what to set every element in the depth stencil buffer to.
 		*/
 		void ClearDepthStencilBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
 			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvHeap, unsigned int indexOfView, unsigned int dsvSize,
 			float clearValue);
 
-		/**@brief Transitions the current render target buffer from the specified before state to the specified after state.
+		/**@brief Transitions the current render target buffer from the specified \a before state to the specified \a after state.
+		* 
+		* @param[in] commandList A Direct3D 12 graphics command list.
 		*/
 		void Transition(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
 			D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);

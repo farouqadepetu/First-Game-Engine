@@ -18,8 +18,11 @@ namespace FARender
 	public:
 		TextResources() = default;
 
-		/**@brief Constructor.
-		* Initializes the text resources.
+		/**@brief Initializes the text resources.
+		* 
+		* @param[in] device A Direct3D 12 device.
+		* @param[in] commandQueue A Direct3D 12 command queue.
+		* @param[in] numSwapChainBuffers The number of swap chain render target buffers.
 		*/
 		TextResources(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& commandQueue, unsigned int numSwapChainBuffers);
@@ -37,14 +40,21 @@ namespace FARender
 		void ResetBuffers();
 
 		/**@brief Resizes the buffers.
+		* 
+		* @param[in] renderTargetBuffers An array of render target buffers.
+		* @param[in] windowHandle A handle to a window.
 		*/
 		void ResizeBuffers(const RenderTargetBuffer* renderTargetBuffers, HWND windowHandle);
 
 		/**@brief Prepares to render text.
+		* 
+		* @param[in] currentBackBuffer The index of the current render target buffer.
 		*/
 		void BeforeRenderText(unsigned int currentBackBuffer);
 
 		/**@brief Executes text commands.
+		* 
+		* @param[in] currentBackBuffer The index of the current render target buffer.
 		*/
 		void AfterRenderText(unsigned int currentBackBuffer);
 
