@@ -17,3 +17,5 @@ The math engine documentation can be found in the directory FA Math Engine.
 The rendering engine documentation can be found in the directory FA Rendering Engine.
 
 The documentation of the Shapes can be found in the directory FA Shapes.
+
+If there are any errors you would wish to report please email me at farouqadepetu@gmail.com detailing the error.
