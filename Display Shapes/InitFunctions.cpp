@@ -25,10 +25,12 @@ namespace Init
 		}
 	}
 
-	void BuildCamera(FARender::RenderScene& scene)
+	void BuildCamera(unsigned int width, unsigned int height)
 	{
-		scene.GetCamera().SetCameraPosition(vec3(5.0f, 0.0f, -12.5f));
+		camera.SetCameraPosition(vec3(5.0f, 0.0f, -12.5f));
+		camera.SetAspectRatio((float)width / height);
 	}
+
 
 	void BuildShaders(FARender::RenderScene& scene)
 	{
@@ -56,9 +58,6 @@ namespace Init
 
 			//Describe the draw arguments for each shape.
 			i->SetDrawArguments(numTriangles * 3, indexList.size(), vertexList.size(), k);
-
-			//store all of the draw arguments of the shapes in the scene object.
-			scene.AddDrawArgument(SHAPES, i->GetDrawArguments());
 
 			//store the vertices of each shape.
 			vertexList.insert(vertexList.end(), i->GetLocalVertices(),
@@ -107,9 +106,27 @@ namespace Init
 			VERTEX_SHADER, PIXEL_SHADER, VS_INPUT_LAYOUT, 0, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 4);
 	}
 
-	void BuildText(FARender::RenderScene& scene)
+	void BuildText(unsigned int width, unsigned int height)
 	{
-		scene.CreateText(FRAMES_PER_SECOND, FAMath::Vector4D(0.0f, 10.0f, 280.0f, 10.0f),
-			L"", 15.0f, FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f));
+		//Frames per second text
+		textList.emplace_back(FARender::Text(FAMath::Vector4D(0.0f, 0.01f * height, 0.3f * width, 0.02f * height), L"", 15.0f,
+			FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f)));
+
+
+		//Instructions text
+		std::wstring instructions
+		{
+			L"Press 1 to turn on/off MSAA\n"
+			L"Press 2 to turn on/off the text\n"
+			L"Press 3 to switch between wireframe/solid mode\n\n"
+			L"How to move the camera:\n"
+			L"Use WASD or the arrow keys to move the camera\n"
+			L"Click the left mouse button and move the mouse to rotate the camera" 
+		};
+
+		textList.emplace_back(FARender::Text(FAMath::Vector4D(0.7f * width, 0.05f * height, width, 0.2f * height),
+			instructions, 15.0f, FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f)));
+
+
 	}
 }

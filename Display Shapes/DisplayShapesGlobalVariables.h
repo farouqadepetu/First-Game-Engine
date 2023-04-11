@@ -4,6 +4,8 @@
 #include "FATime.h"
 #include "FARenderScene.h"
 #include "FAThreeDimensional.h"
+#include "FACamera.h"
+#include "FAText.h"
 
 namespace GlobalVariables
 {
@@ -14,7 +16,7 @@ namespace GlobalVariables
 	inline bool isResizing{ false }; //true if the user is currently resizing the window.
 	inline bool isSolid{ true };	//true if in solid mode.
 	inline bool isMSAAEnabled{ false }; //true if MSAA is enabled.
-	inline bool isTextEnabled{ false }; //true if text is enabled.
+	inline bool isTextEnabled{ true }; //true if text is enabled.
 
 	//Used in the window procedure to store the new width and height of the window when user resizes it.
 	inline FAWindow::Window* window{ nullptr };
@@ -53,7 +55,7 @@ namespace GlobalVariables
 	enum BufferNames { VERTEX_BUFFER, INDEX_BUFFER, OBJECTCB, PASSCB };
 	enum ObjectNames { SHAPES };
 	enum PSONames { SOLID, SOLID_MSAA, WIRE, WIRE_MSAA };
-	enum TextNames { FRAMES_PER_SECOND };
+	enum TextNames { FRAMES_PER_SECOND, INSTRUCTIONS };
 
 	//vector to store pointers to 3D shapes.
 	inline std::vector<std::unique_ptr<FAShapes::ThreeDimensionalShapeAbstract>> shapes;
@@ -63,4 +65,10 @@ namespace GlobalVariables
 
 	//Vector to store all the indices of the 3D shapes.
 	inline std::vector<unsigned int> indexList;
+
+	//Camera for the scene
+	inline FACamera::Camera camera;
+
+	//Vector to store all of the text to render.
+	inline std::vector<FARender::Text> textList;
 }

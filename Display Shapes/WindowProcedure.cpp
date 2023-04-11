@@ -46,6 +46,10 @@ namespace WindowProc
 						isMaximized = true;
 						scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
 							isMSAAEnabled, isTextEnabled);
+
+						camera.SetAspectRatio((float)window->GetWidth() / window->GetHeight());
+						
+						ResizeText(window->GetWidth(), window->GetHeight());
 					}
 					if (wParam == SIZE_RESTORED)
 					{
@@ -56,6 +60,10 @@ namespace WindowProc
 							isMinimized = false;
 							scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
 								isMSAAEnabled, isTextEnabled);
+
+							camera.SetAspectRatio((float)window->GetWidth() / window->GetHeight());
+
+							ResizeText(window->GetWidth(), window->GetHeight());
 						}
 						//restoring from a maximized state
 						else if (isMaximized)
@@ -63,12 +71,20 @@ namespace WindowProc
 							isMaximized = false;
 							scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
 								isMSAAEnabled, isTextEnabled);
+
+							camera.SetAspectRatio((float)window->GetWidth() / window->GetHeight());
+
+							ResizeText(window->GetWidth(), window->GetHeight());
 						}
 						//will resize when the resize bars are released.
 						else if (!isResizing)
 						{
 							scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
 								isMSAAEnabled, isTextEnabled);
+
+							camera.SetAspectRatio((float)window->GetWidth() / window->GetHeight());
+
+							ResizeText(window->GetWidth(), window->GetHeight());
 						}
 					}
 				}
@@ -93,6 +109,11 @@ namespace WindowProc
 				frameTime.Start();
 				scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
 					isMSAAEnabled, isTextEnabled);
+
+				camera.SetAspectRatio((float)window->GetWidth()/ window->GetHeight());
+
+				ResizeText(window->GetWidth(), window->GetHeight());
+
 				return 0;
 			}
 
@@ -126,5 +147,11 @@ namespace WindowProc
 		}
 
 		return DefWindowProc(windowHandle, uMsg, wParam, lParam); //handles events that weren't manually handled.
+	}
+
+	void ResizeText(unsigned int width, unsigned int height)
+	{
+		textList.at(FRAMES_PER_SECOND).SetTextLocation(FAMath::Vector4D(0.0f, 0.01f * height, 0.3f * width, 0.02f * height));
+		textList.at(INSTRUCTIONS).SetTextLocation(FAMath::Vector4D(0.7f * width, 0.05f * height, width, 0.2f * height));
 	}
 }

@@ -8,6 +8,8 @@ To run the program go to x64/Debug/Display Shapes.exe or x64/Release/Display Sha
 
 Open DisplayShapes.sln or DisplayShapes.vcxproj to compile and link the program to create your own executable.
 
+To watch a showcase of the program watch the video DisplayShapesVideo.mp4.
+
 Read How I Made the Program Display Shapes.pdf on what I did to create the program.
 
 For additional information about the structures, classes and functions used please read the documentation. 

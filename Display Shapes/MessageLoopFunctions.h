@@ -4,8 +4,8 @@
 
 namespace MessageLoop
 {
-	void FrameStats(FARender::RenderScene& scene);
-	void UserInput(FARender::RenderScene& scene);
+	void FrameStats();
+	void UserInput();
 	void Update(FARender::RenderScene& scene);
 	void Draw(FARender::RenderScene& scene);
 }

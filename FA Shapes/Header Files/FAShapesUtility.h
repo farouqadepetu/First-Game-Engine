@@ -21,7 +21,7 @@ namespace FAShapes
 		unsigned int indexCount;
 		unsigned int locationOfFirstIndex;
 		int indexOfFirstVertex;
-		int indexOfConstantData;
+		unsigned int indexOfConstantData;
 	};
 
 

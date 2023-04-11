@@ -136,7 +136,7 @@ namespace FAShapes
 	}
 
 	void ThreeDimensionalShapeAbstract::SetDrawArguments(unsigned int indexCount, unsigned int locationOfFirstIndex,
-		int indexOfFirstVertex, int indexOfConstantData)
+		int indexOfFirstVertex, unsigned int indexOfConstantData)
 	{
 		mSphereDrawArguments = { indexCount, locationOfFirstIndex, indexOfFirstVertex, indexOfConstantData };
 	}

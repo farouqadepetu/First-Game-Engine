@@ -11,29 +11,7 @@ namespace FARender
 	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled, bool isTextEnabled) :
 		mDeviceResources{ DeviceResources::GetInstance(width, height, windowHandle, isMSAAEnabled, isTextEnabled) }
 
-	{
-		mCamera.SetAspectRatio((float)width / height);
-	}
-
-	FACamera::Camera& RenderScene::GetCamera()
-	{
-		return mCamera;
-	}
-
-	const FACamera::Camera& RenderScene::GetCamera() const
-	{
-		return mCamera;
-	}
-
-	FARender::Text& RenderScene::GetText(unsigned int textKey)
-	{
-		return mTexts.at(textKey);
-	}
-
-	const FARender::Text& RenderScene::GetText(unsigned int textKey) const
-	{
-		return mTexts.at(textKey);
-	}
+	{}
 
 	void RenderScene::LoadShader(unsigned int shaderKey, const std::wstring& filename)
 	{
@@ -255,36 +233,6 @@ namespace FARender
 		ThrowIfFailed(mDeviceResources.GetDevice()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&mPSOs[psoKey])));
 	}
 
-	void RenderScene::AddDrawArgument(unsigned int index,
-		const FAShapes::DrawArguments& drawArg)
-	{
-		mObjects[index].push_back(drawArg);
-	}
-
-	void RenderScene::CreateDrawArgument(unsigned int index,
-		unsigned int indexCount, unsigned int locationOfFirstIndex, int indexOfFirstVertex, int indexOfConstantData)
-	{
-		FAShapes::DrawArguments drawArgs{ indexCount, locationOfFirstIndex, indexOfFirstVertex, indexOfConstantData };
-		mObjects[index].push_back(drawArgs);
-	}
-
-	void RenderScene::RemoveDrawArgument(unsigned int index, unsigned int drawArgIndex)
-	{
-		std::vector<FAShapes::DrawArguments>::iterator it = mObjects.at(index).begin();
-		mObjects.at(index).erase(it + drawArgIndex);
-	}
-
-	void RenderScene::CreateText(unsigned int textKey, FAMath::Vector4D textLocation, const std::wstring& textString,
-		float textSize, const FAColor::Color textColor)
-	{
-		mTexts[textKey] = Text(textLocation, textString, textSize, textColor);
-	}
-
-	void RenderScene::RemoveText(unsigned int textKey)
-	{
-		mTexts.erase(textKey);
-	}
-
 	void RenderScene::BeforeRenderObjects(bool isMSAAEnabled)
 	{
 		mDeviceResources.Draw(isMSAAEnabled);
@@ -308,7 +256,8 @@ namespace FARender
 			mDeviceResources.GetCommandList()->IASetIndexBuffer(&mStaticBuffers.at(staticBufferKey).GetIndexBufferView());
 	}
 
-	void RenderScene::SetDynamicBuffer(unsigned int bufferType, unsigned int dynamicBufferKey, unsigned int rootParameterIndex)
+	void RenderScene::SetDynamicBuffer(unsigned int bufferType, unsigned int dynamicBufferKey, unsigned int indexConstantData,
+		unsigned int rootParameterIndex)
 	{
 		if (bufferType != 0 && bufferType != 1 && bufferType != 2)
 			throw std::runtime_error("The buffer type for linking a dynamic buffer is not 0, 1 or 2");
@@ -323,34 +272,28 @@ namespace FARender
 		}
 		else if (bufferType == 2) //link a constant buffer.
 		{
-			mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(rootParameterIndex,
-				mDynamicBuffers.at(dynamicBufferKey)[mDeviceResources.GetCurrentFrame()].GetGPUAddress());
+			//Get the GPU address of the first byte of the dynamic buffer.
+			D3D12_GPU_VIRTUAL_ADDRESS cbAddress{
+				mDynamicBuffers.at(dynamicBufferKey)[mDeviceResources.GetCurrentFrame()].GetGPUAddress() };
+
+			//Calculate the offset of where the constant data is in the dynamic buffer.
+			UINT64 offset = (UINT64)indexConstantData *
+				mDynamicBuffers.at(dynamicBufferKey)[mDeviceResources.GetCurrentFrame()].GetStride();
+			cbAddress += offset;
+
+			//Link the constant data to the pipeline.
+			mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(rootParameterIndex, cbAddress);
 		}
 
 	}
 
-	void RenderScene::RenderObjects(unsigned int drawArgsKey, unsigned int objectConstantBufferKey, unsigned int rootParamterIndex,
+	void RenderScene::RenderObject(unsigned int indexCount, unsigned int locationFirstVertex, int indexOfFirstVertex,
 		D3D_PRIMITIVE_TOPOLOGY primitive)
 	{
 		mDeviceResources.GetCommandList()->IASetPrimitiveTopology(primitive);
 
-		for (const FAShapes::DrawArguments& i : mObjects.at(drawArgsKey))
-		{
-			//Get the GPU address of the first byte of the object constant buffer.
-			D3D12_GPU_VIRTUAL_ADDRESS cbAddress{ 
-				mDynamicBuffers.at(objectConstantBufferKey)[mDeviceResources.GetCurrentFrame()].GetGPUAddress() };
-
-			//Calculate the offset of where the objects constant data is in the constant buffer.
-			UINT64 offset = (UINT64)i.indexOfConstantData * 
-				mDynamicBuffers.at(objectConstantBufferKey)[mDeviceResources.GetCurrentFrame()].GetStride();
-			cbAddress += offset;
-
-			//Set the GPU address of the objects constant data.
-			mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(rootParamterIndex, cbAddress);
-
-			mDeviceResources.GetCommandList()->DrawIndexedInstanced(i.indexCount, 1,
-				i.locationOfFirstIndex, i.indexOfFirstVertex, 0);
-		}
+		mDeviceResources.GetCommandList()->DrawIndexedInstanced(indexCount, 1,
+			locationFirstVertex, indexOfFirstVertex, 0);
 	}
 
 	void RenderScene::AfterRenderObjects(bool isMSAAEnabled, bool isTextEnabled)
@@ -365,20 +308,17 @@ namespace FARender
 		mDeviceResources.BeforeTextDraw();
 	}
 
-	void RenderScene::RenderText(unsigned int textKey)
+	void RenderScene::RenderText(const FAMath::Vector4D& textLocation, const FAColor::Color& textColor, float textSize,
+		const std::wstring& textString)
 	{
-		Text* textToRender{ &mTexts.at(textKey) };
+		D2D_RECT_F tLocation{ textLocation.GetX(), textLocation.GetY(), textLocation.GetZ(), textLocation.GetW() };
 
-		D2D_RECT_F textLocation{ textToRender->GetTextLocation().GetX(), textToRender->GetTextLocation().GetY(),
-			textToRender->GetTextLocation().GetZ(), textToRender->GetTextLocation().GetW() };
-
-		D2D1_COLOR_F textColor{ textToRender->GetTextColor().GetRed(), textToRender->GetTextColor().GetGreen(),
-			textToRender->GetTextColor().GetBlue(), textToRender->GetTextColor().GetAlpha() };
+		D2D1_COLOR_F tColor{ textColor.GetRed(), textColor.GetGreen(), textColor.GetBlue(), textColor.GetAlpha() };
 
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mDirect2DBrush;
 		Microsoft::WRL::ComPtr<IDWriteTextFormat> mDirectWriteFormat;
 
-		ThrowIfFailed(mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->CreateSolidColorBrush(textColor,
+		ThrowIfFailed(mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->CreateSolidColorBrush(tColor,
 			mDirect2DBrush.GetAddressOf()));
 
 		ThrowIfFailed(mDeviceResources.GetTextResources().GetDirectWriteFactory()->CreateTextFormat(
@@ -387,17 +327,17 @@ namespace FARender
 			DWRITE_FONT_WEIGHT_NORMAL,
 			DWRITE_FONT_STYLE_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL,
-			textToRender->GetTextSize(),
+			textSize,
 			L"en-us",
 			&mDirectWriteFormat));
 
 		ThrowIfFailed(mDirectWriteFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING));
 		ThrowIfFailed(mDirectWriteFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
 
-		mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->DrawTextW(textToRender->GetTextString().c_str(),
-			(UINT32)textToRender->GetTextString().size(), mDirectWriteFormat.Get(),
-			&textLocation, mDirect2DBrush.Get());
-		
+		mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->DrawTextW(textString.c_str(),
+			(UINT32)textString.size(), mDirectWriteFormat.Get(),
+			&tLocation, mDirect2DBrush.Get());
+
 	}
 
 	void RenderScene::AfterRenderText()
@@ -428,8 +368,6 @@ namespace FARender
 	void RenderScene::Resize(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled, bool isTextEnabled)
 	{
 		mDeviceResources.Resize(width, height, windowHandle, isMSAAEnabled, isTextEnabled);
-
-		mCamera.SetAspectRatio((float)width / height);
 	}
 
 	void RenderScene::CopyDataIntoDynamicBuffer(unsigned int dynamicBufferKey, unsigned int index, const void* data, UINT64 numOfBytes)

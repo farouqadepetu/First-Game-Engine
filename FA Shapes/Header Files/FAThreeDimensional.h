@@ -93,7 +93,7 @@ namespace FAShapes
 		/**@brief Sets the draw arguments of the 3D shape to the specifed draw arguments.
 		*/
 		void SetDrawArguments(unsigned int indexCount, unsigned int locationOfFirstIndex,
-			int indexOfFirstVertex, int indexOfConstantData);
+			int indexOfFirstVertex, unsigned int indexOfConstantData);
 
 		/**@brief Rotates the local axis of the 3D shape by the specified rotation matrix \a rot.
 		*/

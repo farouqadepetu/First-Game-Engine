@@ -1,4 +1,5 @@
 #include "FAColor.h"
+#include <algorithm>
 
 namespace FAColor
 {
@@ -253,18 +254,6 @@ namespace FAColor
 		this->mColor.SetZ(this->mColor.GetZ() * c.mColor.GetZ());
 		this->mColor.SetW(this->mColor.GetW() * c.mColor.GetW());
 
-		if (mColor.GetX() > 1.0f)
-			mColor.SetX(1.0f);
-
-		if (mColor.GetY() > 1.0f)
-			mColor.SetY(1.0f);
-
-		if (mColor.GetZ() > 1.0f)
-			mColor.SetZ(1.0f);
-
-		if (mColor.GetW() > 1.0f)
-			mColor.SetW(1.0f);
-
 		return *this;
 	}
 
@@ -360,17 +349,6 @@ namespace FAColor
 		result.SetBlue(c1.GetBlue() * c2.GetBlue());
 		result.SetAlpha(c1.GetAlpha() * c2.GetAlpha());
 
-		if (result.GetRed() > 1.0f)
-			result.SetRed(1.0f);
-
-		if (result.GetGreen() > 1.0f)
-			result.SetGreen(1.0f);
-
-		if (result.GetBlue() > 1.0f)
-			result.SetBlue(1.0f);
-
-		if (result.GetAlpha() > 1.0f)
-			result.SetAlpha(1.0f);
 
 		return result;
 	}

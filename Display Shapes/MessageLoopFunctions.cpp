@@ -7,7 +7,7 @@ using namespace GlobalVariables;
 
 namespace MessageLoop
 {
-	void FrameStats(FARender::RenderScene& scene)
+	void FrameStats()
 	{
 		//computes average frames per second and
 		//the average time it takes to show each frame
@@ -34,7 +34,7 @@ namespace MessageLoop
 			std::wstring fpsWString{ AnsiToWString(fpsString) };
 			std::wstring milliSecondsPerFrameWString{ AnsiToWString(milliSecondsPerFrameString) };
 			std::wstring textStr = L"FPS: " + fpsWString + L"     Frame Time: " + milliSecondsPerFrameWString;
-			scene.GetText(FRAMES_PER_SECOND).SetTextString(textStr);
+			textList.at(FRAMES_PER_SECOND).SetTextString(textStr);
 
 			//reset for next average
 			frameCount = 0;
@@ -42,28 +42,24 @@ namespace MessageLoop
 		}
 	}
 
-	void UserInput(FARender::RenderScene& scene)
+	void UserInput()
 	{
-		FACamera::Camera* sphereCamera{ &scene.GetCamera() };
-
 		//Poll keyboard and mouse input.
-		sphereCamera->KeyboardInput(frameTime.DeltaTime());
-		sphereCamera->MouseInput();
+		camera.KeyboardInput(frameTime.DeltaTime());
+		camera.MouseInput();
 	}
 
 	void Update(FARender::RenderScene& scene)
 	{
-		FACamera::Camera* sphereCamera{ &scene.GetCamera() };
-
 		//Update the view matrix.
-		sphereCamera->UpdateViewMatrix();
+		camera.UpdateViewMatrix();
 
 		//Update the perspective projection matrix.
-		sphereCamera->UpdatePerspectiveProjectionMatrix();
+		camera.UpdatePerspectiveProjectionMatrix();
 
 		//Transpose and store the view and projection matrices in the PassConstants object.
-		constantData.view = Transpose(sphereCamera->GetViewMatrix());
-		constantData.projection = Transpose(sphereCamera->GetPerspectiveProjectionMatrix());
+		constantData.view = Transpose(camera.GetViewMatrix());
+		constantData.projection = Transpose(camera.GetPerspectiveProjectionMatrix());
 
 		//Copy the view and perspective projection matrices into the pass constant buffer
 		scene.CopyDataIntoDynamicBuffer(PASSCB, 0, &constantData, sizeof(PassConstants));
@@ -89,10 +85,6 @@ namespace MessageLoop
 		//All the commands needed before rendering the shapes.
 		scene.BeforeRenderObjects(isMSAAEnabled);
 
-		//Link the vertex and index buffer to the pipeline
-		scene.SetStaticBuffer(0, VERTEX_BUFFER);
-		scene.SetStaticBuffer(1, INDEX_BUFFER);
-
 		if (isSolid && isMSAAEnabled)
 		{
 			//Set solid msaa pso
@@ -114,11 +106,24 @@ namespace MessageLoop
 			scene.SetPSOAndRootSignature(WIRE, 0);
 		}
 
-		//Link pass constant buffer to the pipeline
-		scene.SetDynamicBuffer(2, PASSCB, 1);
+		//Link the vertex and index buffer to the pipeline
+		scene.SetStaticBuffer(0, VERTEX_BUFFER);
+		scene.SetStaticBuffer(1, INDEX_BUFFER);
 
-		//Render the shapes.
-		scene.RenderObjects(SHAPES, OBJECTCB, 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		//Link pass constant buffer to the pipeline
+		scene.SetDynamicBuffer(2, PASSCB, 0, 1);
+
+		for (auto& i : shapes)
+		{
+			FAShapes::DrawArguments shapeDrawArguments{ i->GetDrawArguments() };
+
+			//Link the shapes constant data to the pipeline.
+			scene.SetDynamicBuffer(2, OBJECTCB, shapeDrawArguments.indexOfConstantData, 0);
+
+			//Render the shapes.
+			scene.RenderObject(shapeDrawArguments.indexCount, shapeDrawArguments.locationOfFirstIndex,
+				shapeDrawArguments.indexOfFirstVertex, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		}
 
 		//All the commands needed after rendering the shapes.
 		scene.AfterRenderObjects(isMSAAEnabled, isTextEnabled);
@@ -129,8 +134,10 @@ namespace MessageLoop
 			//All the commands needed before rendering text.
 			scene.BeforeRenderText();
 
-			//Render the frames per second text.
-			scene.RenderText(FRAMES_PER_SECOND);
+			for (auto& i : textList)
+			{
+				scene.RenderText(i.GetTextLocation(), i.GetTextColor(), i.GetTextSize(), i.GetTextString());
+			}
 
 			//All the commands needed after rendering text.
 			scene.AfterRenderText();

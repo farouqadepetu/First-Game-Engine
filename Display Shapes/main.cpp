@@ -9,25 +9,25 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 {
 	try
 	{
-		//The window where the shapes will be render to.
+		//The window where the shapes will be rendered to.
 		FAWindow::Window displayShapesWindow(hInstance, L"Display Shapes Window Class", L"Display Shapes Window",
 			WindowProc::DisplayShapesWindowProc, 1024, 720);
 		GlobalVariables::window = &displayShapesWindow;
 
 		//The RenderScene we use to render the shapes.
 		FARender::RenderScene displayShapesScene(displayShapesWindow.GetWidth(), displayShapesWindow.GetHeight(), 
-			displayShapesWindow.GetWindowHandle());
+			displayShapesWindow.GetWindowHandle(), GlobalVariables::isMSAAEnabled, GlobalVariables::isTextEnabled);
 		GlobalVariables::scene = &displayShapesScene;
 
 		//Initialization Functions
 		Init::BuildShapes();
-		Init::BuildCamera(displayShapesScene);
+		Init::BuildCamera(displayShapesWindow.GetWidth(), displayShapesWindow.GetHeight());
 		Init::BuildShaders(displayShapesScene);
 		Init::BuildVertexAndIndexList(displayShapesScene);
 		Init::BuildVertexAndIndexBuffers(displayShapesScene);
 		Init::BuildConstantBuffers(displayShapesScene);
 		Init::BuildPSOs(displayShapesScene);
-		Init::BuildText(displayShapesScene);
+		Init::BuildText(displayShapesWindow.GetWidth(), displayShapesWindow.GetHeight());
 
 		MSG msg{};
 		GlobalVariables::frameTime.Reset();
@@ -46,8 +46,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
 				if (!GlobalVariables::isAppPaused)
 				{
-					MessageLoop::FrameStats(displayShapesScene);
-					MessageLoop::UserInput(displayShapesScene);
+					MessageLoop::FrameStats();
+					MessageLoop::UserInput();
 					MessageLoop::Update(displayShapesScene);
 					MessageLoop::Draw(displayShapesScene);
 				}
