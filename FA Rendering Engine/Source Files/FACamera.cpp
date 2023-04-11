@@ -308,6 +308,42 @@ namespace FACamera
 			Down(dt);
 	}
 
+	void Camera::KeyboardInputWASD(float dt)
+	{
+		//check if w, a, s, d, spacebar or control was pressed
+
+		if (GetAsyncKeyState('W') & 0x8000)
+			Foward(dt);
+		if (GetAsyncKeyState('A') & 0x8000)
+			Left(dt);
+		if (GetAsyncKeyState('S') & 0x8000)
+			Backward(dt);
+		if (GetAsyncKeyState('D') & 0x8000)
+			Right(dt);
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+			Up(dt);
+		if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
+			Down(dt);
+	}
+
+
+	void Camera::KeyboardInputArrow(float dt)
+	{
+		//check if up, left, right, down, spacebar or control was pressed
+
+		if (GetAsyncKeyState(VK_UP) & 0x8000)
+			Foward(dt);
+		if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+			Left(dt);
+		if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+			Backward(dt);
+		if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+			Right(dt);
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+			Up(dt);
+		if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
+			Down(dt);
+	}
 
 	void Camera::MouseInput()
 	{

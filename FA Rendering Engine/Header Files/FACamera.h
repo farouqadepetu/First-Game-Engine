@@ -218,6 +218,26 @@ namespace FACamera
 		*/
 		void KeyboardInput(float dt);
 
+		/**@brief Polls keyboard input and moves the camera.
+		*
+		* Moves the camera foward/backward if w/s was pressed.\n
+		* Moves the camera left/right if a/d was pressed.\n
+		* Moves the camera up/down if space/crtl was pressed.\n
+		*
+		* @param[in] dt The time between frames.
+		*/
+		void KeyboardInputWASD(float dt);
+
+		/**@brief Polls keyboard input and moves the camera.
+		*
+		* Moves the camera foward/backward if up/down arrow was pressed.\n
+		* Moves the camera left/right if left/right arrow was pressed.\n
+		* Moves the camera up/down if space/crtl was pressed.\n
+		*
+		* @param[in] dt The time between frames.
+		*/
+		void KeyboardInputArrow(float dt);
+
 		/**@brief Polls mouse input and rotates the camera.
 		*/
 		void MouseInput();
