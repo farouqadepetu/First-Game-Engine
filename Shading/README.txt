@@ -16,7 +16,7 @@ It was made using my math engine, rendering engine and Shape classes.
  
 The program was made using Visual Studio 2022 v143. The Windows SDK Version was 10.0.20348.0. It was compiled using C++17.
 
-To run the program go to Executable/Shading.exe.
+Click on Shading.exe to run the program.
 
 Open Shading.sln or Shading.vcxproj to compile and link the program to create your own executable.
 
