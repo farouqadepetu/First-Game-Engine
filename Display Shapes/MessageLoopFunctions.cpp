@@ -136,7 +136,7 @@ namespace MessageLoop
 
 			for (auto& i : textList)
 			{
-				scene.RenderText(i.GetTextLocation(), i.GetTextColor(), i.GetTextSize(), i.GetTextString());
+				scene.RenderText(i.GetTextLocation(), i.GetTextColor(), i.GetTextSize(), i.GetTextString(), DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			}
 
 			//All the commands needed after rendering text.

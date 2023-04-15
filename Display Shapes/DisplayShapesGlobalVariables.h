@@ -13,7 +13,6 @@ namespace GlobalVariables
 	inline bool isAppPaused{ false }; //true if the application is paused, false otherwise.
 	inline bool isMinimized{ false }; //true of the window is minimized.
 	inline bool isMaximized{ false }; //true of the window is maximized.
-	inline bool isResizing{ false }; //true if the user is currently resizing the window.
 	inline bool isSolid{ true };	//true if in solid mode.
 	inline bool isMSAAEnabled{ false }; //true if MSAA is enabled.
 	inline bool isTextEnabled{ true }; //true if text is enabled.

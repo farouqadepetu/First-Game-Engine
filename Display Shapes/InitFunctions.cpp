@@ -87,8 +87,8 @@ namespace Init
 
 	void BuildConstantBuffers(FARender::RenderScene& scene)
 	{
-		scene.CreateDynamicBuffer(2, OBJECTCB, shapes.size() * sizeof(ObjectConstants), sizeof(ObjectConstants));
-		scene.CreateDynamicBuffer(2, PASSCB, sizeof(PassConstants), sizeof(PassConstants));
+		scene.CreateDynamicBuffer(2, OBJECTCB, shapes.size() * sizeof(ObjectConstants), nullptr, sizeof(ObjectConstants));
+		scene.CreateDynamicBuffer(2, PASSCB, sizeof(PassConstants), nullptr, sizeof(PassConstants));
 	}
 
 	void BuildPSOs(FARender::RenderScene& scene)
@@ -124,7 +124,7 @@ namespace Init
 			L"Click the left mouse button and move the mouse to rotate the camera" 
 		};
 
-		textList.emplace_back(FARender::Text(FAMath::Vector4D(0.7f * width, 0.05f * height, width, 0.2f * height),
+		textList.emplace_back(FARender::Text(FAMath::Vector4D(0.7f * width, 0.0f, width, 0.0f),
 			instructions, 15.0f, FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f)));
 
 
