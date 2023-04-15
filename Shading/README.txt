@@ -2,7 +2,7 @@ This program uses Gouraud, Phong, Blinn-Phong and Flat Shading on various shapes
 
 You are able to chnage which shape to display, which material to use, which shading to use and which light source(s) to use.
 
-You can move the camera with WASD.
+You can move the camera with WASD. You can rotate the camera by clicking the left mouse button and moving the mouse.
 
 You can select what you want to change using the up and down arrow keys.
 
