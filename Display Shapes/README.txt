@@ -4,7 +4,7 @@ It was made using my math engine, rendering engine and Shape classes.
  
 The program was made using Visual Studio 2022 v143. The Windows SDK Version was 10.0.20348.0. It was compiled using C++17.
 
-To run the program go to Executable/Display Shapes.exe.
+To run the program click on Display Shapes.exe.
 
 Open DisplayShapes.sln or DisplayShapes.vcxproj to compile and link the program to create your own executable.
 
