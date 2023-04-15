@@ -28,11 +28,28 @@ namespace FAShapes
 		mTriangles.push_back(Triangle(mLocalVertices.data(), a, c, d));
 	}
 
+	void ThreeDimensionalShapeAbstract::CreateNormals()
+	{
+		//each vertex sums all the normals of the triangles they are a part of.
+		for (auto& i : mTriangles)
+		{
+			FAMath::Vector3D norm(i.GetNormal());
+			mLocalVertices[i.GetP0Index()].normal += norm;
+			mLocalVertices[i.GetP1Index()].normal += norm;
+			mLocalVertices[i.GetP2Index()].normal += norm;
+		}
+
+		//Normalize the normals
+		for (auto& j : mLocalVertices)
+		{
+			j.normal = Norm(j.normal);
+		}
+	}
+
 	const FAMath::Vector3D& ThreeDimensionalShapeAbstract::GetCenter() const
 	{
 		return mCenter;
 	}
-
 
 	const FAMath::Vector3D& ThreeDimensionalShapeAbstract::GetXAxis() const
 	{
@@ -60,6 +77,16 @@ namespace FAShapes
 	}
 
 	const Triangle* ThreeDimensionalShapeAbstract::GetTriangleList() const
+	{
+		return mTriangles.data();
+	}
+
+	Vertex* ThreeDimensionalShapeAbstract::GetLocalVertices()
+	{
+		return mLocalVertices.data();
+	}
+
+	Triangle* ThreeDimensionalShapeAbstract::GetTriangleList()
 	{
 		return mTriangles.data();
 	}
@@ -100,6 +127,30 @@ namespace FAShapes
 		mCenter.SetX(x);
 		mCenter.SetY(y);
 		mCenter.SetZ(z);
+		mUpdateLocalToWorldlMatrix = true;
+	}
+
+	void ThreeDimensionalShapeAbstract::SetXAxis(float x, float y, float z)
+	{
+		mX.SetX(x);
+		mX.SetY(y);
+		mX.SetZ(z);
+		mUpdateLocalToWorldlMatrix = true;
+	}
+
+	void ThreeDimensionalShapeAbstract::SetYAxis(float x, float y, float z)
+	{
+		mY.SetX(x);
+		mY.SetY(y);
+		mY.SetZ(z);
+		mUpdateLocalToWorldlMatrix = true;
+	}
+
+	void ThreeDimensionalShapeAbstract::SetZAxis(float x, float y, float z)
+	{
+		mZ.SetX(x);
+		mZ.SetY(y);
+		mZ.SetZ(z);
 		mUpdateLocalToWorldlMatrix = true;
 	}
 

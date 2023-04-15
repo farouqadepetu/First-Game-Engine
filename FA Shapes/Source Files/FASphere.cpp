@@ -14,7 +14,7 @@ namespace FAShapes
 
 		CreateVertices();
 		CreateTriangles();
-		CreateNormals();
+		ThreeDimensionalShapeAbstract::CreateNormals();
 
 	}
 
@@ -56,7 +56,6 @@ namespace FAShapes
 
 			theta += thetaStep;
 		}
-
 
 		//Top vertex
 		mLocalVertices.push_back({ FAMath::Vector3D(0.0f, 1.0f, 0.0f), mColor, FAMath::Vector3D(0.0f, 1.0f, 0.0f) });

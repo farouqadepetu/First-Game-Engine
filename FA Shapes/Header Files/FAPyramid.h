@@ -73,8 +73,5 @@ namespace FAShapes
 
 		//Creates the triangles that make up pyramid.
 		void CreateTriangles() override final;
-
-		//Creates the normals of the pyramid.
-		void CreateNormals() override final;
 	};
 }

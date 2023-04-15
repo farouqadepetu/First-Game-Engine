@@ -77,8 +77,5 @@ namespace FAShapes
 
 		//Creates the triangles that make up the cone.
 		void CreateTriangles() override final;
-
-		//Creates the normals of the cone.
-		void CreateNormals() override final;
 	};
 }

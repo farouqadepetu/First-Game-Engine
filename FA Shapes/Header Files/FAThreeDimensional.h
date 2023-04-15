@@ -50,6 +50,14 @@ namespace FAShapes
 		*/
 		const Triangle* GetTriangleList() const;
 
+		/**@brief Returns a pointer to the local vertices of the 3D shape.
+		*/
+		Vertex* GetLocalVertices();
+
+		/**@brief Returns a pointer to the triangles of the 3D shape.
+		*/
+		Triangle* GetTriangleList();
+
 		/**@brief Returns a constant reference to the specified triangle.
 		*/
 		const Triangle& GetTriangle(unsigned int index) const;
@@ -77,6 +85,18 @@ namespace FAShapes
 		/**@brief Sets the center of the 3D shape to the specified values.
 		*/
 		void SetCenter(float x, float y, float z);
+
+		/**@brief Sets the local x-axis of the 3D shape to the specified values.
+		*/
+		void SetXAxis(float x, float y, float z);
+
+		/**@brief Sets the local y-axis of the 3D shape to the specified values.
+		*/
+		void SetYAxis(float x, float y, float z);
+
+		/**@brief Sets the local z-axis of the 3D shape to the specified values.
+		*/
+		void SetZAxis(float x, float y, float z);
 
 		/**@brief Sets the color of the sphere to the specified \a color.
 		*/
@@ -180,7 +200,6 @@ namespace FAShapes
 
 		/**@brief Creates the normals of each vertex.
 		*/
-		virtual void CreateNormals() = 0;
-
+		virtual void CreateNormals();
 	};
 }

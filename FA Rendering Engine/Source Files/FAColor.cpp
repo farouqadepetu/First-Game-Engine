@@ -344,11 +344,10 @@ namespace FAColor
 	Color operator*(const Color& c1, const Color& c2)
 	{
 		Color result;
-		result.SetRed(c1.GetRed()* c2.GetRed());
+		result.SetRed(c1.GetRed() * c2.GetRed());
 		result.SetGreen(c1.GetGreen() * c2.GetGreen());
 		result.SetBlue(c1.GetBlue() * c2.GetBlue());
 		result.SetAlpha(c1.GetAlpha() * c2.GetAlpha());
-
 
 		return result;
 	}

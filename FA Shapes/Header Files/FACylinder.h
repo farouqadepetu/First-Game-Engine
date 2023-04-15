@@ -75,8 +75,5 @@ namespace FAShapes
 		//Creates the triangles that make up the cylinder.
 		void CreateTriangles() override final;
 
-		//Creates the normals of the cylinder.
-		void CreateNormals() override final;
-
 	};
 }

@@ -74,8 +74,5 @@ namespace FAShapes
 
 		//Creates the triangles that make up box.
 		void CreateTriangles() override final;
-
-		//Creates the normals of the box.
-		void CreateNormals() override final;
 	};
 }

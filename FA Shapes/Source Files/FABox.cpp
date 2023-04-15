@@ -13,60 +13,29 @@ namespace FAShapes
 		CreateNormals();
 	}
 
-	//strores the local vertices of box
+	//strores the local vertices of the box
 	void Box::CreateVertices()
 	{
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, 0.5f, -0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, 0.5f, -0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, -0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, -0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, 0.5f, 0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, 0.5f, 0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, 0.5f), mColor });
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, 0.5f), mColor });
+		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, 0.5f, 0.5f), mColor });		//0
+		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, 0.5f, 0.5f), mColor });		//1
+		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, 0.5f), mColor });		//2
+		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, 0.5f), mColor });		//3
+		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, 0.5f, -0.5f), mColor });		//4
+		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, 0.5f, -0.5f), mColor });		//5
+		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, -0.5f), mColor });		//6
+		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, -0.5f), mColor });	//7
 	}
 
 	//creates the triangles from the local vertices
 	void Box::CreateTriangles()
 	{
 		//the indices of the vertices that make up each face of the box
-		Quad(0, 1, 2, 3); //back face
-		Quad(5, 4, 7, 6); //front face
-		Quad(4, 5, 1, 0); //top face
-		Quad(3, 2, 6, 7); //bottom face
-		Quad(4, 0, 3, 7); //left face
-		Quad(1, 5, 6, 2); //right face
-	}
-
-	//creates the normals from the triangles
-	void Box::CreateNormals()
-	{
-		//Each vertex has a normal assoicated with it. Each triangle has a normal. A vertex can be a part of multiple triangles.
-		//Get the average of all the triangle normals each vertex is a part of.
-		//For each vertex we sum all of the triangle normals it is a part of.
-		std::unordered_map<unsigned int, std::pair<float, FAMath::Vector3D>> normals;
-
-		size_t numVertices{ mLocalVertices.size() };
-		size_t numTriangles{ mTriangles.size() };
-
-		for (int i = 0; i < numTriangles; ++i)
-		{
-			FAMath::Vector3D norm(mTriangles[i].GetNormal());
-			normals[mTriangles[i].GetP0Index()].first += 1.0f;
-			normals[mTriangles[i].GetP0Index()].second += norm;
-
-			normals[mTriangles[i].GetP1Index()].first += 1.0f;
-			normals[mTriangles[i].GetP1Index()].second += norm;
-
-			normals[mTriangles[i].GetP2Index()].first += 1.0f;
-			normals[mTriangles[i].GetP2Index()].second += norm;
-		}
-
-		//Take the average to get the normal for that vertex.
-		for (int i = 0; i < numVertices; ++i)
-		{
-			mLocalVertices[i].normal = Norm(normals[i].second / normals[i].first);
-		}
+		Quad(1, 0, 3, 2); //front face
+		Quad(4, 5, 6, 7); //back face
+		Quad(0, 1, 5, 4); //top face
+		Quad(7, 6, 2, 3); //bottom face
+		Quad(0, 4, 7, 3); //left face
+		Quad(5, 1, 2, 6); //right face
 	}
 
 	float Box::GetWidth() const

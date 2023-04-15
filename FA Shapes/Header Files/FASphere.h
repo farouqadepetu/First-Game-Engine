@@ -25,7 +25,7 @@ namespace FAShapes
 		* @param[in] numCircles The number of circles the cone has.
 		* @param[in] numVerticesPerCircle The number of vertices each circle has.
 		*/
-		Sphere(float radius = 1.0f, const FAColor::Color& color = FAColor::Color(0.0f, 0.0f, 0.0f , 1.0f), 
+		Sphere(float radius = 1.0f, const FAColor::Color& color = FAColor::Color(0.0f, 0.0f, 0.0f, 1.0f),
 			unsigned int numCircles = 20, unsigned int numVerticesPerCircle = 20);
 
 		/**@brief Returns the radius of the sphere.

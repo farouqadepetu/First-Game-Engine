@@ -100,7 +100,7 @@ namespace FARender
 	}
 
 	void RenderScene::CreateDynamicBuffer(unsigned int bufferType, unsigned int dynamicBufferKey,
-		unsigned numBytes, unsigned int stride, DXGI_FORMAT format)
+		unsigned numBytes, const void* data, unsigned int stride, DXGI_FORMAT format)
 	{
 		if (bufferType != 0 && bufferType != 1 && bufferType != 2)
 			throw std::runtime_error("The buffer type for creating a dynamic buffer is not 0, 1 or 2");
@@ -115,6 +115,11 @@ namespace FARender
 				mDynamicBuffers[dynamicBufferKey].emplace_back();
 				mDynamicBuffers[dynamicBufferKey].at(i).CreateDynamicBuffer(mDeviceResources.GetDevice(), numBytes, stride);
 				mDynamicBuffers[dynamicBufferKey].at(i).CreateVertexBufferView(numBytes);
+
+				if (data != nullptr)
+				{
+					mDynamicBuffers[dynamicBufferKey].at(i).CopyData(0, data, numBytes);
+				}
 			}
 		}
 		else if (bufferType == 1) //create an index buffer
@@ -124,6 +129,11 @@ namespace FARender
 				mDynamicBuffers[dynamicBufferKey].emplace_back();
 				mDynamicBuffers[dynamicBufferKey].at(i).CreateDynamicBuffer(mDeviceResources.GetDevice(), numBytes, stride);
 				mDynamicBuffers[dynamicBufferKey].at(i).CreateIndexBufferView(numBytes);
+
+				if (data != nullptr)
+				{
+					mDynamicBuffers[dynamicBufferKey].at(i).CopyData(0, data, numBytes);
+				}
 			}
 		}
 		else if (bufferType == 2) //create a constant buffer
@@ -132,6 +142,11 @@ namespace FARender
 			{
 				mDynamicBuffers[dynamicBufferKey].emplace_back();
 				mDynamicBuffers[dynamicBufferKey].at(i).CreateDynamicBuffer(mDeviceResources.GetDevice(), numBytes, stride);
+
+				if (data != nullptr)
+				{
+					mDynamicBuffers[dynamicBufferKey].at(i).CopyData(0, data, numBytes);
+				}
 			}
 		}
 	}
@@ -309,7 +324,7 @@ namespace FARender
 	}
 
 	void RenderScene::RenderText(const FAMath::Vector4D& textLocation, const FAColor::Color& textColor, float textSize,
-		const std::wstring& textString)
+		const std::wstring& textString, DWRITE_PARAGRAPH_ALIGNMENT alignment)
 	{
 		D2D_RECT_F tLocation{ textLocation.GetX(), textLocation.GetY(), textLocation.GetZ(), textLocation.GetW() };
 
@@ -332,7 +347,7 @@ namespace FARender
 			&mDirectWriteFormat));
 
 		ThrowIfFailed(mDirectWriteFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING));
-		ThrowIfFailed(mDirectWriteFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER));
+		ThrowIfFailed(mDirectWriteFormat->SetParagraphAlignment(alignment));
 
 		mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->DrawTextW(textString.c_str(),
 			(UINT32)textString.size(), mDirectWriteFormat.Get(),

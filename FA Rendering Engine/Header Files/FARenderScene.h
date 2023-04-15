@@ -85,12 +85,13 @@ namespace FARender
 		* 
 		* @param[in] dynamicBufferKey The key to map the dynamic buffer to.
 		* @param[in] numBytes The number of bytes to allocate for the dynamic buffer.
-		* @param[in] stride The number of bytes to get from one element to the next element. Used for vertex and constant buffers.
+		* @param[in, optional] data The data you want to copy into the dynamic buffer.
+		* @param[in, optional] stride The number of bytes to get from one element to the next element. Used for vertex and constant buffers.
 		* @param[in, optional] format The number of bytes to get from one element to the next element. Used for index buffers.
 		* 
 		*/
 		void CreateDynamicBuffer(unsigned int bufferType, unsigned int dynamicBufferKey,
-			unsigned numBytes, unsigned int stride = 0, DXGI_FORMAT format = DXGI_FORMAT_R32_UINT);
+			unsigned numBytes, const void* data = nullptr, unsigned int stride = 0, DXGI_FORMAT format = DXGI_FORMAT_R32_UINT);
 
 		/**@brief Creates an input element description and stores in an array mapped to the specified \a key.
 		* 
@@ -251,9 +252,11 @@ namespace FARender
 		*  @param[in] textSize The size of the size.
 		* 
 		* @param[in] textString The text to render.
+		* 
+		* @param[in] alignment Where you want the text to start at in the rectangle.
 		*/
 		void RenderText(const FAMath::Vector4D& textLocation, const FAColor::Color& textColor, float textSize,
-			const std::wstring& textString);
+			const std::wstring& textString, DWRITE_PARAGRAPH_ALIGNMENT alignment = DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
 		/**@brief Transitions the render target buffer and executes all of the text drawing commands.
 		* 
