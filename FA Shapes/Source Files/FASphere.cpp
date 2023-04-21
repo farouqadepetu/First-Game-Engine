@@ -22,9 +22,9 @@ namespace FAShapes
 	void Sphere::CreateVertices()
 	{
 		/* Parametric equations of a sphere.
-		x = rsinΦsinθ
+		x = rsinΦcosθ
 		y = rcosΦ
-		z = rsinΦcosθ
+		z = -rsinΦsinθ
 		theta = [0, 360]
 		phi = [0, 180]
 		*/
@@ -65,9 +65,9 @@ namespace FAShapes
 		{
 			for(unsigned int j = 0; j < mNumVerticesPerCircle; ++j)
 			{
-				float x{ sinPhiValues[i] * sinThetaValues[j]};
+				float x{ sinPhiValues[i] * cosThetaValues[j]};
 				float y{ cosPhiValues[i] };
-				float z{ sinPhiValues[i] * cosThetaValues[j] };
+				float z{ -sinPhiValues[i] * sinThetaValues[j] };
 
 				mLocalVertices.push_back({ FAMath::Vector3D(x, y, z), mColor, FAMath::Vector3D(x, y, z) });
 			}
