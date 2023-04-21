@@ -4,32 +4,28 @@
 #include "WindowProcedure.h"
 #include "InitFunctions.h"
 #include "MessageLoopFunctions.h"
+#include <CommCtrl.h>
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ PWSTR pCmdLine, _In_ int nCmdShow)
 {
 	try
 	{
-		//The window where the shapes will be rendered to.
-		FAWindow::Window shadingWindow(hInstance, L"Shading Window Class", L"Shading Window",
-			WindowProc::DisplayShapesWindowProc, 1280, 720);
-		GlobalVariables::window = &shadingWindow;
-
-		//The RenderScene we use to render the shapes.
-		FARender::RenderScene displayShapesScene(shadingWindow.GetWidth(), shadingWindow.GetHeight(),
-			shadingWindow.GetWindowHandle(), true, true);
-		GlobalVariables::scene = &displayShapesScene;
-
 		//Initialization Functions
+		Init::BuildMainWindow(hInstance);
+		Init::BuildRenderingWindow(hInstance);
+		Init::BuildDropDownLists(hInstance);
+		Init::BuildButtons(hInstance);
 		Init::BuildMaterials();
 		Init::BuildLightSources();
 		Init::BuildShapes();
-		Init::BuildCamera(shadingWindow.GetWidth(), shadingWindow.GetHeight());
-		Init::BuildShaders(displayShapesScene);
-		Init::BuildVertexAndIndexList(displayShapesScene);
-		Init::BuildVertexAndIndexBuffers(displayShapesScene);
-		Init::BuildConstantBuffers(displayShapesScene);
-		Init::BuildPSOs(displayShapesScene);
-		Init::BuildText(shadingWindow.GetWidth(), shadingWindow.GetHeight());
+		Init::BuildCamera();
+		Init::BuildScene();
+		Init::BuildShaders();
+		Init::BuildVertexAndIndexList();
+		Init::BuildVertexAndIndexBuffers();
+		Init::BuildConstantBuffers();
+		Init::BuildPSOs();
+		Init::BuildText();
 
 		MSG msg{};
 		GlobalVariables::frameTime.Reset();
@@ -50,8 +46,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 				{
 					MessageLoop::FrameStats();
 					MessageLoop::UserInput();
-					MessageLoop::Update(displayShapesScene);
-					MessageLoop::Draw(displayShapesScene);
+					MessageLoop::Update();
+					MessageLoop::Draw();
 				}
 			}
 		}

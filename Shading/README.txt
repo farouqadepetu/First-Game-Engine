@@ -4,14 +4,6 @@ You are able to chnage which shape to display, which material to use, which shad
 
 You can move the camera with WASD. You can rotate the camera by clicking the left mouse button and moving the mouse.
 
-You can select what you want to change using the up and down arrow keys.
-
-You can pick the option you want by using the left and right arrow keys.
-
-Press P or p to let the object rotate around its local +y axis.
-
-Press R or r to reset everything.
-
 It was made using my math engine, rendering engine and Shape classes.
  
 The program was made using Visual Studio 2022 v143. The Windows SDK Version was 10.0.20348.0. It was compiled using C++17.

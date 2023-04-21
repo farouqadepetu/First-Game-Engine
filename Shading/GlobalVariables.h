@@ -25,7 +25,7 @@ struct PassConstants
 	FAMath::Matrix4x4 view;				//bytes 0-63
 	FAMath::Matrix4x4 projection;		//bytes 64-127
 	FAMath::Vector3D cameraPosition;	//bytes 128-139
-	unsigned int shadingType;			//bytes 140-143
+	unsigned int shadingType{ 0 };		//bytes 140-143
 
 	FAMath::Matrix4x4 pad2;				//bytes 144-207
 	FAMath::Vector4D pad3;				//bytes 208-223
@@ -39,7 +39,7 @@ struct Material
 	FAColor::Color ambient;		//bytes 0-15
 	FAColor::Color diffuse;		//bytes 16-31
 	FAColor::Color specular;	//bytes 32-47
-	float shininess;			//bytes 48-51
+	float shininess{ 0.0f };	//bytes 48-51
 
 	FAMath::Matrix4x4 pad0;		//bytes 52-115
 	FAMath::Matrix4x4 pad1;		//bytes 116-179
@@ -57,12 +57,12 @@ struct Light
 	//for point lights
 	FAMath::Vector3D position;	//bytes 48-59
 
-	int lightSourceType;		//bytes 60-63
+	int lightSourceType{ 0 };		//bytes 60-63
 
 	//for direction lights
 	FAMath::Vector3D direction;	//bytes 64-75
 
-	float pad5;					//bytes 76-79
+	float pad5{ 0.0f };					//bytes 76-79
 };
 
 namespace GlobalVariables
@@ -72,16 +72,35 @@ namespace GlobalVariables
 	inline bool isMinimized{ false }; //true of the window is minimized.
 	inline bool isMaximized{ false }; //true of the window is maximized.
 	inline bool playAnimation{ false }; //true if we want to rotate the object.
+	inline bool enableCameraUserInput{ true };
 
-	//Used in the window procedure to store the new width and height of the window when user resizes it.
-	inline FAWindow::Window* window{ nullptr };
+	inline unsigned int dropDownListWidth{ 200 };
+	inline unsigned int dropDownListHeight{ 125 };
+
+	inline unsigned int buttonWidth{ 150 };
+	inline unsigned int buttonHeight{ 40 };
+
+	//The main window we render to
+	inline FAWindow::Window mainWindow;
+
+	//The width and height of the client area of the main window
+	inline RECT mainWindowClientRect{};
+
+	//The window we render to
+	inline FAWindow::Window renderingWindow;
+
+	//The static text for each drop down list window.
+	inline std::vector<FAWindow::Window> staticText;
+
+	//The drop down list windows to select shading, shapes, materials and light sources.
+	inline std::vector<FAWindow::Window> dropDownLists;
 
 	//Used in the window procedure to stop the time if the application is paused and starts it if the application is no longer paused.
 	//Also used to get the time between frames.
 	inline FATime::Time frameTime;
 
 	//Used in the window procedure to call the resize function when the user resizes the window.
-	inline FARender::RenderScene* scene{ nullptr };
+	inline std::unique_ptr<FARender::RenderScene> shadingScene{ nullptr };
 
 	//Enums to help keep track of the keys of mapped values.
 	enum ShaderNames { GOURAUD_VS, GOURAUD_PS, PHONG_VS, PHONG_PS, BLINN_PHONG_VS, BLINN_PHONG_PS, SHADING_VS, SHADING_PS };
@@ -91,6 +110,7 @@ namespace GlobalVariables
 	enum TextNames { FRAMES_PER_SECOND };
 	enum LightSourceNames { POINT_LIGHT, DIRECTIONAL_LIGHT, POINT_PLUS_DIRECTIONAL_LIGHT };
 	enum SelectionNames { SHADING, SHAPES, MATERIALS, LIGHT_SOURCE };
+	enum ButtonNames { PLAY_PAUSE, RESET_CAMERA, RESET_SHAPE };
 
 	//vector to store pointers to 3D shapes.
 	inline std::vector<std::unique_ptr<FAShapes::ThreeDimensionalShapeAbstract>> shapes;
@@ -112,20 +132,9 @@ namespace GlobalVariables
 
 	inline FARender::Text framesPerSecond;
 
-	inline FARender::Text selectionArrow;
-
 	inline std::vector<unsigned int> currentSelection;
-	inline unsigned int currentArrow{ 0 };
 
-	inline unsigned int numSelections{ 0 };
-	inline unsigned int numShading{ 0 };
-	inline unsigned int numShapes{ 0 };
-	inline unsigned int numMaterials{ 0 };
-	inline unsigned int numLightSources{ 0 };
+	inline HFONT textFont;
 
-	inline std::vector<std::vector<FARender::Text>> selections;
-
-	inline float textSize{ 15.0f };
-	inline FAColor::Color textColor(1.0f, 1.0f, 1.0f);
-	inline float heightIncrease{ 20.0f };
+	inline std::vector<FAWindow::Window> buttons;
 }

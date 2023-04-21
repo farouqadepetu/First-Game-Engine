@@ -4,11 +4,152 @@
 #include <iomanip>
 #include <unordered_map>
 #include <algorithm>
+#include <CommCtrl.h>
 
 using namespace GlobalVariables;
 
 namespace Init
 {
+	void BuildMainWindow(HINSTANCE hInstance)
+	{
+		//Main window
+		WNDCLASSEX mainWindowClass{};
+		mainWindowClass.cbSize = sizeof(WNDCLASSEX);
+		mainWindowClass.style = CS_HREDRAW | CS_VREDRAW;
+		mainWindowClass.lpfnWndProc = WindowProc::MainWindowProc;
+		mainWindowClass.cbClsExtra = 0;
+		mainWindowClass.cbWndExtra = 0;
+		mainWindowClass.hInstance = hInstance;
+		mainWindowClass.hIcon = nullptr;
+		mainWindowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+		mainWindowClass.hbrBackground = CreateSolidBrush(RGB(100, 100, 100));
+		mainWindowClass.lpszMenuName = nullptr;
+		mainWindowClass.lpszClassName = L"Main Window Class";
+		mainWindowClass.hIconSm = nullptr;
+
+		mainWindow = FAWindow::Window(hInstance, mainWindowClass, L"Shading Window",
+			WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720);
+
+	}
+
+	void BuildRenderingWindow(HINSTANCE hInstance)
+	{
+		//Rendering window
+		WNDCLASSEX renderingWindowClass{};
+		renderingWindowClass.cbSize = sizeof(WNDCLASSEX);
+		renderingWindowClass.style = CS_HREDRAW | CS_VREDRAW;
+		renderingWindowClass.lpfnWndProc = WindowProc::RenderingWindowProc;
+		renderingWindowClass.cbClsExtra = 0;
+		renderingWindowClass.cbWndExtra = 0;
+		renderingWindowClass.hInstance = hInstance;
+		renderingWindowClass.hIcon = nullptr;
+		renderingWindowClass.hCursor = nullptr;
+		renderingWindowClass.hbrBackground = nullptr;
+		renderingWindowClass.lpszMenuName = nullptr;
+		renderingWindowClass.lpszClassName = L"Rendering Window Class";
+		renderingWindowClass.hIconSm = nullptr;
+
+		renderingWindow = FAWindow::Window(hInstance, mainWindow.GetWindowHandle(), 0,
+			renderingWindowClass, L"Rendering Window",
+			WS_CHILD | WS_VISIBLE, 0, 0, mainWindow.GetWidth() - dropDownListWidth, mainWindow.GetHeight());
+	}
+
+	void BuildDropDownLists(HINSTANCE hInstance)
+	{
+		unsigned int dropDownListY = 50;
+		unsigned int staticTextY = 25;
+		for (int i = 0; i < 4; ++i)
+		{
+			//Create drop down list
+			dropDownLists.emplace_back(hInstance, mainWindow.GetWindowHandle(), i, WC_COMBOBOX, L"",
+				CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_TILED,
+				renderingWindow.GetWidth(), dropDownListY, dropDownListWidth, dropDownListHeight);
+
+			//Create static text for the drop down list
+			staticText.emplace_back(hInstance, mainWindow.GetWindowHandle(), i, L"STATIC", L"",
+				WS_VISIBLE | WS_CHILD | SS_CENTER, renderingWindow.GetWidth(), staticTextY, dropDownListWidth, dropDownListHeight);
+
+			//Set the font of the static text
+			HDC hdc = GetDC(staticText.at(i).GetWindowHandle());
+			LOGFONT logFont = { 0 };
+			logFont.lfHeight = -MulDiv(15, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+			logFont.lfWeight = FW_BOLD;
+			textFont = CreateFontIndirect(&logFont);
+			SendMessage(staticText.at(i).GetWindowHandle(), WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
+			ReleaseDC(staticText.at(i).GetWindowHandle(), hdc);
+
+			dropDownListY += dropDownListHeight;
+			staticTextY += dropDownListHeight;
+
+			currentSelection.push_back(0);
+		}
+
+		SetWindowText(staticText.at(SHADING).GetWindowHandle(), L"SHADING");
+		SetWindowText(staticText.at(SHAPES).GetWindowHandle(), L"SHAPES");
+		SetWindowText(staticText.at(MATERIALS).GetWindowHandle(), L"MATERIALS");
+		SetWindowText(staticText.at(LIGHT_SOURCE).GetWindowHandle(), L"LIGHT SOURCE");
+
+
+		//Add the options to the shading drop down list
+		SendMessage(dropDownLists.at(SHADING).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Gouraud");
+		SendMessage(dropDownLists.at(SHADING).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Phong");
+		SendMessage(dropDownLists.at(SHADING).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Blinn-Phong");
+		SendMessage(dropDownLists.at(SHADING).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Flat-Phong");
+		SendMessage(dropDownLists.at(SHADING).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Flat-Blinn");
+
+		//Set the the first element in the shape drop down list to be the initial string that is displayed.
+		SendMessage(dropDownLists.at(SHADING).GetWindowHandle(), CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
+
+		//Add the options to the shape drop down list
+		SendMessage(dropDownLists.at(SHAPES).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Box");
+		SendMessage(dropDownLists.at(SHAPES).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Pyramid");
+		SendMessage(dropDownLists.at(SHAPES).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Cylinder");
+		SendMessage(dropDownLists.at(SHAPES).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Cone");
+		SendMessage(dropDownLists.at(SHAPES).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Sphere");
+
+		//Set the the first element in the shape drop down list to be the initial string that is displayed.
+		SendMessage(dropDownLists.at(SHAPES).GetWindowHandle(), CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
+
+		//Add the options to the shape drop down list
+		SendMessage(dropDownLists.at(MATERIALS).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Bronze");
+		SendMessage(dropDownLists.at(MATERIALS).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Polished Bronze");
+		SendMessage(dropDownLists.at(MATERIALS).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Silver");
+		SendMessage(dropDownLists.at(MATERIALS).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Polished Silver");
+		SendMessage(dropDownLists.at(MATERIALS).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Gold");
+		SendMessage(dropDownLists.at(MATERIALS).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Polished Gold");
+
+		//Set the the first element in the shape drop down list to be the initial string that is displayed.
+		SendMessage(dropDownLists.at(MATERIALS).GetWindowHandle(), CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
+
+		//Add the options to the shape drop down list
+		SendMessage(dropDownLists.at(LIGHT_SOURCE).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Point");
+		SendMessage(dropDownLists.at(LIGHT_SOURCE).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Directional");
+		SendMessage(dropDownLists.at(LIGHT_SOURCE).GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Point + Directional");
+
+		//Set the the first element in the shape drop down list to be the initial string that is displayed.
+		SendMessage(dropDownLists.at(LIGHT_SOURCE).GetWindowHandle(), CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
+	}
+
+	void BuildButtons(HINSTANCE hInstance)
+	{
+		unsigned int buttonY = dropDownLists.at(dropDownLists.size() - 1).GetY() + 90;
+		unsigned int buttonX = renderingWindow.GetWidth() + 20;
+
+		buttons.emplace_back(hInstance, mainWindow.GetWindowHandle(), 0, L"BUTTON", L"PLAY/PAUSE ROTATION",
+			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON | BS_MULTILINE,
+			buttonX, buttonY, buttonWidth, buttonHeight);
+
+		buttonY += buttonHeight + 10;
+		buttons.emplace_back(hInstance, mainWindow.GetWindowHandle(), 1, L"BUTTON", L"RESET CAMERA",
+			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON | BS_MULTILINE,
+			buttonX, buttonY, buttonWidth, buttonHeight);
+
+		buttonY += buttonHeight + 10;
+		buttons.emplace_back(hInstance, mainWindow.GetWindowHandle(), 2, L"BUTTON", L"RESET SHAPE",
+			WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON | BS_MULTILINE,
+			buttonX, buttonY, buttonWidth, buttonHeight);
+	}
+
 	void BuildMaterials()
 	{
 		//BRONZE
@@ -101,36 +242,42 @@ namespace Init
 		shapes.emplace_back(std::make_unique<FAShapes::Sphere>(1.0f, FAColor::Color()));
 	}
 
-	void BuildCamera(unsigned int width, unsigned int height)
+	void BuildCamera()
 	{
 		camera.SetCameraPosition(vec3(0.0f, 0.0f, -12.5f));
-		camera.SetAspectRatio((float)width / height);
+		camera.SetAspectRatio((float)renderingWindow.GetWidth() / renderingWindow.GetHeight());
 	}
 
-
-	void BuildShaders(FARender::RenderScene& scene)
+	void BuildScene()
 	{
-		scene.CompileShader(SHADING_VS, L"Shaders/Shading_VS.hlsl", "vsMain", "vs_5_1");
-
-		scene.CompileShader(SHADING_PS, L"Shaders/Shading_PS.hlsl", "psMain", "ps_5_1");
-
-		scene.CreateInputElementDescription(VS_INPUT_LAYOUT, "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
-			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0);
-
-		scene.CreateInputElementDescription(VS_INPUT_LAYOUT, "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
-			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0);
-
-		scene.CreateInputElementDescription(VS_INPUT_LAYOUT, "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28,
-			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0);
-
-		scene.CreateRootParameter(0, 0); //object cb
-		scene.CreateRootParameter(0, 1); //pass cb
-		scene.CreateRootParameter(0, 2); //material cb
-		scene.CreateRootParameter(0, 3); //light cb
-		scene.CreateRootSignature(0, 0); //root signature
+		shadingScene = std::make_unique<FARender::RenderScene>(
+			renderingWindow.GetWidth(), renderingWindow.GetHeight(),
+			renderingWindow.GetWindowHandle(), true, true);
 	}
 
-	void BuildVertexAndIndexList(FARender::RenderScene& scene)
+	void BuildShaders()
+	{
+		shadingScene->CompileShader(SHADING_VS, L"Shaders/Shading_VS.hlsl", "vsMain", "vs_5_1");
+
+		shadingScene->CompileShader(SHADING_PS, L"Shaders/Shading_PS.hlsl", "psMain", "ps_5_1");
+
+		shadingScene->CreateInputElementDescription(VS_INPUT_LAYOUT, "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0);
+
+		shadingScene->CreateInputElementDescription(VS_INPUT_LAYOUT, "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0);
+
+		shadingScene->CreateInputElementDescription(VS_INPUT_LAYOUT, "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28,
+			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0);
+
+		shadingScene->CreateRootParameter(0, 0); //object cb
+		shadingScene->CreateRootParameter(0, 1); //pass cb
+		shadingScene->CreateRootParameter(0, 2); //material cb
+		shadingScene->CreateRootParameter(0, 3); //light cb
+		shadingScene->CreateRootSignature(0, 0); //root signature
+	}
+
+	void BuildVertexAndIndexList()
 	{
 		int k = 0;
 		for (auto& i : shapes)
@@ -155,93 +302,38 @@ namespace Init
 		}
 	}
 
-	void BuildVertexAndIndexBuffers(FARender::RenderScene& scene)
+	void BuildVertexAndIndexBuffers()
 	{
-		scene.CreateStaticBuffer(0, VERTEX_BUFFER, vertexList.data(),
+		shadingScene->CreateStaticBuffer(0, VERTEX_BUFFER, vertexList.data(),
 			vertexList.size() * sizeof(FAShapes::Vertex), sizeof(FAShapes::Vertex));
 
-		scene.CreateStaticBuffer(1, INDEX_BUFFER, indexList.data(), indexList.size() * sizeof(unsigned int), 0, DXGI_FORMAT_R32_UINT);
+		shadingScene->CreateStaticBuffer(1, INDEX_BUFFER, indexList.data(), indexList.size() * sizeof(unsigned int), 0, DXGI_FORMAT_R32_UINT);
 
 		//execute commands
-		scene.ExecuteAndFlush();
+		shadingScene->ExecuteAndFlush();
+		shadingScene->ReleaseUploaders();
 	}
 
-	void BuildConstantBuffers(FARender::RenderScene& scene)
+	void BuildConstantBuffers()
 	{
-		scene.CreateDynamicBuffer(2, OBJECTCB, shapes.size() * sizeof(ObjectConstants), nullptr, sizeof(ObjectConstants));
-		scene.CreateDynamicBuffer(2, PASSCB, sizeof(PassConstants), nullptr, sizeof(PassConstants));
-		scene.CreateDynamicBuffer(2, MATERIALCB, materials.size() * sizeof(Material), nullptr, sizeof(Material));
-		scene.CreateDynamicBuffer(2, LIGHTCB, lightSources.size() * sizeof(Light), nullptr, sizeof(Light));
+		shadingScene->CreateDynamicBuffer(2, OBJECTCB, shapes.size() * sizeof(ObjectConstants), nullptr, sizeof(ObjectConstants));
+		shadingScene->CreateDynamicBuffer(2, PASSCB, sizeof(PassConstants), nullptr, sizeof(PassConstants));
+		shadingScene->CreateDynamicBuffer(2, MATERIALCB, materials.size() * sizeof(Material), nullptr, sizeof(Material));
+		shadingScene->CreateDynamicBuffer(2, LIGHTCB, lightSources.size() * sizeof(Light), nullptr, sizeof(Light));
 
 	}
 
-	void BuildPSOs(FARender::RenderScene& scene)
+	void BuildPSOs()
 	{
-		scene.CreatePSO(SHADING_PSO, D3D12_FILL_MODE_SOLID, TRUE,
+		shadingScene->CreatePSO(SHADING_PSO, D3D12_FILL_MODE_SOLID, TRUE,
 			SHADING_VS, SHADING_PS, VS_INPUT_LAYOUT, 0, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 4);
 	}
 
-	void BuildText(unsigned int width, unsigned int height)
+	void BuildText()
 	{
 		//Frames per second text
-		framesPerSecond = FARender::Text(FAMath::Vector4D(), L"", textSize, textColor);
+		framesPerSecond = FARender::Text(FAMath::Vector4D(), L"", 15.0f, FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f));
 
-		//Selection Arrow txt
-		selectionArrow = FARender::Text(FAMath::Vector4D(), L">", textSize, textColor);
-
-		//Shading selections
-		std::vector<FARender::Text> shadingSelections;
-
-		shadingSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Shading:", textSize, textColor));
-		shadingSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Gouraud", textSize, textColor));
-		shadingSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Phong", textSize, textColor));
-		shadingSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Blinn-Phong", textSize, textColor));
-		shadingSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Flat-Phong", textSize, textColor));
-		shadingSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Flat-Blinn", textSize, textColor));
-		selections.emplace_back(shadingSelections);
-		currentSelection.emplace_back(1);
-
-		//Shape selections
-		std::vector<FARender::Text> shapeSelections;
-
-		shapeSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Shape:", textSize, textColor));
-		shapeSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Box", textSize, textColor));
-		shapeSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Pyramid", textSize, textColor));
-		shapeSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Cylinder", textSize, textColor));
-		shapeSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Cone", textSize, textColor));
-		shapeSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Sphere", textSize, textColor));
-		selections.emplace_back(shapeSelections);
-		currentSelection.emplace_back(1);
-
-		//Material Selections
-		std::vector<FARender::Text> materialSelections;
-
-		materialSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Material:", textSize, textColor));
-		materialSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Bronze", textSize, textColor));
-		materialSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Polished Bronze", textSize, textColor));
-		materialSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Silver", textSize, FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f)));
-		materialSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Polished Silver", textSize, textColor));
-		materialSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Gold", textSize, textColor));
-		materialSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Polished Gold", textSize, textColor));
-		selections.emplace_back(materialSelections);
-		currentSelection.emplace_back(1);
-
-		//Light Source Selections
-		std::vector<FARender::Text> lightSourceSelections;
-
-		lightSourceSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Light Source:", textSize, textColor));
-		lightSourceSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Point Light", textSize, textColor));
-		lightSourceSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Directional Light", textSize, textColor));
-		lightSourceSelections.emplace_back(FARender::Text(FAMath::Vector4D(), L"Point + Directional Light", textSize, textColor));
-		selections.emplace_back(lightSourceSelections);
-		currentSelection.emplace_back(1);
-
-		numShading = shadingSelections.size() - 1;
-		numShapes = shapeSelections.size() - 1;
-		numMaterials = materialSelections.size() - 1;
-		numLightSources = lightSourceSelections.size() - 1;
-		numSelections = selections.size() - 1;
-
-		WindowProc::ResizeText(width, height);
+		WindowProc::ResizeText(renderingWindow.GetWidth(), renderingWindow.GetHeight());
 	}
 }

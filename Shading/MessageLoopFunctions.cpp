@@ -44,12 +44,15 @@ namespace MessageLoop
 
 	void UserInput()
 	{
-		//Poll keyboard and mouse input.
-		camera.KeyboardInputWASD(frameTime.DeltaTime());
-		camera.MouseInput();
+		if (enableCameraUserInput)
+		{
+			//Poll keyboard and mouse input.
+			camera.KeyboardInputWASD(frameTime.DeltaTime());
+			camera.MouseInput();
+		}
 	}
 
-	void Update(FARender::RenderScene& scene)
+	void Update()
 	{
 		//Update the view matrix.
 		camera.UpdateViewMatrix();
@@ -63,118 +66,100 @@ namespace MessageLoop
 		passConstantData.view = Transpose(camera.GetViewMatrix());
 		passConstantData.projection = Transpose(camera.GetPerspectiveProjectionMatrix());
 		passConstantData.cameraPosition = camera.GetCameraPosition();
-		passConstantData.shadingType = currentSelection.at(SHADING) - 1; 
+		passConstantData.shadingType = currentSelection.at(SHADING); 
 
 		//Copy the view and perspective projection matrices into the pass constant buffer
-		scene.CopyDataIntoDynamicBuffer(PASSCB, 0, &passConstantData, sizeof(PassConstants));
+		shadingScene->CopyDataIntoDynamicBuffer(PASSCB, 0, &passConstantData, sizeof(PassConstants));
 
 		//Copy the view and perspective projection matrices into the pass constant buffer
-		scene.CopyDataIntoDynamicBuffer(MATERIALCB, 0, &materials.at(currentSelection.at(MATERIALS) - 1), sizeof(Material));
+		shadingScene->CopyDataIntoDynamicBuffer(MATERIALCB, 0, &materials.at(currentSelection.at(MATERIALS)), sizeof(Material));
 
-		if (currentSelection.at(LIGHT_SOURCE) - 1 == POINT_LIGHT)
+		if (currentSelection.at(LIGHT_SOURCE) == POINT_LIGHT)
 		{
 			lightSources[0].lightSourceType = POINT_LIGHT;
 			lightSources[1].lightSourceType = -1;
 		}
-		if (currentSelection.at(LIGHT_SOURCE) - 1 == DIRECTIONAL_LIGHT)
+		if (currentSelection.at(LIGHT_SOURCE) == DIRECTIONAL_LIGHT)
 		{
 			lightSources[0].lightSourceType = -1;
 			lightSources[1].lightSourceType = DIRECTIONAL_LIGHT;
 		}
-		if (currentSelection.at(LIGHT_SOURCE) - 1 == POINT_PLUS_DIRECTIONAL_LIGHT)
+		if (currentSelection.at(LIGHT_SOURCE) == POINT_PLUS_DIRECTIONAL_LIGHT)
 		{
 			lightSources[0].lightSourceType = POINT_LIGHT;
 			lightSources[1].lightSourceType = DIRECTIONAL_LIGHT;
 		}
 
 		//Copy the view and perspective projection matrices into the pass constant buffer
-		scene.CopyDataIntoDynamicBuffer(LIGHTCB, 0, lightSources.data(), lightSources.size() * sizeof(Light));
+		shadingScene->CopyDataIntoDynamicBuffer(LIGHTCB, 0, lightSources.data(), lightSources.size() * sizeof(Light));
 
 		static float angularVelocity{ 45.0f };
-
-		for (auto& i : shapes)
+		
+		//Rotate each shape around their local +y-axis.
+		if (playAnimation)
 		{
-			//Rotate each shape around their local +y-axis.
-			if (playAnimation)
-			{
-				i->RotateAxes(angularVelocity * frameTime.DeltaTime(), i->GetYAxis());
-			}
-
-			//Update each shapes local to world matrix
-			i->UpdateLocalToWorldMatrix();
-
-			ObjectConstants objectConstantData;
-			objectConstantData.localToWorld = Transpose(i->GetLocalToWorldMatrix());
-
-			//Don't transpose because hlsl will transpose when copying the data over.
-			objectConstantData.inverseTransposeLocalToWorld = Inverse(i->GetLocalToWorldMatrix());
-
-			//Copy the shapes local to world matrix into the object constant buffer.
-			scene.CopyDataIntoDynamicBuffer(OBJECTCB, i->GetDrawArguments().indexOfConstantData,
-				&objectConstantData, sizeof(ObjectConstants));
+			shapes.at(currentSelection.at(SHAPES))->RotateAxes(angularVelocity * frameTime.DeltaTime(), 
+				shapes.at(currentSelection.at(SHAPES))->GetYAxis());
 		}
+
+		//Update each shapes local to world matrix
+		shapes.at(currentSelection.at(SHAPES))->UpdateLocalToWorldMatrix();
+
+		ObjectConstants objectConstantData;
+		objectConstantData.localToWorld = Transpose(shapes.at(currentSelection.at(SHAPES))->GetLocalToWorldMatrix());
+
+		//Don't transpose because hlsl will transpose when copying the data over.
+		objectConstantData.inverseTransposeLocalToWorld = Inverse(shapes.at(currentSelection.at(SHAPES))->GetLocalToWorldMatrix());
+
+		//Copy the shapes local to world matrix into the object constant buffer.
+		shadingScene->CopyDataIntoDynamicBuffer(OBJECTCB, shapes.at(currentSelection.at(SHAPES))->GetDrawArguments().indexOfConstantData,
+			&objectConstantData, sizeof(ObjectConstants));
 	}
 
-	void Draw(FARender::RenderScene& scene)
+	void Draw()
 	{
 		//All the commands needed before rendering the shapes.
-		scene.BeforeRenderObjects(true);
+		shadingScene->BeforeRenderObjects(true);
 		
-		scene.SetPSOAndRootSignature(SHADING_PSO, 0);
+		shadingScene->SetPSOAndRootSignature(SHADING_PSO, 0);
 	
 		//Link the vertex and index buffer to the pipeline
-		scene.SetStaticBuffer(0, VERTEX_BUFFER);
-		scene.SetStaticBuffer(1, INDEX_BUFFER);
+		shadingScene->SetStaticBuffer(0, VERTEX_BUFFER);
+		shadingScene->SetStaticBuffer(1, INDEX_BUFFER);
 
 		//Link pass constant data to the pipeline
-		scene.SetDynamicBuffer(2, PASSCB, 0, 1);
+		shadingScene->SetDynamicBuffer(2, PASSCB, 0, 1);
 		
 		//Link material constant data to the pipeline
-		scene.SetDynamicBuffer(2, MATERIALCB, 0, 2);
+		shadingScene->SetDynamicBuffer(2, MATERIALCB, 0, 2);
 
 		//Link light constant data to the pipeline
-		scene.SetDynamicBuffer(2, LIGHTCB, 0, 3);
+		shadingScene->SetDynamicBuffer(2, LIGHTCB, 0, 3);
 
 		//Get the draw arguments of the current shape.
-		FAShapes::DrawArguments currentShapeDrawArguments{ shapes.at(currentSelection.at(SHAPES) - 1)->GetDrawArguments() };
+		FAShapes::DrawArguments currentShapeDrawArguments{ shapes.at(currentSelection.at(SHAPES))->GetDrawArguments() };
 
 		//Link the shapes constant data to the pipeline.
-		scene.SetDynamicBuffer(2, OBJECTCB, currentShapeDrawArguments.indexOfConstantData, 0);
+		shadingScene->SetDynamicBuffer(2, OBJECTCB, currentShapeDrawArguments.indexOfConstantData, 0);
 
 		//Render the current shape.
-		scene.RenderObject(currentShapeDrawArguments.indexCount, currentShapeDrawArguments.locationOfFirstIndex,
+		shadingScene->RenderObject(currentShapeDrawArguments.indexCount, currentShapeDrawArguments.locationOfFirstIndex,
 			currentShapeDrawArguments.indexOfFirstVertex, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		
 		//All the commands needed after rendering the shapes.
-		scene.AfterRenderObjects(true, true);
+		shadingScene->AfterRenderObjects(true, true);
 
 		//All the commands needed before rendering text.
-		scene.BeforeRenderText();
+		shadingScene->BeforeRenderText();
 
 		//Render FPS
-		scene.RenderText(framesPerSecond.GetTextLocation(), framesPerSecond.GetTextColor(), 
+		shadingScene->RenderText(framesPerSecond.GetTextLocation(), framesPerSecond.GetTextColor(),
 			framesPerSecond.GetTextSize(), framesPerSecond.GetTextString(), DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 
-		//Render selection arrow
-		scene.RenderText(selectionArrow.GetTextLocation(), selectionArrow.GetTextColor(),
-			selectionArrow.GetTextSize(), selectionArrow.GetTextString(), DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-
-		for (unsigned int i = 0; i <= numSelections; ++i)
-		{
-			FARender::Text textToRender(selections.at(i).at(0));
-			scene.RenderText(textToRender.GetTextLocation(), textToRender.GetTextColor(),
-				textToRender.GetTextSize(), textToRender.GetTextString(), DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-
-			textToRender = selections.at(i).at(currentSelection[i]);
-			scene.RenderText(textToRender.GetTextLocation(), textToRender.GetTextColor(),
-				textToRender.GetTextSize(), textToRender.GetTextString(), DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		}
-
-		
 		//All the commands needed after rendering text.
-		scene.AfterRenderText();
+		shadingScene->AfterRenderText();
 
 		//All the commands needed after rendering the shapes and objects.
-		scene.AfterRender();
+		shadingScene->AfterRender();
 	}
 }

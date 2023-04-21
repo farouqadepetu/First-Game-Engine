@@ -1,12 +1,181 @@
 #include "WindowProcedure.h"
 #include "GlobalVariables.h"
+#include <Windowsx.h>
 
 using namespace GlobalVariables;
 
 namespace WindowProc
 {
+	LRESULT MainWindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
+		switch (uMsg)
+		{
+			case WM_ACTIVATE:
+			{
+				//Send message to the rendering window procedure.
+				SendMessage(renderingWindow.GetWindowHandle(), uMsg, wParam, lParam);
+				return 0;
+			}
+
+			case WM_SIZE:
+			{
+				//Get the new width and height of the client area of the main window
+				GetClientRect(windowHandle, &mainWindowClientRect);
+
+				//Adjust width and height of the rendering window based of the width and height of the main window
+				renderingWindow.SetWidth(mainWindowClientRect.right - dropDownListWidth);
+				renderingWindow.SetHeight(mainWindowClientRect.bottom);
+				MoveWindow(renderingWindow.GetWindowHandle(), 0, 0, renderingWindow.GetWidth(), renderingWindow.GetHeight(), FALSE);
+
+				//Adjust the locations of the drop down lists.
+				for (auto& i : dropDownLists)
+				{
+					i.SetX(renderingWindow.GetWidth());
+					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), FALSE);
+				}
+
+				//Adjust the location of the static texts.
+				for (auto& i : staticText)
+				{
+					i.SetX(renderingWindow.GetWidth());
+					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), TRUE);
+				}
+
+				//Adjust the locations of the buttons.
+				for (auto& i : buttons)
+				{
+					i.SetX(renderingWindow.GetWidth() + 20);
+					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), TRUE);
+				}
+
+				//Execute the WM_SIZE message in the rendering windows message procedure.
+				SendMessage(renderingWindow.GetWindowHandle(), uMsg, wParam, lParam);
+
+				return 0;
+			}
+
+			case WM_EXITSIZEMOVE:
+			{
+				//Get the new width and height of the client area of the main window
+				GetClientRect(windowHandle, &mainWindowClientRect);
+
+				//Adjust width and height of the rendering window based of the width and height of the main window
+				renderingWindow.SetWidth(mainWindowClientRect.right - dropDownListWidth);
+				renderingWindow.SetHeight(mainWindowClientRect.bottom);
+
+				//Adjust the locations of the drop down lists.
+				for (auto& i : dropDownLists)
+				{
+					i.SetX(renderingWindow.GetWidth());
+					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), FALSE);
+				}
+
+				//Adjust the location of the static texts.
+				for (auto& i : staticText)
+				{
+					i.SetX(renderingWindow.GetWidth());
+					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), FALSE);
+				}
+
+				//Adjust the locations of the buttons.
+				for (auto& i : buttons)
+				{
+					i.SetX(renderingWindow.GetWidth() + 20);
+					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), TRUE);
+				}
+
+				//Execute the WM_SIZE message in the rendering windows message procedure.
+				SendMessage(renderingWindow.GetWindowHandle(), uMsg, wParam, lParam);
+
+				return 0;
+			}
+
+			case WM_LBUTTONDOWN:
+			{
+				//Send message to the rendering window procedure.
+				SendMessage(renderingWindow.GetWindowHandle(), uMsg, wParam, lParam);
+
+				return 0;
+			}
+
+			case WM_KEYDOWN:
+			{
+				//Send message to the rendering window procedure.
+				SendMessage(renderingWindow.GetWindowHandle(), uMsg, wParam, lParam);
+				return 0;
+			}
+
+			case WM_COMMAND:
+			{
+				//if the user activates/deactivates the drop down list
+				if (HIWORD(wParam) == CBN_DROPDOWN || HIWORD(wParam) == CBN_CLOSEUP)
+				{
+					enableCameraUserInput = false;
+
+					SetFocus(windowHandle);
+				}
+
+				if(HIWORD(wParam) == CBN_SELENDOK) //If the user changed their selection
+				{
+					int index = SendMessage((HWND)lParam, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM) 0);
+
+					currentSelection.at(LOWORD(wParam)) = index;
+
+					SetFocus(windowHandle);
+
+				}
+
+				if (HIWORD(wParam) == BN_CLICKED)
+				{
+					if (LOWORD(wParam) == PLAY_PAUSE)
+					{
+						playAnimation = (playAnimation) ? false : true;
+					}
+					else if (LOWORD(wParam) == RESET_CAMERA)
+					{
+						camera.SetCameraPosition(vec3(0.0f, 0.0f, -12.5f));
+						camera.SetX(vec3(1.0f, 0.0f, 0.0f));
+						camera.SetY(vec3(0.0f, 1.0f, 0.0f));
+						camera.SetZ(vec3(0.0f, 0.0f, 1.0f));
+					}
+					else if (LOWORD(wParam) == RESET_SHAPE)
+					{
+						shapes.at(currentSelection.at(SHAPES))->SetXAxis(1.0f, 0.0f, 0.0f);
+						shapes.at(currentSelection.at(SHAPES))->SetYAxis(0.0f, 1.0f, 0.0f);
+						shapes.at(currentSelection.at(SHAPES))->SetZAxis(0.0f, 0.0f, 1.0f);
+					}
+
+					enableCameraUserInput = false;
+					SetFocus(windowHandle);
+				}
+
+				return 0;
+			}
+
+			//Chnages the fore and background color of the text
+			case WM_CTLCOLORSTATIC:
+			{
+				HDC hdcStatic = (HDC)wParam;
+				SetTextColor(hdcStatic, RGB(0, 0, 0));
+				SetBkColor(hdcStatic, RGB(100, 100, 100));
+
+				return (LRESULT)GetStockObject(NULL_BRUSH);
+			}
+
+			case WM_DESTROY: //when the user exits the window.
+			{
+				DeleteObject(textFont);
+				PostQuitMessage(0);
+				return 0;
+			}
+		}
+
+		//handles events that weren't manually handled.
+		return DefWindowProc(windowHandle, uMsg, wParam, lParam);
+	}
+
 	//Window Procedure
-	LRESULT DisplayShapesWindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	LRESULT RenderingWindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		switch (uMsg)
 		{
@@ -28,11 +197,11 @@ namespace WindowProc
 
 			case WM_SIZE: //when the window gets resized.
 			{
-				if (scene != nullptr && window != nullptr)
+				if (shadingScene != nullptr)
 				{
-					window->SetWidth(LOWORD(lParam));
-					window->SetHeight(HIWORD(lParam));
-					
+					int width = renderingWindow.GetWidth();
+					int height = renderingWindow.GetHeight();
+
 					if (wParam == SIZE_MINIMIZED) //window gets minimized
 					{
 						isAppPaused = true;
@@ -44,12 +213,12 @@ namespace WindowProc
 						isAppPaused = false;
 						isMinimized = false;
 						isMaximized = true;
-						scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
-							true, true);
 
-						camera.SetAspectRatio((float)window->GetWidth() / window->GetHeight());
+						shadingScene->Resize(width, height, windowHandle,true, true);
 
-						ResizeText(window->GetWidth(), window->GetHeight());
+						camera.SetAspectRatio((float)width / height);
+
+						ResizeText(width, height);
 					}
 					if (wParam == SIZE_RESTORED)
 					{
@@ -58,23 +227,23 @@ namespace WindowProc
 						{
 							isAppPaused = false;
 							isMinimized = false;
-							scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
-								true, true);
 
-							camera.SetAspectRatio((float)window->GetWidth() / window->GetHeight());
+							shadingScene->Resize(width, height, windowHandle, true, true);
 
-							ResizeText(window->GetWidth(), window->GetHeight());
+							camera.SetAspectRatio((float)width / height);
+
+							ResizeText(width, height);
 						}
 						//restoring from a maximized state
 						else if (isMaximized)
 						{
 							isMaximized = false;
-							scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
-								true, true);
 
-							camera.SetAspectRatio((float)window->GetWidth() / window->GetHeight());
+							shadingScene->Resize(width, height, windowHandle, true, true);
 
-							ResizeText(window->GetWidth(), window->GetHeight());
+							camera.SetAspectRatio((float)width / height);
+
+							ResizeText(width, height);
 						}
 					}
 				}
@@ -96,98 +265,32 @@ namespace WindowProc
 				isAppPaused = false;
 				frameTime.Start();
 
-				RECT windowSize{};
-				GetWindowRect(windowHandle, &windowSize);
-
-				window->SetWidth(windowSize.right - windowSize.left);
-				window->SetHeight(windowSize.bottom - windowSize.top);
-
-				scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
-					true, true);
-
-				camera.SetAspectRatio((float)window->GetWidth() / window->GetHeight());
-
-				ResizeText(window->GetWidth(), window->GetHeight());
-
-				return 0;
-			}
-
-			case WM_KEYDOWN: //if they user every presses a char key.
-			{
-				switch (wParam)
+				if (shadingScene != nullptr)
 				{
-					case VK_DOWN:
-						if (currentArrow < numSelections)
-						{
-							++currentArrow;
-							FAMath::Vector4D saLocation(selectionArrow.GetTextLocation());
-							saLocation.SetY(saLocation.GetY() + heightIncrease);
-							saLocation.SetW(saLocation.GetW() + heightIncrease);
-							selectionArrow.SetTextLocation(saLocation);
-						}
-						break;
-					
-					case VK_UP:
-						if (currentArrow > 0)
-						{
-							--currentArrow;
-							FAMath::Vector4D saLocation(selectionArrow.GetTextLocation());
-							saLocation.SetY(saLocation.GetY() - heightIncrease);
-							saLocation.SetW(saLocation.GetW() - heightIncrease);
-							selectionArrow.SetTextLocation(saLocation);
-						}
-						break;
+					int width = renderingWindow.GetWidth();
+					int height = renderingWindow.GetHeight();
 
-					case VK_LEFT:
-						if (currentArrow == SHADING)
-						{
-							if (currentSelection.at(SHADING) > 1)
-								--currentSelection.at(SHADING);
-						}
-						else if (currentArrow == SHAPES)
-						{
-							if (currentSelection.at(SHAPES) > 1)
-								--currentSelection.at(SHAPES);
-						}
-						else if (currentArrow == MATERIALS)
-						{
-							if (currentSelection.at(MATERIALS) > 1)
-								--currentSelection.at(MATERIALS);
-						}
-						else if (currentArrow == LIGHT_SOURCE)
-						{
-							if (currentSelection.at(LIGHT_SOURCE) > 1)
-								--currentSelection.at(LIGHT_SOURCE);
-						}
-						break;
+					shadingScene->Resize(width, height, windowHandle, true, true);
 
-					case VK_RIGHT:
-						if (currentArrow == SHADING)
-						{
-							if (currentSelection.at(SHADING) < numShading)
-								++currentSelection.at(SHADING);
-						}
-						else if (currentArrow == SHAPES)
-						{
-							if (currentSelection.at(SHAPES) < numShapes)
-								++currentSelection.at(SHAPES);
-						}
-						else if (currentArrow == MATERIALS)
-						{
-							if (currentSelection.at(MATERIALS) < numMaterials)
-								++currentSelection.at(MATERIALS);
-						}
-						else if (currentArrow == LIGHT_SOURCE)
-						{
-							if (currentSelection.at(LIGHT_SOURCE) < numLightSources)
-								++currentSelection.at(LIGHT_SOURCE);
-						}
-						break;
+					camera.SetAspectRatio((float)width / height);
+
+					ResizeText(width, height);
 				}
+
 				return 0;
 			}
 
-			case WM_CHAR:
+			case WM_LBUTTONDOWN:
+			{
+				if (GET_X_LPARAM(lParam) > renderingWindow.GetWidth())
+					enableCameraUserInput = false;
+				else
+					enableCameraUserInput = true;
+
+				return 0;
+			}
+
+			/*case WM_CHAR:
 			{
 				switch (wParam)
 				{
@@ -209,7 +312,7 @@ namespace WindowProc
 				}
 
 				return 0;
-			}
+			}*/
 
 			case WM_DESTROY: //when the user exits the window.
 			{
@@ -223,44 +326,11 @@ namespace WindowProc
 
 	void ResizeText(unsigned int width, unsigned int height)
 	{
-		float selectionTextX = width - (21.0f * textSize);
-		float arrowX{ selectionTextX - 20.0f  };
-		float halfTextSize{ textSize / 2.0f };
-		unsigned int h = 0.0f;
-
 		//Resize the FPS text
-		framesPerSecond.SetTextLocation(FAMath::Vector4D(0.0f, 0.0f, 20.0f * textSize, 0.0f));
-
-		//Resize the selection arrow
-		selectionArrow.SetTextLocation(FAMath::Vector4D(arrowX, currentArrow * heightIncrease,
-			arrowX - 2.0f, currentArrow * (heightIncrease + heightIncrease)));
-
-		//Resize the selections text
-		for (unsigned int i = 0; i <= numSelections; ++i)
-		{
-			selections.at(i).at(0).SetTextLocation(FAMath::Vector4D(selectionTextX, h ,
-				selectionTextX + (selections.at(i).at(0).GetTextSize() * halfTextSize), h + heightIncrease));
-
-			h += heightIncrease;
-		}
-
-		//Resize the options text
-		h = 0.0f;
-		for (unsigned int i = 0; i <= numSelections; ++i)
-		{
-			unsigned int numCols = (unsigned int)selections.at(i).size();
-			for (unsigned int j = 1; j < numCols; ++j)
-			{
-				selections.at(i).at(j).SetTextLocation(
-					FAMath::Vector4D(selectionTextX + (selections.at(i).at(0).GetTextSize() * halfTextSize),
-					h, width, h + heightIncrease));
-			}
-
-			h += heightIncrease;
-		}
+		framesPerSecond.SetTextLocation(FAMath::Vector4D(0.0f, 0.0f, 300.0f, 0.0f));
 	}
 
-	void Reset(unsigned int width, unsigned int height)
+	/*void Reset(unsigned int width, unsigned int height)
 	{
 		//reset selection arrow to the top
 		currentArrow = 0;
@@ -281,5 +351,5 @@ namespace WindowProc
 
 		//to change the location of the selection arrow.
 		ResizeText(width, height);
-	}
+	}*/
 }
