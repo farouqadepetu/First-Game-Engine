@@ -22,30 +22,98 @@ namespace FAWindow
 
 		Window() = default;
 
-		/**@brief Creates and displays a window.
+		/**@brief Creates a parent window.
+		*
+		* The window gets displayed after it is created.
 		* 
 		* @param[in] hInstance The handle to a module used to identify the executable.
-		* @param[in] windowClassName The name of the window class.
-		* @param[in] windowName The name of the window.
-		* @param[in] winProcFunction The window procedure.
-		* @param[in] width The width of the window.
-		* @param[in] height The height of the window.
-		* @param[in, optional] additionalData A pointer to data to access in the window procedure.
-		*/
-		Window(const HINSTANCE& hInstance, const std::wstring& windowClassName, const std::wstring& windowName,
-			WNDPROC winProcFunction, unsigned int width, unsigned int height, void* additionalData = nullptr);
-
-		/**@brief Creates and displays a window.
 		* 
-		* @param[in] hInstance The handle to a module used to identify the executable.
 		* @param[in] windowClass The window class for this window.
+		* 
 		* @param[in] windowName The name of the window.
-		* @param[in] width The width of the window.
-		* @param[in] height The height of the window.
+		* 
+		* @param[in] styles The style of the window. OR together the styles at
+		* https://learn.microsoft.com/en-us/windows/win32/winmsg/window-styles
+		* 
+		* @param[in] The x position of the top left corner of the window from the desktops top left corner.
+		* Use CW_USEDEFAULT to let system select a default position for you.
+		* 
+		* @param[in] The y position of the top left corner of the windo  from the desktops top left corner.
+		* Use CW_USEDEFAULT to let system select a default position for you.
+		* 
+		* @param[in] width The width of the client area of the window.
+		* 
+		* @param[in] height The height of the client area of the window.
+		* 
+		* @param[in, optional] parent a handle to a parent. Set to nullptr if it is not a child window.
+		* 
 		* @param[in, optional] additionalData A pointer to data to access in the window procedure.
+		* 
 		*/
-		Window(const HINSTANCE& hInstance, const WNDCLASSEX& windowClass, const std::wstring& windowName,
-			unsigned int width, unsigned int height, void* additionalData = nullptr);
+		Window(const HINSTANCE& hInstance, const WNDCLASSEX& windowClass, const std::wstring& windowName, unsigned int styles,
+			unsigned int x, unsigned int y, unsigned int width, unsigned int height, void* additionalData = nullptr);
+
+		/**@brief Creates a non-control child window.
+		*
+		* @param[in] hInstance The handle to a module used to identify the executable.
+		* 
+		* @param[in] parent A handle to a parent window.
+		* 
+		* @param[in] identifier An unsigned integer to identify the child window.
+		* 
+		* @param[in] windowClass The window class for this window.
+		* 
+		* @param[in] windowName The name of the window.
+		* 
+		* @param[in] styles The style of the window. OR together the styles at
+		* https://learn.microsoft.com/en-us/windows/win32/winmsg/window-styles
+		* 
+		* @param[in] The x position of the top left corner of the window from the parent window top left corner.
+		* 
+		* @param[in] The y position of the top left corner of the window from the parent window top left corner..
+		* 
+		* @param[in] width The width of the client area of the window.
+		* 
+		* @param[in] height The height of the client area of the window.
+		* 
+		* @param[in, optional] additionalData A pointer to data to access in the window procedure.
+		*
+		*/
+		Window(const HINSTANCE& hInstance, HWND parent, unsigned int identifier,
+			const WNDCLASSEX& windowClass, const std::wstring& windowName, unsigned int styles,
+			unsigned int x, unsigned int y, unsigned int width, unsigned int height, void* additionalData = nullptr);
+
+		/**@brief Creates a control window.
+		*
+		* @param[in] hInstance The handle to a module used to identify the executable.
+		* 
+		* @param[in] parent A handle to a parent window.
+		* 
+		* @param[in] identifier An unsigned integer to identify the child window.
+		* 
+		* @param[in] windowClass The name of the window class.
+		* 
+		* @param[in] windowName The name of the window.
+		* 
+		* @param[in] styles The style of the window. OR together the styles at
+		* https://learn.microsoft.com/en-us/windows/win32/winmsg/window-styles
+		* 
+		* @param[in] The x position of the top left corner of the window from the parent window top left corner.
+		* 
+		* @param[in] The y position of the top left corner of the window from the parent window top left corner.
+		* 
+		* @param[in] width The width of the client area of the window.
+		* 
+		* @param[in] height The height of the client area of the window.
+		* 
+		* @param[in, optional] additionalData A pointer to data to access in the window procedure.
+		*
+		*/
+		Window(const HINSTANCE& hInstance, HWND parent, unsigned int identifier,
+			const std::wstring& windowClassName,
+			const std::wstring& windowName, unsigned int styles,
+			unsigned int x, unsigned int y, unsigned int width, unsigned int height, void* additionalData = nullptr);
+
 
 		/**@brief Returns the window handle.
 		*/
@@ -59,6 +127,14 @@ namespace FAWindow
 		*/
 		unsigned int GetHeight() const;
 
+		/**@brief Returns the x position of the top left corner of the window.
+		*/
+		unsigned int GetX() const;
+
+		/**@brief Returns the y position of the top left corner of the window.
+		*/
+		unsigned int GetY() const;
+
 		/**@brief Sets the width of the window to the specified \a width.
 		*/
 		void SetWidth(unsigned int width);
@@ -67,12 +143,21 @@ namespace FAWindow
 		*/
 		void SetHeight(unsigned int height);
 
+		/**@brief Sets the x position of the top left corner of the window.
+		*/
+		void SetX(unsigned int x);
+
+		/**@brief Sets the y position of the top left corner of the window.
+		*/
+		void SetY(unsigned int y);
+
 	private:
 		HWND mWindowHandle;
 
 		WNDCLASSEX mWindowClass;
-		std::wstring mWindowClassName;
 
+		unsigned int mX;
+		unsigned int mY;
 		unsigned int mWidth;
 		unsigned int mHeight;
 	};

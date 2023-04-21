@@ -378,7 +378,7 @@ namespace FARender
 			//Transistion the msaa RT buffer to resolve source state from render target state
 			mMultiSampling.Transition(mCommandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
 
-			//Copy a multi-sampled resource into a non-multi-sampled resource
+			//Copy a multi-sampled resource into a non multi-sampled resource
 			mCommandList->ResolveSubresource(mSwapChain.GetCurrentBackBuffer().Get(), 0, 
 				mMultiSampling.GetRenderTargetBuffer().Get(), 0, mSwapChain.GetBackBufferFormat());
 

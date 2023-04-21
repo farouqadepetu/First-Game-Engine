@@ -241,6 +241,11 @@ namespace FARender
 		return mIndexBufferView;
 	}
 
+	void StaticBuffer::ReleaseUploader()
+	{
+		mStaticUploadBuffer = nullptr;
+	}
+
 
 	//-----------------------------------------------------------------------------------------------------------------------
 

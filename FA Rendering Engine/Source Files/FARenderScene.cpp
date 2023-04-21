@@ -390,5 +390,16 @@ namespace FARender
 		mDynamicBuffers.at(dynamicBufferKey)[mDeviceResources.GetCurrentFrame()].CopyData(index, data, numOfBytes);
 	}
 
+	void RenderScene::ReleaseUploaders()
+	{
+		if (!mStaticBuffers.empty())
+		{
+			for (auto& i : mStaticBuffers)
+			{
+				i.second.ReleaseUploader();
+			}
+		}
+	}
+
 	//-----------------------------------------------------------------------------------------------------------------------
 }

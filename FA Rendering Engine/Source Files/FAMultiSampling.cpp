@@ -49,39 +49,6 @@ namespace FARender
 	{
 		mMSAARenderTargetBuffer.CreateRenderTargetBufferAndView(device, rtvHeap, indexOfWhereToStoreView, rtvSize, 
 			width, height, mSampleCount);
-
-		/*D3D12_RESOURCE_DESC mMSAARenderTargetBufferDesc{};
-		mMSAARenderTargetBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		mMSAARenderTargetBufferDesc.Alignment = 0;
-		mMSAARenderTargetBufferDesc.Width = width;
-		mMSAARenderTargetBufferDesc.Height = height;
-		mMSAARenderTargetBufferDesc.DepthOrArraySize = 1;
-		mMSAARenderTargetBufferDesc.MipLevels = 1;
-		mMSAARenderTargetBufferDesc.Format = mMSAAFormat;
-		mMSAARenderTargetBufferDesc.SampleDesc.Count = 4;
-		mMSAARenderTargetBufferDesc.SampleDesc.Quality = 0;
-		mMSAARenderTargetBufferDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		mMSAARenderTargetBufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-
-		D3D12_CLEAR_VALUE msaaRTBufferClearValue{};
-		msaaRTBufferClearValue.Format = mMSAAFormat;
-		msaaRTBufferClearValue.Color[0] = 0.0f;
-		msaaRTBufferClearValue.Color[1] = 0.0f;
-		msaaRTBufferClearValue.Color[2] = 0.0f;
-		msaaRTBufferClearValue.Color[3] = 1.0f;
-
-		//Use this class to say which type of heap our buffer will be stored in.
-		CD3DX12_HEAP_PROPERTIES msaaRTHeapProp(D3D12_HEAP_TYPE_DEFAULT);
-
-		//Create the RT buffer resouce
-		ThrowIfFailed(device->CreateCommittedResource(&msaaRTHeapProp, D3D12_HEAP_FLAG_NONE, &mMSAARenderTargetBufferDesc,
-			D3D12_RESOURCE_STATE_RESOLVE_SOURCE, &msaaRTBufferClearValue, IID_PPV_ARGS(&mMSAARenderTargetBuffer.GetRenderTargetBuffer())));
-
-		//Get the address of where you want to store the view in the RTV heap.
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), indexOfWhereToStoreView, rtvSize);
-
-		//Create the RTV
-		device->CreateRenderTargetView(mMSAARenderTargetBuffer.GetRenderTargetBuffer().Get(), nullptr, rtvHeapHandle);*/
 	}
 
 	void MultiSampling::CreateDepthStencilBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
@@ -90,41 +57,6 @@ namespace FARender
 	{
 		mMSAADepthStencilBuffer.CreateDepthStencilBufferAndView(device, dsvHeap, indexOfWhereToStoreView, dsvSize, 
 			width, height, mSampleCount);
-
-		/*D3D12_RESOURCE_DESC mMSAADepthStencilBufferDesc{};
-		mMSAADepthStencilBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		mMSAADepthStencilBufferDesc.Alignment = 0;
-		mMSAADepthStencilBufferDesc.Width = width;
-		mMSAADepthStencilBufferDesc.Height = height;
-		mMSAADepthStencilBufferDesc.DepthOrArraySize = 1;
-		mMSAADepthStencilBufferDesc.MipLevels = 1;
-		mMSAADepthStencilBufferDesc.Format = format;
-		mMSAADepthStencilBufferDesc.SampleDesc.Count = 4;
-		mMSAADepthStencilBufferDesc.SampleDesc.Quality = 0;
-		mMSAADepthStencilBufferDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		mMSAADepthStencilBufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-
-		D3D12_CLEAR_VALUE msaaDSBufferClearValue{};
-		msaaDSBufferClearValue.Format = format;
-		msaaDSBufferClearValue.DepthStencil.Depth = 1.0f;
-		msaaDSBufferClearValue.DepthStencil.Stencil = 0;
-
-		//Use this class to say which type of heap our buffer will be stored in.
-		CD3DX12_HEAP_PROPERTIES msaaDSHeapProp(D3D12_HEAP_TYPE_DEFAULT);
-
-		//Create the msaa DS buffer resouce
-		ThrowIfFailed(device->CreateCommittedResource(&msaaDSHeapProp, D3D12_HEAP_FLAG_NONE, &mMSAADepthStencilBufferDesc,
-			D3D12_RESOURCE_STATE_DEPTH_WRITE, &msaaDSBufferClearValue, IID_PPV_ARGS(&mMSAADepthStencilBuffer)));
-
-		//Describe the msaa DSV
-		D3D12_DEPTH_STENCIL_VIEW_DESC dsViewDescription{};
-		dsViewDescription.Format = format;
-		dsViewDescription.Flags = D3D12_DSV_FLAG_NONE;
-		dsViewDescription.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
-
-		//Create the msaa DSV
-		device->CreateDepthStencilView(mMSAADepthStencilBuffer.Get(), &dsViewDescription,
-			mMSAADSVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());*/
 	}
 
 	void MultiSampling::Transition(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,

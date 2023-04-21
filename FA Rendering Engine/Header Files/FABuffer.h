@@ -173,6 +173,12 @@ namespace FARender
 		*/
 		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView();
 
+		/**@brief Frees the upload buffer memory.
+		* 
+		* Call when the command to copy data to the default buffer has been executed.
+		*/
+		void ReleaseUploader();
+
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> mStaticDefaultBuffer;
 		Microsoft::WRL::ComPtr<ID3D12Resource> mStaticUploadBuffer;

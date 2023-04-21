@@ -293,6 +293,10 @@ namespace FARender
 		*/
 		void CopyDataIntoDynamicBuffer(unsigned int dynamicBufferKey, unsigned int index, const void* data, UINT64 numOfBytes);
 
+		/**@brief Frees the memory of the static buffers upload buffers.
+		*/
+		void ReleaseUploaders();
+
 	private:
 		//The device resources object that all RenderScene objects share.
 		DeviceResources& mDeviceResources;
