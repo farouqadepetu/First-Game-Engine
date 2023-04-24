@@ -63,7 +63,7 @@ namespace FARender
 		return mSwapChain.GetDepthStencilFormat();
 	}
 
-	unsigned int DeviceResources::GetCBVSize() const
+	unsigned int DeviceResources::GetCBVSRVUAVSize() const
 	{
 		return mCBVSize;
 	}

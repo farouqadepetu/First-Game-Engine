@@ -12,6 +12,9 @@
 */
 namespace FARender
 {
+	enum BufferTypes { VERTEX_BUFFER, INDEX_BUFFER, CONSTANT_BUFFER, TEXTURE_BUFFER };
+	enum TextureTypes { TEX2D, TEX2D_MS };
+
 	/** @class RenderTargetBuffer ""
 	*	@brief A wrapper for render target buffer resources. Uses DirectD 12 API.
 	*/
@@ -71,7 +74,6 @@ namespace FARender
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> mRenderTargetBuffer;
 		DXGI_FORMAT mRenderTargetFormat;
-
 	};
 
 	/** @class DepthStencilBuffer ""
@@ -135,43 +137,87 @@ namespace FARender
 	class StaticBuffer
 	{
 	public:
-		StaticBuffer() = default;
-		StaticBuffer(const StaticBuffer&) = delete;
-		StaticBuffer& operator=(const StaticBuffer&) = delete;
 
-		StaticBuffer(StaticBuffer&&) = default;
+		/**@brief Creates static vertex buffer and stores all of the specified data in the buffer.
+		*
+		* @param[in] device A Direct3D 12 device.
+		*
+		* @param[in] commadList A Direct3D 12 graphics command list.
+		*
+		* @param[in] data The data to store in the static vertex buffer.
+		*
+		* @param[in] numBytes The number of bytes to store in the static vertex buffer.
+		*
+		* @param[in] stride The number of bytes to get from one element to the next element.
+		*/
+		StaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+			const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data,
+			unsigned int numBytes, unsigned int stride);
 
-		/**@brief Creates the static buffer and stores all of the specified data.
+		/**@brief Creates static index buffer and stores all of the specified data in the buffer.
+		*
+		* @param[in] device A Direct3D 12 device.
+		*
+		* @param[in] commadList A Direct3D 12 graphics command list.
+		*
+		* @param[in] data The data to store in the static index buffer.
+		*
+		* @param[in] numBytes The number of bytes to store in the static index buffer.
+		*
+		* @param[in] format The number of bytes to get from one element to the next element.
+		*/
+		StaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+			const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data,
+			unsigned int numBytes, DXGI_FORMAT format);
+
+		/**@brief Creates static texture buffer and stores all of the data from the file in the buffer.
+		*
+		* @param[in] device A Direct3D 12 device.
+		*
+		* @param[in] commadList A Direct3D 12 graphics command list.
+		*
+		* @param[in] data The data to store in the static texture buffer.
+		*
+		* @param[in] numBytes The number of bytes to store in the static texture buffer.
+		*
+		* @param[in] filename The name of the texture file.
+		*/
+		StaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+			const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const wchar_t* filename);
+
+		/**@brief Returns a constant reference to the vertex buffer view.
+		*/
+		const D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() const;
+
+		/**@brief Returns a constant reference to the vertex buffer view.
+		*/
+		const D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const;
+
+		/**@brief Creates a 2D texture view and stores it in the specified heap.
 		* 
 		* @param[in] device A Direct3D 12 device.
-		* @param[in] commadList A Direct3D 12 graphics command list.
-		* @param[in] data The data to store in the static buffer.
-		* @param[in] numBytes The number of bytes to store in the static buffer.
-		*/
-		void CreateStaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data, UINT numBytes);
-
-		/**@brief Creates a vertex buffer view and stores it.
 		* 
-		* @param[in] numBytes The number of bytes in the static buffer.
-		* @param[in] stride The number of bytes to get from one element to another in the static buffer.
-		*/
-		void CreateVertexBufferView(UINT numBytes, UINT stride);
-
-		/**@brief Creates a index buffer view and stores it.
+		* @param[in] srvHeap A shader resource view heap.
 		* 
-		* @param[in] numBytes The number of bytes in the static buffer.
-		* @param[in] format The number of bytes to get from one element to another in the static buffer.
+		* @param[in] srvSize The size of a shader resource view.
+		* 
+		* @param[in] index The index of where to store the texture view in the shader resource view heap.
 		*/
-		void CreateIndexBufferView(UINT numBytes, DXGI_FORMAT format);
+		void CreateTexture2DView(const Microsoft::WRL::ComPtr<ID3D12Device>& device, 
+			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& srvHeap, unsigned int srvSize, unsigned int index);
 
-		/**@brief Returns a constant reference to the vertex buffer view.
+		/**@brief Creates a multi-sampled 2D texture view and stores it in the specified heap.
+		*
+		* @param[in] device A Direct3D 12 device.
+		*
+		* @param[in] srvHeap A shader resource view heap.
+		*
+		* @param[in] srvSize The size of a shader resource view.
+		*
+		* @param[in] index The index of where to store the texture view in the shader resource view heap.
 		*/
-		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView();
-
-		/**@brief Returns a constant reference to the vertex buffer view.
-		*/
-		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView();
+		void CreateTexture2DMSView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& srvHeap, unsigned int srvSize, unsigned int index);
 
 		/**@brief Frees the upload buffer memory.
 		* 
@@ -185,8 +231,8 @@ namespace FARender
 
 		union
 		{
-			D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
-			D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
+			unsigned int mStride;
+			DXGI_FORMAT mFormat;
 		};
 	};
 
@@ -196,48 +242,34 @@ namespace FARender
 	class DynamicBuffer
 	{
 	public:
-		DynamicBuffer() = default;
 
-		DynamicBuffer(const DynamicBuffer&) = delete;
-		DynamicBuffer& operator=(const DynamicBuffer&) = delete;
+		/**@brief Creates and maps a dynamic vertex buffer or a dynamic constant buffer.
+		*
+		* @param[in] device A Direct3D 12 device.
+		* 
+		* @param[in] numOfBytes The number of bytes you want to allocate for the dynamic buffer.
+		* 
+		* @param[in] stride The number of bytes to get from one element to another in the dynamic buffer.
+		*/
+		DynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, unsigned int numOfBytes, unsigned int stride);
 
-		DynamicBuffer(DynamicBuffer&&) = default;
+		/**@brief Creates and maps a dynamic index buffer.
+		*
+		* @param[in] device A Direct3D 12 device.
+		* 
+		* @param[in] numOfBytes The number of bytes you want to allocate for the dynamic buffer.
+		* 
+		* @param[in] format The number of bytes to get from one element to another in the dynamic buffer.
+		*/
+		DynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, unsigned int numOfBytes, DXGI_FORMAT format);
 
 		/**@brief Unmaps the pointer to the dynamic buffer.
 		*/
 		~DynamicBuffer();
 
-		/**@brief Returns the GPU virtual address of the first byte of the dynamic buffer.
+		/**@brief Returns the GPU address of the data at the specified index.
 		*/
-		D3D12_GPU_VIRTUAL_ADDRESS GetGPUAddress() const;
-
-		/**@brief Returns the stride of the dymanic buffer.
-		*/
-		const unsigned int& GetStride() const;
-
-		/**@brief Returns the format of the dymanic buffer.
-		*/
-		const DXGI_FORMAT& GetFormat() const;
-
-		/**@brief Creates and maps the dynamic buffer.
-		* 
-		* Call if you want to create a dynamic vertex buffer or dynamic constant buffer.
-		* 
-		* @param[in] device A Direct3D 12 device.
-		* @param[in] numOfBytes The number of bytes you want to allocate for the dynamic buffer.
-		* @param[in] stride The number of bytes to get from one element to another in the dynamic buffer.
-		*/
-		void CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, UINT numOfBytes, UINT stride);
-
-		/**@brief Creates and maps the dynamic buffer.
-		* 
-		* Call if you want to create a dynamic index buffer.
-		* 
-		* @param[in] device A Direct3D 12 device.
-		* @param[in] numOfBytes The number of bytes you want to allocate for the dynamic buffer.
-		* @param[in] format The number of bytes to get from one element to another in the dynamic buffer.
-		*/
-		void CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, UINT numOfBytes, DXGI_FORMAT format);
+		const D3D12_GPU_VIRTUAL_ADDRESS GetGPUAddress(unsigned int index) const;
 
 		/**@brief Creates the constant buffer view and stores it in the specified descriptor heap.
 		* 
@@ -248,28 +280,16 @@ namespace FARender
 		* @param[in] cBufferIndex The index of the constant data in the constant buffer you want to describe.
 		*/
 		void CreateConstantBufferView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& cbvHeap, UINT cbvSize, UINT cbvHeapIndex,
-			UINT cBufferIndex);
-
-		/**@brief Creates a vertex buffer view and stores it.
-		* 
-		* @param[in] numBytes The number of bytes in the dynamic buffer.
-		*/
-		void CreateVertexBufferView(UINT numBytes);
-
-		/**@brief Creates a index buffer view and stores it.
-		* 
-		* @param[in] numBytes The number of bytes in the dynamic buffer.
-		*/
-		void CreateIndexBufferView(UINT numBytes);
+			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& cbvHeap, unsigned int cbvSize, unsigned int cbvHeapIndex,
+			unsigned int cBufferIndex);
 
 		/**@brief Returns a constant reference to the vertex buffer view.
 		*/
-		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView();
+		const D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView();
 
 		/**@brief Returns a constant reference to the vertex buffer view.
 		*/
-		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView();
+		const D3D12_INDEX_BUFFER_VIEW GetIndexBufferView();
 
 		/**@brief Copies data from the given data into the dynamic buffer.
 		* Uses 0-indexing.
@@ -277,7 +297,7 @@ namespace FARender
 		* @param[in] data The data to copy in the dynamic buffer.
 		* @param[in] numOfBytes The number of bytes to copy.
 		*/
-		void CopyData(UINT index, const void* data, UINT64 numOfBytes);
+		void CopyData(unsigned int index, const void* data, unsigned long long numOfBytes);
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> mDynamicBuffer;
@@ -287,12 +307,6 @@ namespace FARender
 		{
 			UINT mStride;
 			DXGI_FORMAT mFormat;
-		};
-
-		union
-		{
-			D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
-			D3D12_INDEX_BUFFER_VIEW mIndexBufferView;
 		};
 	};
 }

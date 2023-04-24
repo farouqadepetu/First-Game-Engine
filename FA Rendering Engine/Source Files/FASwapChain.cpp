@@ -6,7 +6,7 @@ namespace FARender
 	SwapChain::SwapChain(const Microsoft::WRL::ComPtr<IDXGIFactory4>& dxgiFactory,
 		const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& commandQueue, HWND windowHandle, 
 		DXGI_FORMAT rtFormat, DXGI_FORMAT dsFormat, unsigned int numRenderTargetBuffers) :
-		mNumRenderTargetBuffers{ numRenderTargetBuffers },mCurrentBackBufferIndex{ 0 }, 
+		mNumRenderTargetBuffers{ numRenderTargetBuffers }, mCurrentBackBufferIndex{ 0 }, 
 		mRenderTargetBuffers{ rtFormat }, mDepthStencilBuffer { dsFormat }
 	{
 		mSwapChain.Reset();

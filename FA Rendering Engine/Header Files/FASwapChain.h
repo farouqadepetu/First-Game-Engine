@@ -130,8 +130,8 @@ namespace FARender
 		void Present();
 
 	private:
-		unsigned int mNumRenderTargetBuffers = 0;
-		unsigned int mCurrentBackBufferIndex = 0;
+		unsigned int mNumRenderTargetBuffers;
+		unsigned int mCurrentBackBufferIndex;
 
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> mSwapChain;
 		std::vector<RenderTargetBuffer> mRenderTargetBuffers;

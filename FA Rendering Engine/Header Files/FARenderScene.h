@@ -29,11 +29,6 @@ namespace FARender
 		*/
 		RenderScene(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled = false, bool isTextEnabled = false);
 
-		RenderScene(const RenderScene&) = delete;
-		RenderScene& operator=(const RenderScene&) = delete;
-
-		RenderScene(RenderScene&&) = default;
-
 		/**@brief Loads a shaders bytecode and maps it to the specified \a shaderKey.
 		* 
 		* @param[in] shaderKey The key to map the bytecode to.
@@ -57,41 +52,83 @@ namespace FARender
 		*/
 		void RemoveShader(unsigned int shaderKey);
 
-		/**@brief Creates a static buffer and stores the specified \a data in the buffer.
+		/**@brief Creates a static vertex buffer and stores the specified \a data in the buffer.
+		* 
 		* The user cannot update/change the data once it is stored in the buffer.\n
-		* Make sure to pass in different keys to store the static buffers with to prevent replacing the static buffer
-		* at that key with the newly created static buffer.
+		* If the specified key is already mapped to a static buffer, this function does nothing.
 		* 
-		* @param[in] bufferType The type of buffer. Must be the values 0 or 1. If it isn't one of those values a 
-		* runtime_error exception is thrown. If 0 a static vertex buffer is created. If 1 a static index buffer is created.
-		* If 1 pass in 0 for the stride.
+		* @param[in] staticBufferKey The key to map the static buffer to.
 		* 
-		* @param[in] staticBufferKey The key to map the dynamic buffer to.
-		* @param[in] numBytes The number of bytes to allocate for the dynamic buffer.
-		* @param[in] stride The number of bytes to get from one element to the next element. Used for vertex and constant buffers.
-		* @param[in, optional] format The number of bytes to get from one element to the next element. Used for index buffers.
+		* @param[in] numBytes The number of bytes to allocate for the static buffer.
+		* 
+		* @param[in] stride The number of bytes to get from one element to the next element.
 		*/
-		void CreateStaticBuffer(unsigned int bufferType, unsigned int staticBufferKey,
-			const void* data, unsigned numBytes, unsigned int stride = 0, DXGI_FORMAT format = DXGI_FORMAT_R32_UINT);
+		void CreateStaticBuffer(unsigned int staticBufferKey, const void* data, unsigned numBytes, unsigned int stride);
 
-		/**@brief Creates a dynamic buffer.
-		* The user can update the data on a per-frame basis.\n
-		*  Make sure to pass in different keys to store the dynamic buffers with to prevent replacing the dynamic buffer
-		*  at that key with the newly created dynamic buffer.
-		* 
-		* @param[in] bufferType The type of buffer. Must be the values 0, 1, or 2. If it isn't one of those values a 
-		* runtime_error exception is thrown. If 0 a dymanic vertex buffer is created. If 1 a dynamic index buffer is created. 
-		* If 2 a dynamic constant buffer is created. If 1 pass in 0 for the stride.
-		* 
-		* @param[in] dynamicBufferKey The key to map the dynamic buffer to.
-		* @param[in] numBytes The number of bytes to allocate for the dynamic buffer.
-		* @param[in, optional] data The data you want to copy into the dynamic buffer.
-		* @param[in, optional] stride The number of bytes to get from one element to the next element. Used for vertex and constant buffers.
-		* @param[in, optional] format The number of bytes to get from one element to the next element. Used for index buffers.
-		* 
+		/**@brief Creates a static index buffer and stores the specified \a data in the buffer.
+		*
+		* The user cannot update/change the data once it is stored in the buffer.\n
+		* If the specified key is already mapped to a static buffer, this function does nothing.
+		*
+		* @param[in] staticBufferKey The key to map the static buffer to.
+		*
+		* @param[in] numBytes The number of bytes to allocate for the static buffer.
+		*
+		* @param[in] format The number of bytes to get from one element to the next element.
 		*/
-		void CreateDynamicBuffer(unsigned int bufferType, unsigned int dynamicBufferKey,
-			unsigned numBytes, const void* data = nullptr, unsigned int stride = 0, DXGI_FORMAT format = DXGI_FORMAT_R32_UINT);
+		void CreateStaticBuffer(unsigned int staticBufferKey, const void* data, unsigned numBytes, DXGI_FORMAT format);
+
+		/**@brief Creates a static texture buffer, stores the data from the file into the buffer and creates a view of the texture.
+		*
+		* The user cannot update/change the data once it is stored in the buffer.\n
+		* If the specified key is already mapped to a static buffer, this function does nothing.
+		*
+		* @param[in] staticBufferKey The key to map the static buffer to.
+		*
+		* @param[in] numBytes The number of bytes to allocate for the static buffer.
+		*
+		*  @param[in] filename The filename of the texture.
+		* 
+		* @param[in] texType The type of texture. 
+		* Pass in FARender::Tex2D for a 2D texture or FARender::Tex2D_MS for a multi-sampled 2D texture.
+		* 
+		* @param[in] index Where to store the description (view) of the texture in a shader resource view heap.
+		*/
+		void CreateStaticBuffer(unsigned int staticBufferKey, const wchar_t* filename, unsigned int texType, unsigned int index);
+
+		/**@brief Creates a dynamic vertex buffer or a dynamic constant buffer.
+		* 
+		* The user can update the data on a per-frame basis.\n
+		* If the specified key is already mapped to a dynamic buffer, this function does nothing.
+		*
+		* @param[in] dynamicBufferKey The key to map the dynamic buffer to.
+		* 
+		* @param[in] numBytes The number of bytes to allocate for the dynamic buffer.
+		* 
+		* @param[in] data The data you want to copy into the dynamic buffer. 
+		* Pass in nullptr if you don't want to copy data into the buffer on creation.
+		* 
+		* @param[in] stride The number of bytes to get from one element to the next element.
+		*
+		*/
+		void CreateDynamicBuffer(unsigned int dynamicBufferKey, unsigned numBytes, const void* data, unsigned int stride);
+
+		/**@brief Creates a dynamic index buffer.
+		*
+		* The user can update the data on a per-frame basis.\n
+		* If the specified key is already mapped to a dynamic buffer, this function does nothing.
+		*
+		* @param[in] dynamicBufferKey The key to map the dynamic buffer to.
+		*
+		* @param[in] numBytes The number of bytes to allocate for the dynamic buffer.
+		*
+		* @param[in] data The data you want to copy into the dynamic buffer.
+		* Pass in nullptr if you don't want to copy data into the buffer on creation.
+		*
+		* @param[in] format The number of bytes to get from one element to the next element.
+		*
+		*/
+		void CreateDynamicBuffer(unsigned int dynamicBufferKey, unsigned numBytes, const void* data, DXGI_FORMAT format);
 
 		/**@brief Creates an input element description and stores in an array mapped to the specified \a key.
 		* 
@@ -109,21 +146,65 @@ namespace FARender
 			D3D12_INPUT_CLASSIFICATION inputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
 			unsigned int instanceStepRate = 0);
 
-		/**@brief Creates a root parameter and stores it in the array mapped to the specified \a rootParameterKey.
+		/**@brief Creates a root descriptor and stores it in the array mapped to the specified \a rootParameterKey.
 		* 
 		* @param[in] rootParameterKey The key to a mappped array to store the created root parameter in.
 		* @param[in] shaderRegister The register where constant data will be stored.
 		*/
-		void CreateRootParameter(unsigned int rootParameterKey, unsigned int shaderRegister);
+		void CreateRootDescriptor(unsigned int rootParameterKey, unsigned int shaderRegister);
+
+		/**@brief Creates a descriptor range and stores it in the array mapped to the specified \a descriptorRangeKey.
+		* 
+		* @param[in] descriptorRangeKey The key to an array of descriptor ranges to store the descriptor range in.
+		* 
+		* @param[in] type The type of descriptor range.
+		* 
+		* @param[in] numDescriptors The number of descriptors in the range.
+		* 
+		* @param[in] shaderRegister The shader register the views are mapped to.
+		* 
+		* @param[in] registerSpace The space of the shader register.
+		*/
+		void CreateDescriptorRange(unsigned int descriptorRangeKey,
+			D3D12_DESCRIPTOR_RANGE_TYPE type, unsigned int numDescriptors, unsigned int shaderRegister, unsigned int registerSpace);
+
+		/**@brief Creates a root descriptor table and stores it in the array mapped to the specified \a rootParameterKey.
+		*
+		* @param[in] rootParameterKey The key to a mappped array to store the created root parameter in.
+		* @param[in] descriptorRangeKey The key to an array of descriptor ranges.
+		*/
+		void CreateDescriptorTable(unsigned int rootParameterKey, unsigned int descriptorRangeKey);
+
+		/**@brief Creates a root constant and stores it in the array mapped to the specified \a rootParameterKey.
+		*
+		* @param[in] rootParameterKey The key to a mappped array to store the created root parameter in.
+		* @param[in] shaderRegister The register where constant data will be stored.
+		* @param[in] numValues The number of 32-bit values.
+		*/
+		void CreateRootConstants(unsigned int rootParameterKey, unsigned int shaderRegister, unsigned int numValues);
+
+		/**@brief Creates a root signature and maps it to the specified \a rootSigKey.
+		*
+		* If the \a rootParameterKey does not have a mapped value an out_of_range excepetion is thrown.
+		*
+		* @param[in] rootSigKey The key to map the created root signature to.
+		* @param[in] rootParameterKey The key to a mapped array of root parameters.
+		*
+		*/
+		void CreateRootSignature(unsigned int rootSigKey, unsigned int rootParametersKey);
 
 		/**@brief Creates a root signature and maps it to the specified \a rootSigKey.
 		* 
-		* If the \a rootParameterKey does not have a mapped value an out_of_range excepetion is thrown.
+		* If the \a rootParameterKey or staticsSamplerKey does not have a mapped value an out_of_range excepetion is thrown.
 		* 
 		* @param[in] rootSigKey The key to map the created root signature to.
 		* @param[in] rootParameterKey The key to a mapped array of root parameters.
+		* @param[in] numStaticSamplers The number of static samplers.
+		* @param[in] staticsSamplerKey The key to an array of static samplers.
+		* 
 		*/
-		void CreateRootSignature(unsigned int rootSigKey, unsigned int rootParametersKey);
+		void CreateRootSignature(unsigned int rootSigKey, unsigned int rootParametersKey, unsigned int numStaticSamplers,
+			unsigned int staticsSamplerKey);
 
 		/**@brief Creates a PSO and maps it to the specified \a psoKey.
 		* 
@@ -191,6 +272,28 @@ namespace FARender
 		*/
 		void SetDynamicBuffer(unsigned int bufferType, unsigned int dynamicBufferKey, unsigned int indexConstantData = 0,
 			unsigned int rootParameterIndex = 0);
+
+		/**@brief Links a texture to the pipeline.
+		*
+		* @param[in] rootParameterIndex The index of the root parameter in the root signature
+		* that has the register the texture will be stored in.
+		*
+		*  @param[in] textureViewIndex The index of the view to the texture in a shader resource view heap.
+		*/
+		void SetTexture(unsigned int rootParameterIndex, unsigned int textureViewIndex);
+
+		/**@brief Links an array of 32-bit values to the pipeline.
+		*
+		* @param[in] rootParameterIndex The index of the root parameter in the root signature
+		* that has the register the texture will be stored in.
+		*
+		*  @param[in] numValues The number of 32-bit values.
+		* 
+		* @param[in] data Pointer to an array of 32-bit values.
+		* 
+		* @param[in] index The index of the the first 32-bit value in the hlsl constant buffer.
+		*/
+		void SetConstants(unsigned int rootParameterIndex, unsigned int numValues, void* data, unsigned int index);
 
 		/**@brief Puts all of the commands needed in the command list before drawing the objects of the scene.
 		* 
@@ -297,6 +400,23 @@ namespace FARender
 		*/
 		void ReleaseUploaders();
 
+		/**@brief Creates a descriptor heap to store views of textures.
+		* @param[in] numDescriptors The number of views to be stored in the heap.
+		*/
+		void CreateTextureViewHeap(unsigned int numDescriptors);
+
+		/**@brief Creates a static sampler and stores in an an array mapped to the specified key.
+		* 
+		* @param[in] staticSamplerKey The key to an array of static samplers.
+		* @param[in] filter The filtering method to use when sampling a texture.
+		* @param[in] u The address mode for the u texture coordinate.
+		* @param[in] v The address mode for the v texture coordinate.
+		* @param[in] w The address mode for the w texture coordinate.
+		* @param[in] shaderRegister The register the sampler is linked to.
+		*/
+		void CreateStaticSampler(unsigned int staticSamplerKey, D3D12_FILTER filter,
+			D3D12_TEXTURE_ADDRESS_MODE u, D3D12_TEXTURE_ADDRESS_MODE v, D3D12_TEXTURE_ADDRESS_MODE w, unsigned int shaderRegister);
+
 	private:
 		//The device resources object that all RenderScene objects share.
 		DeviceResources& mDeviceResources;
@@ -325,5 +445,14 @@ namespace FARender
 		//We can't update a dynamic buffer until the GPU
 		//is done executing all the commands that reference it, so each frame needs its own dynamic buffer.
 		std::unordered_map<unsigned int, std::vector<DynamicBuffer>> mDynamicBuffers;
+
+		//Used to store descriptors of textures.
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mTextureViewHeap;
+
+		//Stores descriptor ranges for descriptor tables.
+		std::unordered_map<unsigned int, std::vector<D3D12_DESCRIPTOR_RANGE >> mDescriptorRanges;
+
+		//Stores static samplers.
+		std::unordered_map<unsigned int, std::vector<D3D12_STATIC_SAMPLER_DESC>> mStaticSamplers;
 	};
 }

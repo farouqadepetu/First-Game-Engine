@@ -39,9 +39,6 @@ namespace FARender
 		*/
 		static DeviceResources& GetInstance(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled, bool isTextEnabled);
 
-		DeviceResources(const DeviceResources&) = delete;
-		DeviceResources& operator=(const DeviceResources&) = delete;
-
 		/**@brief Flushes the command queue.
 		*/
 		~DeviceResources();
@@ -62,9 +59,9 @@ namespace FARender
 		*/
 		DXGI_FORMAT GetDepthStencilFormat() const;
 
-		/**@brief The size of a constant buffer view.
+		/**@brief The size of a constant buffer/shader resource/unordered access view.
 		*/
-		unsigned int GetCBVSize() const;
+		unsigned int GetCBVSRVUAVSize() const;
 
 		/**@brief Returns the current frame.
 		*/
