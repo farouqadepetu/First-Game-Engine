@@ -270,10 +270,10 @@ namespace Init
 		shadingScene->CreateInputElementDescription(VS_INPUT_LAYOUT, "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28,
 			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0);
 
-		shadingScene->CreateRootParameter(0, 0); //object cb
-		shadingScene->CreateRootParameter(0, 1); //pass cb
-		shadingScene->CreateRootParameter(0, 2); //material cb
-		shadingScene->CreateRootParameter(0, 3); //light cb
+		shadingScene->CreateRootDescriptor(0, 0); //object cb
+		shadingScene->CreateRootDescriptor(0, 1); //pass cb
+		shadingScene->CreateRootDescriptor(0, 2); //material cb
+		shadingScene->CreateRootDescriptor(0, 3); //light cb
 		shadingScene->CreateRootSignature(0, 0); //root signature
 	}
 
@@ -304,10 +304,11 @@ namespace Init
 
 	void BuildVertexAndIndexBuffers()
 	{
-		shadingScene->CreateStaticBuffer(0, VERTEX_BUFFER, vertexList.data(),
+		shadingScene->CreateStaticBuffer(SHAPES_VERTEX_BUFFER, vertexList.data(),
 			vertexList.size() * sizeof(FAShapes::Vertex), sizeof(FAShapes::Vertex));
 
-		shadingScene->CreateStaticBuffer(1, INDEX_BUFFER, indexList.data(), indexList.size() * sizeof(unsigned int), 0, DXGI_FORMAT_R32_UINT);
+		shadingScene->CreateStaticBuffer(SHAPES_INDEX_BUFFER, indexList.data(),
+			indexList.size() * sizeof(unsigned int), DXGI_FORMAT_R32_UINT);
 
 		//execute commands
 		shadingScene->ExecuteAndFlush();
@@ -316,10 +317,10 @@ namespace Init
 
 	void BuildConstantBuffers()
 	{
-		shadingScene->CreateDynamicBuffer(2, OBJECTCB, shapes.size() * sizeof(ObjectConstants), nullptr, sizeof(ObjectConstants));
-		shadingScene->CreateDynamicBuffer(2, PASSCB, sizeof(PassConstants), nullptr, sizeof(PassConstants));
-		shadingScene->CreateDynamicBuffer(2, MATERIALCB, materials.size() * sizeof(Material), nullptr, sizeof(Material));
-		shadingScene->CreateDynamicBuffer(2, LIGHTCB, lightSources.size() * sizeof(Light), nullptr, sizeof(Light));
+		shadingScene->CreateDynamicBuffer(OBJECTCB, shapes.size() * sizeof(ObjectConstants), nullptr, sizeof(ObjectConstants));
+		shadingScene->CreateDynamicBuffer(PASSCB, sizeof(PassConstants), nullptr, sizeof(PassConstants));
+		shadingScene->CreateDynamicBuffer(MATERIALCB, materials.size() * sizeof(Material), nullptr, sizeof(Material));
+		shadingScene->CreateDynamicBuffer(LIGHTCB, lightSources.size() * sizeof(Light), nullptr, sizeof(Light));
 
 	}
 

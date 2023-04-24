@@ -105,7 +105,7 @@ namespace GlobalVariables
 	//Enums to help keep track of the keys of mapped values.
 	enum ShaderNames { GOURAUD_VS, GOURAUD_PS, PHONG_VS, PHONG_PS, BLINN_PHONG_VS, BLINN_PHONG_PS, SHADING_VS, SHADING_PS };
 	enum InputElementDescriptionNames { VS_INPUT_LAYOUT };
-	enum BufferNames { VERTEX_BUFFER, INDEX_BUFFER, OBJECTCB, PASSCB, MATERIALCB, LIGHTCB };
+	enum BufferNames { SHAPES_VERTEX_BUFFER, SHAPES_INDEX_BUFFER, OBJECTCB, PASSCB, MATERIALCB, LIGHTCB };
 	enum PSONames { SHADING_PSO };
 	enum TextNames { FRAMES_PER_SECOND };
 	enum LightSourceNames { POINT_LIGHT, DIRECTIONAL_LIGHT, POINT_PLUS_DIRECTIONAL_LIGHT };

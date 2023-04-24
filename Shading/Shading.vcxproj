@@ -78,6 +78,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Shapes\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Rendering Engine\Header Files\directx;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Rendering Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Math Engine\Header Files;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -94,6 +95,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Shapes\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Rendering Engine\Header Files\directx;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Rendering Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Math Engine\Header Files;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -110,6 +112,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Shapes\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Rendering Engine\Header Files\directx;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Rendering Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Math Engine\Header Files;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -126,6 +129,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Shapes\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Rendering Engine\Header Files\directx;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Rendering Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\FA Math Engine\Header Files;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\FA Rendering Engine\Source Files\DDSTextureLoader.cpp" />
     <ClCompile Include="..\FA Rendering Engine\Source Files\FABuffer.cpp" />
     <ClCompile Include="..\FA Rendering Engine\Source Files\FACamera.cpp" />
     <ClCompile Include="..\FA Rendering Engine\Source Files\FAColor.cpp" />
@@ -162,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\FA Math Engine\Header Files\FAMathEngine.h" />
+    <ClInclude Include="..\FA Rendering Engine\Header Files\DDSTextureLoader.h" />
     <ClInclude Include="..\FA Rendering Engine\Header Files\Direct3DLink.h" />
     <ClInclude Include="..\FA Rendering Engine\Header Files\FABuffer.h" />
     <ClInclude Include="..\FA Rendering Engine\Header Files\FACamera.h" />

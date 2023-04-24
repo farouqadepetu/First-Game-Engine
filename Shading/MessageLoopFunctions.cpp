@@ -124,23 +124,23 @@ namespace MessageLoop
 		shadingScene->SetPSOAndRootSignature(SHADING_PSO, 0);
 	
 		//Link the vertex and index buffer to the pipeline
-		shadingScene->SetStaticBuffer(0, VERTEX_BUFFER);
-		shadingScene->SetStaticBuffer(1, INDEX_BUFFER);
+		shadingScene->SetStaticBuffer(FARender::VERTEX_BUFFER, SHAPES_VERTEX_BUFFER);
+		shadingScene->SetStaticBuffer(FARender::INDEX_BUFFER, SHAPES_INDEX_BUFFER);
 
 		//Link pass constant data to the pipeline
-		shadingScene->SetDynamicBuffer(2, PASSCB, 0, 1);
+		shadingScene->SetDynamicBuffer(FARender::CONSTANT_BUFFER, PASSCB, 0, 1);
 		
 		//Link material constant data to the pipeline
-		shadingScene->SetDynamicBuffer(2, MATERIALCB, 0, 2);
+		shadingScene->SetDynamicBuffer(FARender::CONSTANT_BUFFER, MATERIALCB, 0, 2);
 
 		//Link light constant data to the pipeline
-		shadingScene->SetDynamicBuffer(2, LIGHTCB, 0, 3);
+		shadingScene->SetDynamicBuffer(FARender::CONSTANT_BUFFER, LIGHTCB, 0, 3);
 
 		//Get the draw arguments of the current shape.
 		FAShapes::DrawArguments currentShapeDrawArguments{ shapes.at(currentSelection.at(SHAPES))->GetDrawArguments() };
 
 		//Link the shapes constant data to the pipeline.
-		shadingScene->SetDynamicBuffer(2, OBJECTCB, currentShapeDrawArguments.indexOfConstantData, 0);
+		shadingScene->SetDynamicBuffer(FARender::CONSTANT_BUFFER, OBJECTCB, currentShapeDrawArguments.indexOfConstantData, 0);
 
 		//Render the current shape.
 		shadingScene->RenderObject(currentShapeDrawArguments.indexCount, currentShapeDrawArguments.locationOfFirstIndex,
