@@ -57,12 +57,18 @@ struct Light
 	//for point lights
 	FAMath::Vector3D position;	//bytes 48-59
 
-	int lightSourceType{ 0 };		//bytes 60-63
+	int lightSourceType{ 0 };	//bytes 60-63
 
 	//for direction lights
 	FAMath::Vector3D direction;	//bytes 64-75
 
-	float pad5{ 0.0f };					//bytes 76-79
+	float pad5{ 0.0f };			//bytes 76-79
+
+	FAMath::Matrix4x4 pad6; 	//bytes 80-143
+	FAMath::Matrix4x4 pad7;		//bytes 144-207
+	FAMath::Vector4D pad8;		//bytes 208-223
+	FAMath::Vector4D pad9;		//bytes 224-239
+	FAMath::Vector4D pad10;		//bytes 240-255
 };
 
 namespace GlobalVariables

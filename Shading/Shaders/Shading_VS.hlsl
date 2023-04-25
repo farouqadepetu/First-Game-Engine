@@ -3,7 +3,7 @@
 //input struct
 struct vertexInput
 {
-	float3 inputPosition: POSITION;
+	float3 inputPosition : POSITION;
 	float4 color : COLOR;
 	float3 normal : NORMAL;
 };
@@ -44,22 +44,13 @@ cbuffer PassConstantBuffer : register(b1)
 //Material data
 cbuffer Material : register(b2)
 {
-	float4 mAmbient;	//bytes 0-15
-	float4 mDiffuse;	//bytes 16-31
-	float4 mSpecular;	//bytes 32-47
-	float mShininess;	//bytes 48-51
-
-	float4x4 padding0;	//bytes 52-115
-	float4x4 padding1;	//bytes 116-179
-	float4x4 padding2;	//bytes 180-243
-	float3 padding3;	//bytes 244-255
+	Material mat;
 };
 
 //Light data
 cbuffer LightCB : register (b3)
 {
 	Light lightSources[MAX_NUM_LIGHTS];
-	float4 padding4;
 };
 
 vertexOutput vsMain(vertexInput vin)
@@ -75,8 +66,6 @@ vertexOutput vsMain(vertexInput vin)
 
 	if (shadingType == GOURAUD)
 	{
-		Material mat = { mAmbient, mDiffuse, mSpecular, mShininess };
-
 		worldNormal = normalize(worldNormal);
 
 		//sums all of the contributions from each light source
@@ -92,7 +81,7 @@ vertexOutput vsMain(vertexInput vin)
 			}
 		}
 
-		vout.Color = float4(totalColor, mAmbient.w);
+		vout.Color = float4(totalColor, mat.mAmbient.w);
 	}
 	else //phong or blinn phong
 	{

@@ -11,28 +11,39 @@
 //Material properties
 struct Material
 {
-	float4 mAmbient;
-	float4 mDiffuse;
-	float4 mSpecular;
-	float mShininess;
+	float4 mAmbient;	//bytes 0-15
+	float4 mDiffuse;	//bytes 16-31
+	float4 mSpecular;	//bytes 32-47
+	float mShininess;	//bytes 48-51
+
+	float4x4 padding0;	//bytes 52-115
+	float4x4 padding1;	//bytes 116-179
+	float4x4 padding2;	//bytes 180-243
+	float3 padding3;	//bytes 244-255
 };
 
 //Light properties
 struct Light
 {
-	float4 lAmbient;
-	float4 lDiffuse;
-	float4 lSpecular;	
+	float4 lAmbient;		//bytes 0-15
+	float4 lDiffuse;		//bytes 16-31
+	float4 lSpecular;		//bytes 32-47
 
-	//for point lights
-	float3 lightPosition;
+	//for point lights	
+	float3 lightPosition;	//bytes 48-59
 
-	int lightSourceType;
+	int lightSourceType;	//bytes 60-63
 
 	//for direction lights
-	float3 lightDirection;
+	float3 lightDirection;	//bytes 64-75
 
-	float pad20;
+	float pad20;			//bytes 76-79
+
+	float4x4 pad21;			//bytes 80-143
+	float4x4 pad22;			//bytes 144-207
+	float4 pad23;			//bytes 208-223
+	float4 pad24;			//bytes 224-239
+	float4 pad25;			//bytes 240-255
 };
 
 //Make sure the worldNormal, lightVector and viewVector are normalized before passing them in.

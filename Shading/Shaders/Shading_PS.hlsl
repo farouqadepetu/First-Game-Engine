@@ -26,22 +26,13 @@ cbuffer PassConstantBuffer : register(b1)
 //Material data
 cbuffer Material : register(b2)
 {
-	float4 mAmbient;	//bytes 0-15
-	float4 mDiffuse;	//bytes 16-31
-	float4 mSpecular;	//bytes 32-47
-	float mShininess;	//bytes 48-51
-
-	float4x4 padding0;	//bytes 52-115
-	float4x4 padding1;	//bytes 116-179
-	float4x4 padding2;	//bytes 180-243
-	float3 padding3;	//bytes 244-255
+	Material mat;
 };
 
 //Light data
 cbuffer LightCB : register (b3)
 {
 	Light lightSources[MAX_NUM_LIGHTS];
-	float4 padding4;
 };
 
 float4 psMain(vertexOutput vout) : SV_TARGET
@@ -55,7 +46,7 @@ float4 psMain(vertexOutput vout) : SV_TARGET
 	{
 		float3 totalColor = float3(0.0f, 0.0f, 0.0f);
 
-		Material mat = { mAmbient, mDiffuse, mSpecular, mShininess };
+		//Material mat = { mAmbient, mDiffuse, mSpecular, mShininess };
 
 		vout.worldNormal = normalize(vout.worldNormal);
 
@@ -74,14 +65,11 @@ float4 psMain(vertexOutput vout) : SV_TARGET
 			}
 		}
 
-		pColor = float4(totalColor, mAmbient.w);
+		pColor = float4(totalColor, mat.mAmbient.w);
 	}
 	else if (shadingType == FLAT_PHONG || shadingType == FLAT_BLINN)
 	{
-
 		float3 totalColor = float3(0.0f, 0.0f, 0.0f);
-
-		Material mat = { mAmbient, mDiffuse, mSpecular, mShininess };
 
 		//take the parital derivatives of the world position of the pixel
 		//with respect to screen-space coordiantes x and y to get two
@@ -106,7 +94,7 @@ float4 psMain(vertexOutput vout) : SV_TARGET
 			}
 		}
 
-		pColor = float4(totalColor, mAmbient.w);
+		pColor = float4(totalColor, mat.mAmbient.w);
 	}
 
 	return pColor;
