@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\FA Rendering Engine\Source Files\DDSTextureLoader.cpp" />
     <ClCompile Include="..\FA Rendering Engine\Source Files\FABuffer.cpp" />
     <ClCompile Include="..\FA Rendering Engine\Source Files\FACamera.cpp" />
     <ClCompile Include="..\FA Rendering Engine\Source Files\FAColor.cpp" />

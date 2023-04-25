@@ -44,8 +44,8 @@ namespace Init
 		scene.CreateInputElementDescription(VS_INPUT_LAYOUT, "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
 			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0);
 
-		scene.CreateRootParameter(0, 0); //object cb
-		scene.CreateRootParameter(0, 1); //pass cb
+		scene.CreateRootDescriptor(0, 0); //object cb
+		scene.CreateRootDescriptor(0, 1); //pass cb
 		scene.CreateRootSignature(0, 0);
 	}
 
@@ -76,10 +76,10 @@ namespace Init
 
 	void BuildVertexAndIndexBuffers(FARender::RenderScene& scene)
 	{
-		scene.CreateStaticBuffer(0, VERTEX_BUFFER, vertexList.data(),
+		scene.CreateStaticBuffer(VERTEX_BUFFER, vertexList.data(),
 			vertexList.size() * sizeof(FAShapes::Vertex), sizeof(FAShapes::Vertex));
 
-		scene.CreateStaticBuffer(1, INDEX_BUFFER, indexList.data(), indexList.size() * sizeof(unsigned int), 0, DXGI_FORMAT_R32_UINT);
+		scene.CreateStaticBuffer(INDEX_BUFFER, indexList.data(), indexList.size() * sizeof(unsigned int), DXGI_FORMAT_R32_UINT);
 
 		//execute commands
 		scene.ExecuteAndFlush();
@@ -87,8 +87,8 @@ namespace Init
 
 	void BuildConstantBuffers(FARender::RenderScene& scene)
 	{
-		scene.CreateDynamicBuffer(2, OBJECTCB, shapes.size() * sizeof(ObjectConstants), nullptr, sizeof(ObjectConstants));
-		scene.CreateDynamicBuffer(2, PASSCB, sizeof(PassConstants), nullptr, sizeof(PassConstants));
+		scene.CreateDynamicBuffer(OBJECTCB, shapes.size() * sizeof(ObjectConstants), nullptr, sizeof(ObjectConstants));
+		scene.CreateDynamicBuffer(PASSCB, sizeof(PassConstants), nullptr, sizeof(PassConstants));
 	}
 
 	void BuildPSOs(FARender::RenderScene& scene)

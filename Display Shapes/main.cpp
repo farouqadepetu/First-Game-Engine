@@ -9,9 +9,24 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 {
 	try
 	{
+		//Main window
+		WNDCLASSEX mainWindowClass{};
+		mainWindowClass.cbSize = sizeof(WNDCLASSEX);
+		mainWindowClass.style = CS_HREDRAW | CS_VREDRAW;
+		mainWindowClass.lpfnWndProc = WindowProc::DisplayShapesWindowProc;
+		mainWindowClass.cbClsExtra = 0;
+		mainWindowClass.cbWndExtra = 0;
+		mainWindowClass.hInstance = hInstance;
+		mainWindowClass.hIcon = nullptr;
+		mainWindowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+		mainWindowClass.hbrBackground = CreateSolidBrush(RGB(100, 100, 100));
+		mainWindowClass.lpszMenuName = nullptr;
+		mainWindowClass.lpszClassName = L"Main Window Class";
+		mainWindowClass.hIconSm = nullptr;
+
 		//The window where the shapes will be rendered to.
-		FAWindow::Window displayShapesWindow(hInstance, L"Display Shapes Window Class", L"Display Shapes Window",
-			WindowProc::DisplayShapesWindowProc, 1024, 720);
+		FAWindow::Window displayShapesWindow(hInstance, mainWindowClass, L"Display Shapes Window", 
+			WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 720);
 		GlobalVariables::window = &displayShapesWindow;
 
 		//The RenderScene we use to render the shapes.

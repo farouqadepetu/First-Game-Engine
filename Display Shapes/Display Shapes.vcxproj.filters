@@ -87,6 +87,9 @@
     <ClCompile Include="MessageLoopFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\FA Rendering Engine\Source Files\DDSTextureLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\FA Math Engine\Header Files\FAMathEngine.h">
