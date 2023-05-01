@@ -8,10 +8,19 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//RENDER SCENE FUNCITON DEFINTIONS
 
-	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled, bool isTextEnabled) :
-		mDeviceResources{ DeviceResources::GetInstance(width, height, windowHandle, isMSAAEnabled, isTextEnabled) }
-
+	RenderScene::RenderScene() : mDeviceResources{ nullptr }
 	{}
+
+	RenderScene::RenderScene(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled, bool isTextEnabled)
+	{
+		mDeviceResources = &DeviceResources::GetInstance(width, height, windowHandle, isMSAAEnabled, isTextEnabled);
+	}
+
+	void RenderScene::CreateDeviceResources(unsigned int width, unsigned int height, HWND windowHandle, 
+		bool isMSAAEnabled, bool isTextEnabled)
+	{
+		mDeviceResources = &DeviceResources::GetInstance(width, height, windowHandle, isMSAAEnabled, isTextEnabled);
+	}
 
 	void RenderScene::LoadShader(unsigned int shaderKey, const std::wstring& filename)
 	{
@@ -79,31 +88,30 @@ namespace FARender
 
 	void RenderScene::CreateStaticBuffer(unsigned int staticBufferKey, const void* data, unsigned numBytes, unsigned int stride)
 	{
-		mStaticBuffers.insert({ staticBufferKey, StaticBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(),
-				data, numBytes, stride) });
+		mStaticBuffers[staticBufferKey].CreateStaticBuffer(mDeviceResources->GetDevice(), mDeviceResources->GetCommandList(),
+			data, numBytes, stride);
 	}
 
 	void RenderScene::CreateStaticBuffer(unsigned int staticBufferKey, const void* data, unsigned numBytes, DXGI_FORMAT format)
 	{
-		mStaticBuffers.insert({ staticBufferKey, StaticBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(),
-				data, numBytes, format) });
+		mStaticBuffers[staticBufferKey].CreateStaticBuffer(mDeviceResources->GetDevice(), mDeviceResources->GetCommandList(),
+			data, numBytes, format);
 	}
 
 	void  RenderScene::CreateStaticBuffer(unsigned int staticBufferKey, 
 		const wchar_t* filename, unsigned int texType, unsigned int index)
 	{
-		mStaticBuffers.insert({ staticBufferKey, StaticBuffer(mDeviceResources.GetDevice(), mDeviceResources.GetCommandList(),
-			filename) });
+		mStaticBuffers[staticBufferKey].CreateStaticBuffer(mDeviceResources->GetDevice(), mDeviceResources->GetCommandList(), filename);
 
 		if (texType == TEX2D)
 		{
-			mStaticBuffers.at(staticBufferKey).CreateTexture2DView(mDeviceResources.GetDevice(), mTextureViewHeap,
-				mDeviceResources.GetCBVSRVUAVSize(), index);
+			mStaticBuffers.at(staticBufferKey).CreateTexture2DView(mDeviceResources->GetDevice(), mTextureViewHeap,
+				mDeviceResources->GetCBVSRVUAVSize(), index);
 		}
 		else if (texType == TEX2D_MS)
 		{
-			mStaticBuffers.at(staticBufferKey).CreateTexture2DMSView(mDeviceResources.GetDevice(), mTextureViewHeap,
-				mDeviceResources.GetCBVSRVUAVSize(), index);
+			mStaticBuffers.at(staticBufferKey).CreateTexture2DMSView(mDeviceResources->GetDevice(), mTextureViewHeap,
+				mDeviceResources->GetCBVSRVUAVSize(), index);
 		}
 	}
 
@@ -111,11 +119,11 @@ namespace FARender
 	{
 		for (unsigned int i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
 		{
-			mDynamicBuffers[dynamicBufferKey].emplace_back(mDeviceResources.GetDevice(), numBytes, stride);
+			mDynamicBuffers[dynamicBufferKey][i].CreateDynamicBuffer(mDeviceResources->GetDevice(), numBytes, stride);
 
 			if (data != nullptr)
 			{
-				mDynamicBuffers[dynamicBufferKey].at(i).CopyData(0, data, numBytes);
+				mDynamicBuffers[dynamicBufferKey][i].CopyData(0, data, numBytes);
 			}
 		}
 	}
@@ -124,11 +132,11 @@ namespace FARender
 	{
 		for (unsigned int i = 0; i < DeviceResources::NUM_OF_FRAMES; ++i)
 		{
-			mDynamicBuffers[dynamicBufferKey].emplace_back(mDeviceResources.GetDevice(), numBytes, format);
+			mDynamicBuffers[dynamicBufferKey][i].CreateDynamicBuffer(mDeviceResources->GetDevice(), numBytes, format);
 
 			if (data != nullptr)
 			{
-				mDynamicBuffers[dynamicBufferKey].at(i).CopyData(0, data, numBytes);
+				mDynamicBuffers[dynamicBufferKey][i].CopyData(0, data, numBytes);
 			}
 		}
 	}
@@ -216,18 +224,18 @@ namespace FARender
 		}
 		ThrowIfFailed(e);
 
-		ThrowIfFailed(mDeviceResources.GetDevice()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
+		ThrowIfFailed(mDeviceResources->GetDevice()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
 			seralizedRootSignature->GetBufferSize(), IID_PPV_ARGS(&mRootSignatures[rootSigKey])));
 	}
 
-	void RenderScene::CreateRootSignature(unsigned int rootSigKey, unsigned int rootParametersKey, unsigned int numStaticSamplers,
+	void RenderScene::CreateRootSignature(unsigned int rootSigKey, unsigned int rootParametersKey,
 		unsigned int staticsSamplerKey)
 	{
 		//Describe a root signature to store all our root parameters.
 		D3D12_ROOT_SIGNATURE_DESC rootSignatureDescription{};
 		rootSignatureDescription.NumParameters = mRootParameters.at(rootParametersKey).size(); //number of root paramters
 		rootSignatureDescription.pParameters = mRootParameters.at(rootParametersKey).data(); //the array of root parameters
-		rootSignatureDescription.NumStaticSamplers = numStaticSamplers;
+		rootSignatureDescription.NumStaticSamplers = mStaticSamplers.at(staticsSamplerKey).size();
 		rootSignatureDescription.pStaticSamplers = mStaticSamplers.at(staticsSamplerKey).data();
 		rootSignatureDescription.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
@@ -245,7 +253,7 @@ namespace FARender
 		}
 		ThrowIfFailed(e);
 
-		ThrowIfFailed(mDeviceResources.GetDevice()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
+		ThrowIfFailed(mDeviceResources->GetDevice()->CreateRootSignature(0, seralizedRootSignature->GetBufferPointer(),
 			seralizedRootSignature->GetBufferSize(), IID_PPV_ARGS(&mRootSignatures[rootSigKey])));
 	}
 
@@ -292,26 +300,26 @@ namespace FARender
 		pState.PrimitiveTopologyType = primitiveType;
 
 		pState.NumRenderTargets = 1;
-		pState.RTVFormats[0] = mDeviceResources.GetBackBufferFormat();
+		pState.RTVFormats[0] = mDeviceResources->GetBackBufferFormat();
 
-		pState.DSVFormat = mDeviceResources.GetDepthStencilFormat();
+		pState.DSVFormat = mDeviceResources->GetDepthStencilFormat();
 
 		pState.SampleDesc.Count = sampleCount;
 		pState.SampleDesc.Quality = 0;
 
-		ThrowIfFailed(mDeviceResources.GetDevice()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&mPSOs[psoKey])));
+		ThrowIfFailed(mDeviceResources->GetDevice()->CreateGraphicsPipelineState(&pState, IID_PPV_ARGS(&mPSOs[psoKey])));
 	}
 
 	void RenderScene::BeforeRenderObjects(bool isMSAAEnabled)
 	{
-		mDeviceResources.Draw(isMSAAEnabled);
+		mDeviceResources->Draw(isMSAAEnabled);
 	}
 
 	void RenderScene::SetPSOAndRootSignature(unsigned int psoKey, unsigned int rootSigKey)
 	{
-		mDeviceResources.GetCommandList()->SetPipelineState(mPSOs.at(psoKey).Get());
+		mDeviceResources->GetCommandList()->SetPipelineState(mPSOs.at(psoKey).Get());
 
-		mDeviceResources.GetCommandList()->SetGraphicsRootSignature(mRootSignatures.at(rootSigKey).Get());
+		mDeviceResources->GetCommandList()->SetGraphicsRootSignature(mRootSignatures.at(rootSigKey).Get());
 	}
 
 	void RenderScene::SetStaticBuffer(unsigned int bufferType, unsigned int staticBufferKey)
@@ -323,12 +331,12 @@ namespace FARender
 		if (bufferType == VERTEX_BUFFER) //link a vertex buffer.
 		{
 			D3D12_VERTEX_BUFFER_VIEW vbView{ mStaticBuffers.at(staticBufferKey).GetVertexBufferView() };
-			mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, &vbView);
+			mDeviceResources->GetCommandList()->IASetVertexBuffers(0, 1, &vbView);
 		}
 		else if (bufferType == INDEX_BUFFER) //link a index buffer.
 		{
 			D3D12_INDEX_BUFFER_VIEW ibView{ mStaticBuffers.at(staticBufferKey).GetIndexBufferView() };
-			mDeviceResources.GetCommandList()->IASetIndexBuffer(&ibView);
+			mDeviceResources->GetCommandList()->IASetIndexBuffer(&ibView);
 		}
 	}
 
@@ -342,58 +350,64 @@ namespace FARender
 		if (bufferType == VERTEX_BUFFER) //link a vertex buffer.
 		{
 			D3D12_VERTEX_BUFFER_VIEW vbView
-			{ mDynamicBuffers.at(dynamicBufferKey).at(mDeviceResources.GetCurrentFrame()).GetVertexBufferView() };
+			{ mDynamicBuffers.at(dynamicBufferKey)[mDeviceResources->GetCurrentFrame()].GetVertexBufferView() };
 
-			mDeviceResources.GetCommandList()->IASetVertexBuffers(0, 1, &vbView);
+			mDeviceResources->GetCommandList()->IASetVertexBuffers(0, 1, &vbView);
 		}
 		else if (bufferType == INDEX_BUFFER) //link a index buffer.
 		{
 			D3D12_INDEX_BUFFER_VIEW ibView
-			{ mDynamicBuffers.at(dynamicBufferKey).at(mDeviceResources.GetCurrentFrame()).GetIndexBufferView() };
+			{ mDynamicBuffers.at(dynamicBufferKey)[mDeviceResources->GetCurrentFrame()].GetIndexBufferView() };
 
-			mDeviceResources.GetCommandList()->IASetIndexBuffer(&ibView);
+			mDeviceResources->GetCommandList()->IASetIndexBuffer(&ibView);
 		}
 		else if (bufferType == CONSTANT_BUFFER) //link a constant buffer.
 		{
 			//Link the constant data to the pipeline.
-			mDeviceResources.GetCommandList()->SetGraphicsRootConstantBufferView(rootParameterIndex, 
-				mDynamicBuffers.at(dynamicBufferKey).at(mDeviceResources.GetCurrentFrame()).GetGPUAddress(indexConstantData));
+			mDeviceResources->GetCommandList()->SetGraphicsRootConstantBufferView(rootParameterIndex,
+				mDynamicBuffers.at(dynamicBufferKey)[mDeviceResources->GetCurrentFrame()].GetGPUAddress(indexConstantData));
 		}
+	}
+
+	void RenderScene::SetTextureViewHeap()
+	{
+		ID3D12DescriptorHeap* descriptorHeaps[] = { mTextureViewHeap.Get() };
+		mDeviceResources->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
 	}
 
 	void RenderScene::SetTexture(unsigned int rootParameterIndex, unsigned int textureViewIndex)
 	{
 		//offset to the texture view at the specified index in the shader resource view heap.
 		CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle(mTextureViewHeap->GetGPUDescriptorHandleForHeapStart());
-		texHandle.Offset(textureViewIndex, mDeviceResources.GetCBVSRVUAVSize());
+		texHandle.Offset(textureViewIndex, mDeviceResources->GetCBVSRVUAVSize());
 
-		mDeviceResources.GetCommandList()->SetGraphicsRootDescriptorTable(rootParameterIndex, texHandle);
+		mDeviceResources->GetCommandList()->SetGraphicsRootDescriptorTable(rootParameterIndex, texHandle);
 	}
 
 	void RenderScene::SetConstants(unsigned int rootParameterIndex, unsigned int numValues, void* data, unsigned int index)
 	{
-		mDeviceResources.GetCommandList()->SetGraphicsRoot32BitConstants(rootParameterIndex, numValues, data, index);
+		mDeviceResources->GetCommandList()->SetGraphicsRoot32BitConstants(rootParameterIndex, numValues, data, index);
 	}
 
 	void RenderScene::RenderObject(unsigned int indexCount, unsigned int locationFirstVertex, int indexOfFirstVertex,
 		D3D_PRIMITIVE_TOPOLOGY primitive)
 	{
-		mDeviceResources.GetCommandList()->IASetPrimitiveTopology(primitive);
+		mDeviceResources->GetCommandList()->IASetPrimitiveTopology(primitive);
 
-		mDeviceResources.GetCommandList()->DrawIndexedInstanced(indexCount, 1,
+		mDeviceResources->GetCommandList()->DrawIndexedInstanced(indexCount, 1,
 			locationFirstVertex, indexOfFirstVertex, 0);
 	}
 
 	void RenderScene::AfterRenderObjects(bool isMSAAEnabled, bool isTextEnabled)
 	{
-		mDeviceResources.RTBufferTransition(isMSAAEnabled, isTextEnabled);
+		mDeviceResources->RTBufferTransition(isMSAAEnabled, isTextEnabled);
 
-		mDeviceResources.Execute();
+		mDeviceResources->Execute();
 	}
 
 	void RenderScene::BeforeRenderText()
 	{
-		mDeviceResources.BeforeTextDraw();
+		mDeviceResources->BeforeTextDraw();
 	}
 
 	void RenderScene::RenderText(const FAMath::Vector4D& textLocation, const FAColor::Color& textColor, float textSize,
@@ -406,10 +420,10 @@ namespace FARender
 		Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mDirect2DBrush;
 		Microsoft::WRL::ComPtr<IDWriteTextFormat> mDirectWriteFormat;
 
-		ThrowIfFailed(mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->CreateSolidColorBrush(tColor,
+		ThrowIfFailed(mDeviceResources->GetTextResources().GetDirect2DDeviceContext()->CreateSolidColorBrush(tColor,
 			mDirect2DBrush.GetAddressOf()));
 
-		ThrowIfFailed(mDeviceResources.GetTextResources().GetDirectWriteFactory()->CreateTextFormat(
+		ThrowIfFailed(mDeviceResources->GetTextResources().GetDirectWriteFactory()->CreateTextFormat(
 			L"Verdana",
 			nullptr,
 			DWRITE_FONT_WEIGHT_NORMAL,
@@ -422,7 +436,7 @@ namespace FARender
 		ThrowIfFailed(mDirectWriteFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING));
 		ThrowIfFailed(mDirectWriteFormat->SetParagraphAlignment(alignment));
 
-		mDeviceResources.GetTextResources().GetDirect2DDeviceContext()->DrawTextW(textString.c_str(),
+		mDeviceResources->GetTextResources().GetDirect2DDeviceContext()->DrawTextW(textString.c_str(),
 			(UINT32)textString.size(), mDirectWriteFormat.Get(),
 			&tLocation, mDirect2DBrush.Get());
 
@@ -430,48 +444,37 @@ namespace FARender
 
 	void RenderScene::AfterRenderText()
 	{
-		mDeviceResources.AfterTextDraw();
+		mDeviceResources->AfterTextDraw();
 	}
 
 	void RenderScene::AfterRender()
 	{
-		mDeviceResources.Present();
+		mDeviceResources->Present();
 
 		//Update the current fence value
-		mDeviceResources.UpdateCurrentFrameFenceValue();
+		mDeviceResources->UpdateCurrentFrameFenceValue();
 
 		//Add a fence instruction to the command queue.
-		mDeviceResources.Signal();
+		mDeviceResources->Signal();
 
-		mDeviceResources.NextFrame();
-		mDeviceResources.WaitForGPU();
+		mDeviceResources->NextFrame();
+		mDeviceResources->WaitForGPU();
 	}
 
 	void RenderScene::ExecuteAndFlush()
 	{
-		mDeviceResources.Execute();
-		mDeviceResources.FlushCommandQueue();
+		mDeviceResources->Execute();
+		mDeviceResources->FlushCommandQueue();
 	}
 
 	void RenderScene::Resize(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled, bool isTextEnabled)
 	{
-		mDeviceResources.Resize(width, height, windowHandle, isMSAAEnabled, isTextEnabled);
+		mDeviceResources->Resize(width, height, windowHandle, isMSAAEnabled, isTextEnabled);
 	}
 
 	void RenderScene::CopyDataIntoDynamicBuffer(unsigned int dynamicBufferKey, unsigned int index, const void* data, UINT64 numOfBytes)
 	{
-		mDynamicBuffers.at(dynamicBufferKey)[mDeviceResources.GetCurrentFrame()].CopyData(index, data, numOfBytes);
-	}
-
-	void RenderScene::ReleaseUploaders()
-	{
-		if (!mStaticBuffers.empty())
-		{
-			for (auto& i : mStaticBuffers)
-			{
-				i.second.ReleaseUploader();
-			}
-		}
+		mDynamicBuffers.at(dynamicBufferKey)[mDeviceResources->GetCurrentFrame()].CopyData(index, data, numOfBytes);
 	}
 
 	void RenderScene::CreateTextureViewHeap(unsigned int numDescriptors)
@@ -482,7 +485,7 @@ namespace FARender
 		textureViewDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		textureViewDescription.NodeMask = 0;
 
-		ThrowIfFailed(mDeviceResources.GetDevice()->CreateDescriptorHeap(&textureViewDescription, IID_PPV_ARGS(&mTextureViewHeap)));
+		ThrowIfFailed(mDeviceResources->GetDevice()->CreateDescriptorHeap(&textureViewDescription, IID_PPV_ARGS(&mTextureViewHeap)));
 	}
 
 	void RenderScene::CreateStaticSampler(unsigned int staticSamplerKey, D3D12_FILTER filter, 

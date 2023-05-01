@@ -3,9 +3,17 @@
 
 namespace FARender
 {
+	MultiSampling::MultiSampling() : mSampleCount{ 0 }
+	{}
+
 	MultiSampling::MultiSampling(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-		DXGI_FORMAT rtFormat, DXGI_FORMAT dsFormat, unsigned int sampleCount) :
-		mMSAARenderTargetBuffer{ rtFormat }, mMSAADepthStencilBuffer{ dsFormat }
+		DXGI_FORMAT rtFormat, unsigned int sampleCount)
+	{
+		CheckMultiSamplingSupport(device, rtFormat, sampleCount);
+	}
+
+	void MultiSampling::CheckMultiSamplingSupport(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		DXGI_FORMAT rtFormat, unsigned int sampleCount)
 	{
 		//Describes the render target format and sample count we want to check to see if it is supported.
 		D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS levels{};
@@ -37,10 +45,10 @@ namespace FARender
 		return mMSAADepthStencilBuffer.GetDepthStencilFormat();
 	}
 
-	void MultiSampling::ResetBuffers()
+	void MultiSampling::ReleaseBuffers()
 	{
-		mMSAARenderTargetBuffer.ResetBuffer();
-		mMSAADepthStencilBuffer.ResetBuffer();
+		mMSAARenderTargetBuffer.ReleaseBuffer();
+		mMSAADepthStencilBuffer.ReleaseBuffer();
 	}
 
 	void MultiSampling::CreateRenderTargetBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
@@ -48,7 +56,7 @@ namespace FARender
 		unsigned int width, unsigned int height)
 	{
 		mMSAARenderTargetBuffer.CreateRenderTargetBufferAndView(device, rtvHeap, indexOfWhereToStoreView, rtvSize, 
-			width, height, mSampleCount);
+			width, height, DXGI_FORMAT_R8G8B8A8_UNORM, mSampleCount);
 	}
 
 	void MultiSampling::CreateDepthStencilBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
@@ -56,7 +64,7 @@ namespace FARender
 		unsigned int width, unsigned int height)
 	{
 		mMSAADepthStencilBuffer.CreateDepthStencilBufferAndView(device, dsvHeap, indexOfWhereToStoreView, dsvSize, 
-			width, height, mSampleCount);
+			width, height, DXGI_FORMAT_D24_UNORM_S8_UINT, mSampleCount);
 	}
 
 	void MultiSampling::Transition(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,

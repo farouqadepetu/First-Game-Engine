@@ -29,8 +29,8 @@ namespace FARender
 		mCreateDSVHeap();
 		mCreateCommandObjects();
 
-		mSwapChain = SwapChain(mDXGIFactory, mCommandQueue, windowHandle);
-		mMultiSampling = MultiSampling(mDirect3DDevice, mSwapChain.GetBackBufferFormat(), mSwapChain.GetDepthStencilFormat(), 4);
+		mSwapChain.CreateSwapChain(mDXGIFactory, mCommandQueue, windowHandle);
+		mMultiSampling.CheckMultiSamplingSupport(mDirect3DDevice, mSwapChain.GetBackBufferFormat(), 4);
 		mTextResources = TextResources(mDirect3DDevice, mCommandQueue, mSwapChain.GetNumRenderTargetBuffers());
 
 		Resize(width, height, windowHandle, isMSAAEnabled, isTextEnabled);
@@ -239,23 +239,21 @@ namespace FARender
 		//Reset text buffers.
 		mTextResources.ResetBuffers();
 
-		//Reset/Release all buffers that have a reference to the swap chain.
-		mSwapChain.ResetBuffers();
+		//Free the memory of the swap chain buffers.
+		mSwapChain.ReleaseBuffers();
 
-		//reset MSAA buffers
-		mMultiSampling.ResetBuffers();
-		
-		//Resize the swap chain buffers.
-		mSwapChain.ResizeSwapChain(width, height);
+		//free the memory of the  MSAA buffers
+		mMultiSampling.ReleaseBuffers();
 
-		//Create the swap chains render target buffers and views to them.
-		mSwapChain.CreateRenderTargetBuffersAndViews(mDirect3DDevice, mRTVHeap, 0, mRTVSize);
+		//Recreate the swap chains render target buffers and views to them.
+		mSwapChain.CreateRenderTargetBuffersAndViews(mDirect3DDevice, mRTVHeap, 0, mRTVSize, width, height);
 
-		//Create the swap chains depth stencil buffer and a view to it.
+		//Rereate the swap chains depth stencil buffer and a view to it.
 		mSwapChain.CreateDepthStencilBufferAndView(mDirect3DDevice, mDSVHeap, 0, mDSVSize, width, height);
 
 		if (isMSAAEnabled)
 		{
+			//recreate the MSAA buffers
 			mMultiSampling.CreateRenderTargetBufferAndView(mDirect3DDevice, mRTVHeap, 2, mRTVSize, width, height);
 			mMultiSampling.CreateDepthStencilBufferAndView(mDirect3DDevice, mDSVHeap, 1, mDSVSize, width, height);
 		}

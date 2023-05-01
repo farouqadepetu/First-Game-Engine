@@ -15,10 +15,15 @@ namespace FARender
 {
 	/** @class DeviceResources ""
 	*	@brief A wrapper for resources that are needed to render objects and text using the Direct3D 12 API.
+	*	The copy constructor and assignment operators are explicitly deleted. This makes this class non-copyable.
 	*/
 	class DeviceResources
 	{
 	public:
+
+		//No copying
+		DeviceResources(const DeviceResources&) = delete;
+		DeviceResources& operator=(const DeviceResources&) = delete;
 
 		/**@brief The number of frames in the ciruclar array.
 		* 

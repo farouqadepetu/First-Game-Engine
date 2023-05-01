@@ -14,10 +14,20 @@ namespace FARender
 {
 	/** @class RenderScene ""
 	*	@brief This class is used to render a scene using Direct3D 12 API.
+	*	The copy constructor and assignment operators are explicitly deleted. This makes this class non-copyable.
 	*/
 	class RenderScene
 	{
 	public:
+
+		//No copying
+		RenderScene(const RenderScene&) = delete;
+		RenderScene operator=(const RenderScene&) = delete;
+
+		/*@brief Creates a RenderScene object. Does not create the necessary resources to render a scene.
+		* Call the function CreateDeviceResources() to initialize all necessary resources.
+		*/
+		RenderScene();
 
 		/*@brief Initializes all necessary resources.
 		*
@@ -28,6 +38,8 @@ namespace FARender
 		* @param[in, optional] isTextEnabled Pass in true if you want to have text enabled for the initial frame, false otherwise.
 		*/
 		RenderScene(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled = false, bool isTextEnabled = false);
+
+		void CreateDeviceResources(unsigned int width, unsigned int height, HWND windowHandle, bool isMSAAEnabled = false, bool isTextEnabled = false);
 
 		/**@brief Loads a shaders bytecode and maps it to the specified \a shaderKey.
 		* 
@@ -203,7 +215,7 @@ namespace FARender
 		* @param[in] staticsSamplerKey The key to an array of static samplers.
 		* 
 		*/
-		void CreateRootSignature(unsigned int rootSigKey, unsigned int rootParametersKey, unsigned int numStaticSamplers,
+		void CreateRootSignature(unsigned int rootSigKey, unsigned int rootParametersKey,
 			unsigned int staticsSamplerKey);
 
 		/**@brief Creates a PSO and maps it to the specified \a psoKey.
@@ -272,6 +284,8 @@ namespace FARender
 		*/
 		void SetDynamicBuffer(unsigned int bufferType, unsigned int dynamicBufferKey, unsigned int indexConstantData = 0,
 			unsigned int rootParameterIndex = 0);
+
+		void SetTextureViewHeap();
 
 		/**@brief Links a texture to the pipeline.
 		*
@@ -396,10 +410,6 @@ namespace FARender
 		*/
 		void CopyDataIntoDynamicBuffer(unsigned int dynamicBufferKey, unsigned int index, const void* data, UINT64 numOfBytes);
 
-		/**@brief Frees the memory of the static buffers upload buffers.
-		*/
-		void ReleaseUploaders();
-
 		/**@brief Creates a descriptor heap to store views of textures.
 		* @param[in] numDescriptors The number of views to be stored in the heap.
 		*/
@@ -419,7 +429,7 @@ namespace FARender
 
 	private:
 		//The device resources object that all RenderScene objects share.
-		DeviceResources& mDeviceResources;
+		DeviceResources* mDeviceResources;
 
 		//Stores all of the shaders for this scene.
 		std::unordered_map<unsigned int, Microsoft::WRL::ComPtr<ID3DBlob>> mShaders;
@@ -444,13 +454,13 @@ namespace FARender
 		//Stores data that will be updated on a per-frame basis.
 		//We can't update a dynamic buffer until the GPU
 		//is done executing all the commands that reference it, so each frame needs its own dynamic buffer.
-		std::unordered_map<unsigned int, std::vector<DynamicBuffer>> mDynamicBuffers;
+		std::unordered_map<unsigned int, DynamicBuffer[DeviceResources::NUM_OF_FRAMES]> mDynamicBuffers;
 
 		//Used to store descriptors of textures.
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mTextureViewHeap;
 
 		//Stores descriptor ranges for descriptor tables.
-		std::unordered_map<unsigned int, std::vector<D3D12_DESCRIPTOR_RANGE >> mDescriptorRanges;
+		std::unordered_map<unsigned int, std::vector<D3D12_DESCRIPTOR_RANGE>> mDescriptorRanges;
 
 		//Stores static samplers.
 		std::unordered_map<unsigned int, std::vector<D3D12_STATIC_SAMPLER_DESC>> mStaticSamplers;

@@ -4,18 +4,27 @@
 #include "d3dx12.h"
 #include <dxgi1_4.h>
 #include <vector>
+#include <memory>
 #include "FABuffer.h"
 
 namespace FARender
 {
 	/** @class SwapChain ""
 	*	@brief A wrapper for swap chain resources. Uses DirectD 12 API and DXGI API.
+	*   The copy constructor and assignment operators are explicitly deleted. This makes this class non-copyable.
 	*/
 	class SwapChain
 	{
 	public:
 
-		SwapChain() = default;
+		//No copying
+		SwapChain(const SwapChain&) = delete;
+		SwapChain& operator=(const SwapChain&) = delete;
+
+		/**@brief Creates a swap chain object.
+		* Call the CreateSwapChain() function to create a swap chain.
+		*/
+		SwapChain();
 
 		/**@brief Creates a swap chain.
 		* 
@@ -31,9 +40,19 @@ namespace FARender
 			DXGI_FORMAT rtFormat = DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT dsFormat = DXGI_FORMAT_D24_UNORM_S8_UINT,
 			unsigned int numRenderTargetBuffers = 2);
 
-		/**@brief Returns a constant pointer to the render target buffers.
+		/**@brief Creates a swap chain.
+		*
+		* @param[in] dxgiFactory A DXGIFactory4 object.
+		* @param[in] A Direct3D 12 command queue.
+		* @param[in] windowHandle A handle to a window.
+		* @param[in, optional] rtFormat The format of the render target buffer.
+		* @param[in, optional] dsFormat The format of the depth stencil buffer.
+		* @param[in, optional] numRenderTargetBuffers The number of render target buffers the swap chain has.
 		*/
-		const RenderTargetBuffer* GetRenderTargetBuffers() const;
+		void CreateSwapChain(const Microsoft::WRL::ComPtr<IDXGIFactory4>& dxgiFactory,
+			const Microsoft::WRL::ComPtr<ID3D12CommandQueue>& commandQueue, HWND windowHandle,
+			DXGI_FORMAT rtFormat = DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT dsFormat = DXGI_FORMAT_D24_UNORM_S8_UINT,
+			unsigned int numRenderTargetBuffers = 2);
 
 		/**@brief Returns a constant reference to the current render target buffer.
 		*/
@@ -55,27 +74,24 @@ namespace FARender
 		*/
 		DXGI_FORMAT GetDepthStencilFormat() const;
 
-		/**@brief The render target buffers no longer reference the swap chain buffers after this function is executed.
-		*/
-		void ResetBuffers();
+		const std::vector<std::unique_ptr<RenderTargetBuffer>>& GetRenderTargetBuffers();
 
-		/**@brief Resizes the swap chain.
-		* 
-		* @param[in] width The width to resize the render target buffers to.
-		* @param[in] height The height to resize the render target buffers to.
+		/**@brief Frees the memory of the render target and depth stencil buffers.
 		*/
-		void ResizeSwapChain(unsigned width, unsigned height);
+		void ReleaseBuffers();
 
-		/**@brief Creates the render target buffers and views to them.
+		/**@brief Creates the swap chains render target buffers and views to them.
 		* 
 		* @param[in] device A Direct3D 12 device.
 		* @param[in] rtvHeap A descriptor heap for storing render target descriptors.
-		* @param[in] indexOfWhereToStoreView The index of where to store the created descriptor in the descriptor heap.
+		* @param[in] index The index of where to store the created descriptor in the descriptor heap.
 		* @param[in] rtvSize The size of a render target descriptor.
+		* @param[in] width The width of the render target buffers.
+		* @param[in] height The height of the render target buffers.
 		*/
 		void CreateRenderTargetBuffersAndViews(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int indexOfWhereToStoreFirstView, 
-			unsigned int rtvSize);
+			const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int index, 
+			unsigned int rtvSize, unsigned width, unsigned height);
 
 		/**@brief Creates the swap chains depth stencil buffer and view to it.
 		* 
@@ -134,7 +150,7 @@ namespace FARender
 		unsigned int mCurrentBackBufferIndex;
 
 		Microsoft::WRL::ComPtr<IDXGISwapChain1> mSwapChain;
-		std::vector<RenderTargetBuffer> mRenderTargetBuffers;
+		std::vector<std::unique_ptr<RenderTargetBuffer>> mRenderTargetBuffers;
 
 		DepthStencilBuffer mDepthStencilBuffer;
 	};

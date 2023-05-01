@@ -6,6 +6,7 @@
 #include <d2d1_3.h>
 #include <dwrite.h>
 #include <vector>
+#include <memory>
 #include "FABuffer.h"
 
 namespace FARender
@@ -44,7 +45,7 @@ namespace FARender
 		* @param[in] renderTargetBuffers An array of render target buffers.
 		* @param[in] windowHandle A handle to a window.
 		*/
-		void ResizeBuffers(const RenderTargetBuffer* renderTargetBuffers, HWND windowHandle);
+		void ResizeBuffers(const std::vector<std::unique_ptr<RenderTargetBuffer>>& renderTargetBuffers, HWND windowHandle);
 
 		/**@brief Prepares to render text.
 		* 

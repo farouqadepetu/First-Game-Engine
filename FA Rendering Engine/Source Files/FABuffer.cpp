@@ -7,13 +7,20 @@ namespace FARender
 {
 	//-----------------------------------------------------------------------------------------------------------------------
 	//RENDER TARGET BUFFER FUNCTION DEFINITIONS
-	
-	RenderTargetBuffer::RenderTargetBuffer(DXGI_FORMAT format) : mRenderTargetFormat{ format }
+
+	RenderTargetBuffer::RenderTargetBuffer() : mRenderTargetBuffer{ nullptr }
 	{}
+
+	RenderTargetBuffer::RenderTargetBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int index, unsigned int rtvSize,
+		unsigned int width, unsigned int height, DXGI_FORMAT format, unsigned int sampleCount)
+	{
+		CreateRenderTargetBufferAndView(device, rtvHeap, index, rtvSize, width, height, format, sampleCount);
+	}
 
 	DXGI_FORMAT RenderTargetBuffer::GetRenderTargetFormat() const
 	{
-		return mRenderTargetFormat;
+		return mRenderTargetBuffer->GetDesc().Format;
 	}
 
 	Microsoft::WRL::ComPtr<ID3D12Resource>& RenderTargetBuffer::GetRenderTargetBuffer()
@@ -27,8 +34,8 @@ namespace FARender
 	}
 
 	void RenderTargetBuffer::CreateRenderTargetBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int indexOfWhereToStoreView, unsigned int rtvSize,
-		unsigned int width, unsigned int height, unsigned int sampleCount)
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& rtvHeap, unsigned int index, unsigned int rtvSize,
+		unsigned int width, unsigned int height, DXGI_FORMAT format, unsigned int sampleCount)
 	{
 		D3D12_RESOURCE_DESC renderTargetBufferDesc{};
 		renderTargetBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -37,14 +44,14 @@ namespace FARender
 		renderTargetBufferDesc.Height = height;
 		renderTargetBufferDesc.DepthOrArraySize = 1;
 		renderTargetBufferDesc.MipLevels = 1;
-		renderTargetBufferDesc.Format = mRenderTargetFormat;
+		renderTargetBufferDesc.Format = format;
 		renderTargetBufferDesc.SampleDesc.Count = sampleCount;
 		renderTargetBufferDesc.SampleDesc.Quality = 0;
 		renderTargetBufferDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		renderTargetBufferDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
 		D3D12_CLEAR_VALUE rtBufferClearValue{};
-		rtBufferClearValue.Format = mRenderTargetFormat;
+		rtBufferClearValue.Format = format;
 		rtBufferClearValue.Color[0] = 0.0f;
 		rtBufferClearValue.Color[1] = 0.0f;
 		rtBufferClearValue.Color[2] = 0.0f;
@@ -58,15 +65,15 @@ namespace FARender
 			D3D12_RESOURCE_STATE_RESOLVE_SOURCE, &rtBufferClearValue, IID_PPV_ARGS(&mRenderTargetBuffer)));
 
 		//Get the address of where you want to store the view in the RTV heap.
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), indexOfWhereToStoreView, rtvSize);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart(), index, rtvSize);
 
 		//Create the RTV
 		device->CreateRenderTargetView(mRenderTargetBuffer.Get(), nullptr, rtvHeapHandle);
 	}
 
-	void RenderTargetBuffer::ResetBuffer()
+	void RenderTargetBuffer::ReleaseBuffer()
 	{
-		mRenderTargetBuffer.Reset();
+		mRenderTargetBuffer = nullptr;
 	}
 
 	void RenderTargetBuffer::ClearRenderTargetBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
@@ -80,23 +87,30 @@ namespace FARender
 	}
 
 	//-----------------------------------------------------------------------------------------------------------------------
-	
+
 
 
 	//-----------------------------------------------------------------------------------------------------------------------
 	//DEPTH STENCIL BUFFER FUNCTION DEFINITIONS
 
-	DepthStencilBuffer::DepthStencilBuffer(DXGI_FORMAT format) : mDepthStencilFormat{ format }
+	DepthStencilBuffer::DepthStencilBuffer() : mDepthStencilBuffer{ nullptr }
 	{}
+
+	DepthStencilBuffer::DepthStencilBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvHeap, unsigned int index, unsigned int dsvSize,
+		unsigned int width, unsigned int height, DXGI_FORMAT format, unsigned int sampleCount)
+	{
+		CreateDepthStencilBufferAndView(device, dsvHeap, index, dsvSize, width, height, format, sampleCount);
+	}
 
 	DXGI_FORMAT DepthStencilBuffer::GetDepthStencilFormat() const
 	{
-		return mDepthStencilFormat;
+		return mDepthStencilBuffer->GetDesc().Format;
 	}
 
 	void DepthStencilBuffer::CreateDepthStencilBufferAndView(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvHeap, unsigned int indexOfWhereToStoreView, unsigned int dsvSize,
-		unsigned int width, unsigned int height, unsigned int sampleCount)
+		const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& dsvHeap, unsigned int index, unsigned int dsvSize,
+		unsigned int width, unsigned int height, DXGI_FORMAT format, unsigned int sampleCount)
 	{
 		//Create Depth/Stenicl Buffer and View (Descriptor)
 
@@ -107,14 +121,14 @@ namespace FARender
 		depthBufferDescription.Height = height;
 		depthBufferDescription.DepthOrArraySize = 1;
 		depthBufferDescription.MipLevels = 1;
-		depthBufferDescription.Format = mDepthStencilFormat;
+		depthBufferDescription.Format = format;
 		depthBufferDescription.SampleDesc.Count = sampleCount;
 		depthBufferDescription.SampleDesc.Quality = 0;
 		depthBufferDescription.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		depthBufferDescription.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
 		D3D12_CLEAR_VALUE depthBufferClearValue{};
-		depthBufferClearValue.Format = mDepthStencilFormat;
+		depthBufferClearValue.Format = format;
 		depthBufferClearValue.DepthStencil.Depth = 1.0f;
 		depthBufferClearValue.DepthStencil.Stencil = 0;
 
@@ -125,7 +139,7 @@ namespace FARender
 			D3D12_RESOURCE_STATE_DEPTH_WRITE, &depthBufferClearValue, IID_PPV_ARGS(&mDepthStencilBuffer)));
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC depthBufferViewDescription{};
-		depthBufferViewDescription.Format = mDepthStencilFormat;
+		depthBufferViewDescription.Format = format;
 
 		if (sampleCount == 1)
 			depthBufferViewDescription.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
@@ -135,14 +149,14 @@ namespace FARender
 		depthBufferViewDescription.Flags = D3D12_DSV_FLAG_NONE;
 
 		//Get the address of where you want to store the view in the DSV heap.
-		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHeapHandle(dsvHeap->GetCPUDescriptorHandleForHeapStart(), indexOfWhereToStoreView, dsvSize);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHeapHandle(dsvHeap->GetCPUDescriptorHandleForHeapStart(), index, dsvSize);
 
 		device->CreateDepthStencilView(mDepthStencilBuffer.Get(), &depthBufferViewDescription, dsvHeapHandle);
 	}
 
-	void DepthStencilBuffer::ResetBuffer()
+	void DepthStencilBuffer::ReleaseBuffer()
 	{
-		mDepthStencilBuffer.Reset();
+		mDepthStencilBuffer = nullptr;
 	}
 
 	void DepthStencilBuffer::ClearDepthStencilBuffer(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList,
@@ -163,133 +177,156 @@ namespace FARender
 	//-----------------------------------------------------------------------------------------------------------------------
 	//STATIC BUFFER FUNCTION DEFINITIONS
 
+	StaticBuffer::StaticBuffer() : mStaticDefaultBuffer{ nullptr }, mStaticUploadBuffer{ nullptr }, mStride{ 0 }
+	{}
+
 	StaticBuffer::StaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 		const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data,
 		unsigned int numBytes, unsigned int stride)
 	{
-		D3D12_RESOURCE_DESC staticBufferDescription{};
-		staticBufferDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		staticBufferDescription.Alignment = 0;
-		staticBufferDescription.Width = numBytes;
-		staticBufferDescription.Height = 1;
-		staticBufferDescription.DepthOrArraySize = 1;
-		staticBufferDescription.MipLevels = 1;
-		staticBufferDescription.Format = DXGI_FORMAT_UNKNOWN;
-		staticBufferDescription.SampleDesc.Count = 1;
-		staticBufferDescription.SampleDesc.Quality = 0;
-		staticBufferDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		staticBufferDescription.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		//Use this class to say which type of heap our buffer will be stored in.
-		CD3DX12_HEAP_PROPERTIES staticDefaultHeapProp(D3D12_HEAP_TYPE_DEFAULT);
-
-		CD3DX12_HEAP_PROPERTIES staticUploadHeapProp(D3D12_HEAP_TYPE_UPLOAD);
-
-		//Creates the resource and allocates enough memory on the heap to contain the entire resource.
-		//The resource is also mapped to the heap.
-		ThrowIfFailed(device->CreateCommittedResource(&staticDefaultHeapProp,
-			D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
-			D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&mStaticDefaultBuffer)));
-
-		ThrowIfFailed(device->CreateCommittedResource(&staticUploadHeapProp,
-			D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
-			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mStaticUploadBuffer)));
-
-		//this describes the data we want to copy to the default buffer
-		D3D12_SUBRESOURCE_DATA staticData{};
-		staticData.pData = data;
-		staticData.RowPitch = numBytes;
-		staticData.SlicePitch = staticData.RowPitch;
-
-		CD3DX12_RESOURCE_BARRIER staticDefaultBufferTransitionToCopyState =
-			CD3DX12_RESOURCE_BARRIER::Transition(mStaticDefaultBuffer.Get(),
-				D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
-
-		//Transistion the vertex default buffer to a copy state
-		commandList->ResourceBarrier(1, &staticDefaultBufferTransitionToCopyState);
-
-		//This helper function copies our vertex data into our upload buffer, then copies the data from the upload buffer
-		//to the default buffer
-		UpdateSubresources<1>(commandList.Get(), mStaticDefaultBuffer.Get(),
-			mStaticUploadBuffer.Get(), 0, 0, 1, &staticData);
-
-		CD3DX12_RESOURCE_BARRIER staticDefaultBufferTransitionToReadState =
-			CD3DX12_RESOURCE_BARRIER::Transition(mStaticDefaultBuffer.Get(),
-				D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
-
-		//Transition the default buffer to a read state
-		commandList->ResourceBarrier(1, &staticDefaultBufferTransitionToReadState);
-
-		mStride = stride;
+		CreateStaticBuffer(device, commandList, data, numBytes, stride);
 	}
 
 	StaticBuffer::StaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 		const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data,
 		unsigned int numBytes, DXGI_FORMAT format)
 	{
-		D3D12_RESOURCE_DESC staticBufferDescription{};
-		staticBufferDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		staticBufferDescription.Alignment = 0;
-		staticBufferDescription.Width = numBytes;
-		staticBufferDescription.Height = 1;
-		staticBufferDescription.DepthOrArraySize = 1;
-		staticBufferDescription.MipLevels = 1;
-		staticBufferDescription.Format = DXGI_FORMAT_UNKNOWN;
-		staticBufferDescription.SampleDesc.Count = 1;
-		staticBufferDescription.SampleDesc.Quality = 0;
-		staticBufferDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		staticBufferDescription.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		//Use this class to say which type of heap our buffer will be stored in.
-		CD3DX12_HEAP_PROPERTIES staticDefaultHeapProp(D3D12_HEAP_TYPE_DEFAULT);
-
-		CD3DX12_HEAP_PROPERTIES staticUploadHeapProp(D3D12_HEAP_TYPE_UPLOAD);
-
-		//Creates the resource and allocates enough memory on the heap to contain the entire resource.
-		//The resource is also mapped to the heap.
-		ThrowIfFailed(device->CreateCommittedResource(&staticDefaultHeapProp,
-			D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
-			D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&mStaticDefaultBuffer)));
-
-		ThrowIfFailed(device->CreateCommittedResource(&staticUploadHeapProp,
-			D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
-			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mStaticUploadBuffer)));
-
-		//this describes the data we want to copy to the default buffer
-		D3D12_SUBRESOURCE_DATA staticData{};
-		staticData.pData = data;
-		staticData.RowPitch = numBytes;
-		staticData.SlicePitch = staticData.RowPitch;
-
-		CD3DX12_RESOURCE_BARRIER staticDefaultBufferTransitionToCopyState =
-			CD3DX12_RESOURCE_BARRIER::Transition(mStaticDefaultBuffer.Get(),
-				D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
-
-		//Transistion the vertex default buffer to a copy state
-		commandList->ResourceBarrier(1, &staticDefaultBufferTransitionToCopyState);
-
-		//This helper function copies our vertex data into our upload buffer, then copies the data from the upload buffer
-		//to the default buffer
-		UpdateSubresources<1>(commandList.Get(), mStaticDefaultBuffer.Get(),
-			mStaticUploadBuffer.Get(), 0, 0, 1, &staticData);
-
-		CD3DX12_RESOURCE_BARRIER staticDefaultBufferTransitionToReadState =
-			CD3DX12_RESOURCE_BARRIER::Transition(mStaticDefaultBuffer.Get(),
-				D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
-
-		//Transition the default buffer to a read state
-		commandList->ResourceBarrier(1, &staticDefaultBufferTransitionToReadState);
-
-		mFormat = format;
+		CreateStaticBuffer(device, commandList, data, numBytes, format);
 	}
 
 	StaticBuffer::StaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
 		const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const wchar_t* filename)
 	{
-		DirectX::CreateDDSTextureFromFile12(device.Get(), commandList.Get(), filename, mStaticDefaultBuffer, mStaticUploadBuffer);
-
-		mStride = 0;
+		CreateStaticBuffer(device, commandList, filename);
 	}
+
+	 void StaticBuffer::CreateStaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data,
+		unsigned int numBytes, unsigned int stride)
+	{
+		 D3D12_RESOURCE_DESC staticBufferDescription{};
+		 staticBufferDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		 staticBufferDescription.Alignment = 0;
+		 staticBufferDescription.Width = numBytes;
+		 staticBufferDescription.Height = 1;
+		 staticBufferDescription.DepthOrArraySize = 1;
+		 staticBufferDescription.MipLevels = 1;
+		 staticBufferDescription.Format = DXGI_FORMAT_UNKNOWN;
+		 staticBufferDescription.SampleDesc.Count = 1;
+		 staticBufferDescription.SampleDesc.Quality = 0;
+		 staticBufferDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		 staticBufferDescription.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		 //Use this class to say which type of heap our buffer will be stored in.
+		 CD3DX12_HEAP_PROPERTIES staticDefaultHeapProp(D3D12_HEAP_TYPE_DEFAULT);
+
+		 CD3DX12_HEAP_PROPERTIES staticUploadHeapProp(D3D12_HEAP_TYPE_UPLOAD);
+
+		 //Creates the resource and allocates enough memory on the heap to contain the entire resource.
+		 //The resource is also mapped to the heap.
+		 ThrowIfFailed(device->CreateCommittedResource(&staticDefaultHeapProp,
+			 D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
+			 D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&mStaticDefaultBuffer)));
+
+		 ThrowIfFailed(device->CreateCommittedResource(&staticUploadHeapProp,
+			 D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
+			 D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mStaticUploadBuffer)));
+
+		 //this describes the data we want to copy to the default buffer
+		 D3D12_SUBRESOURCE_DATA staticData{};
+		 staticData.pData = data;
+		 staticData.RowPitch = numBytes;
+		 staticData.SlicePitch = staticData.RowPitch;
+
+		 CD3DX12_RESOURCE_BARRIER staticDefaultBufferTransitionToCopyState =
+			 CD3DX12_RESOURCE_BARRIER::Transition(mStaticDefaultBuffer.Get(),
+				 D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+
+		 //Transistion the vertex default buffer to a copy state
+		 commandList->ResourceBarrier(1, &staticDefaultBufferTransitionToCopyState);
+
+		 //This helper function copies our vertex data into our upload buffer, then copies the data from the upload buffer
+		 //to the default buffer
+		 UpdateSubresources<1>(commandList.Get(), mStaticDefaultBuffer.Get(),
+			 mStaticUploadBuffer.Get(), 0, 0, 1, &staticData);
+
+		 CD3DX12_RESOURCE_BARRIER staticDefaultBufferTransitionToReadState =
+			 CD3DX12_RESOURCE_BARRIER::Transition(mStaticDefaultBuffer.Get(),
+				 D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+
+		 //Transition the default buffer to a read state
+		 commandList->ResourceBarrier(1, &staticDefaultBufferTransitionToReadState);
+
+		 mStride = stride;
+	}
+
+	 void StaticBuffer::CreateStaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		 const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const void* data,
+		 unsigned int numBytes, DXGI_FORMAT format)
+	 {
+		 D3D12_RESOURCE_DESC staticBufferDescription{};
+		 staticBufferDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		 staticBufferDescription.Alignment = 0;
+		 staticBufferDescription.Width = numBytes;
+		 staticBufferDescription.Height = 1;
+		 staticBufferDescription.DepthOrArraySize = 1;
+		 staticBufferDescription.MipLevels = 1;
+		 staticBufferDescription.Format = DXGI_FORMAT_UNKNOWN;
+		 staticBufferDescription.SampleDesc.Count = 1;
+		 staticBufferDescription.SampleDesc.Quality = 0;
+		 staticBufferDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		 staticBufferDescription.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		 //Use this class to say which type of heap our buffer will be stored in.
+		 CD3DX12_HEAP_PROPERTIES staticDefaultHeapProp(D3D12_HEAP_TYPE_DEFAULT);
+
+		 CD3DX12_HEAP_PROPERTIES staticUploadHeapProp(D3D12_HEAP_TYPE_UPLOAD);
+
+		 //Creates the resource and allocates enough memory on the heap to contain the entire resource.
+		 //The resource is also mapped to the heap.
+		 ThrowIfFailed(device->CreateCommittedResource(&staticDefaultHeapProp,
+			 D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
+			 D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&mStaticDefaultBuffer)));
+
+		 ThrowIfFailed(device->CreateCommittedResource(&staticUploadHeapProp,
+			 D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
+			 D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mStaticUploadBuffer)));
+
+		 //this describes the data we want to copy to the default buffer
+		 D3D12_SUBRESOURCE_DATA staticData{};
+		 staticData.pData = data;
+		 staticData.RowPitch = numBytes;
+		 staticData.SlicePitch = staticData.RowPitch;
+
+		 CD3DX12_RESOURCE_BARRIER staticDefaultBufferTransitionToCopyState =
+			 CD3DX12_RESOURCE_BARRIER::Transition(mStaticDefaultBuffer.Get(),
+				 D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+
+		 //Transistion the vertex default buffer to a copy state
+		 commandList->ResourceBarrier(1, &staticDefaultBufferTransitionToCopyState);
+
+		 //This helper function copies our vertex data into our upload buffer, then copies the data from the upload buffer
+		 //to the default buffer
+		 UpdateSubresources<1>(commandList.Get(), mStaticDefaultBuffer.Get(),
+			 mStaticUploadBuffer.Get(), 0, 0, 1, &staticData);
+
+		 CD3DX12_RESOURCE_BARRIER staticDefaultBufferTransitionToReadState =
+			 CD3DX12_RESOURCE_BARRIER::Transition(mStaticDefaultBuffer.Get(),
+				 D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+
+		 //Transition the default buffer to a read state
+		 commandList->ResourceBarrier(1, &staticDefaultBufferTransitionToReadState);
+
+		 mFormat = format;
+	 }
+
+	 void StaticBuffer::CreateStaticBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		 const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList, const wchar_t* filename)
+	 {
+		 DirectX::CreateDDSTextureFromFile12(device.Get(), commandList.Get(), filename, mStaticDefaultBuffer, mStaticUploadBuffer);
+
+		 mStride = 0;
+	 }
 
 	const D3D12_VERTEX_BUFFER_VIEW StaticBuffer::GetVertexBufferView() const
 	{
@@ -325,7 +362,7 @@ namespace FARender
 
 		//Offset to where to store the view in the view heap.
 		CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(srvHeap->GetCPUDescriptorHandleForHeapStart());
-		hDescriptor.Offset(1, srvSize);
+		hDescriptor.Offset(index, srvSize);
 
 		device->CreateShaderResourceView(mStaticDefaultBuffer.Get(), &tex2DView, hDescriptor);
 	}
@@ -340,13 +377,14 @@ namespace FARender
 
 		//Offset to where to store the view in the view heap.
 		CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(srvHeap->GetCPUDescriptorHandleForHeapStart());
-		hDescriptor.Offset(1, srvSize);
+		hDescriptor.Offset(index, srvSize);
 
 		device->CreateShaderResourceView(mStaticDefaultBuffer.Get(), &tex2DMSView, hDescriptor);
 	}
 
-	void StaticBuffer::ReleaseUploader()
+	void StaticBuffer::ReleaseBuffer()
 	{
+		mStaticDefaultBuffer = nullptr;
 		mStaticUploadBuffer = nullptr;
 	}
 	//-----------------------------------------------------------------------------------------------------------------------
@@ -355,7 +393,29 @@ namespace FARender
 	//----------------------------------------------------------------------------------------------------------------------
 	//DYNAMIC BUFFER FUNCTION DEFINITIONS
 
+	DynamicBuffer::DynamicBuffer() : mDynamicBuffer{ nullptr }, mStride{ 0 }
+	{}
+
 	DynamicBuffer::DynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, unsigned int numOfBytes, unsigned int stride)
+	{
+		CreateDynamicBuffer(device, numOfBytes, stride);
+	}
+
+	DynamicBuffer::DynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, unsigned int numOfBytes, DXGI_FORMAT format)
+	{
+		CreateDynamicBuffer(device, numOfBytes, format);
+	}
+
+	DynamicBuffer::~DynamicBuffer()
+	{
+		if (mDynamicBuffer != nullptr)
+			mDynamicBuffer->Unmap(0, nullptr);
+
+		mMappedData = nullptr;
+	}
+
+	void DynamicBuffer::CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, 
+		unsigned int numOfBytes, unsigned int stride)
 	{
 		mStride = stride;
 
@@ -385,7 +445,8 @@ namespace FARender
 		ThrowIfFailed(mDynamicBuffer->Map(0, nullptr, (void**)&mMappedData));
 	}
 
-	DynamicBuffer::DynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, unsigned int numOfBytes, DXGI_FORMAT format)
+	void DynamicBuffer::CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, 
+		unsigned int numOfBytes, DXGI_FORMAT format)
 	{
 		mFormat = format;
 
@@ -413,14 +474,6 @@ namespace FARender
 
 		//Map the dyanmic buffer
 		ThrowIfFailed(mDynamicBuffer->Map(0, nullptr, (void**)&mMappedData));
-	}
-
-	DynamicBuffer::~DynamicBuffer()
-	{
-		if (mDynamicBuffer != nullptr)
-			mDynamicBuffer->Unmap(0, nullptr);
-
-		mMappedData = nullptr;
 	}
 
 	const D3D12_GPU_VIRTUAL_ADDRESS DynamicBuffer::GetGPUAddress(unsigned int index) const
@@ -480,6 +533,11 @@ namespace FARender
 	void DynamicBuffer::CopyData(unsigned int index, const void* data, unsigned long long numOfBytes)
 	{
 		memcpy(&mMappedData[index * mStride], data, numOfBytes);
+	}
+
+	void DynamicBuffer::ReleaseBuffer()
+	{
+		mDynamicBuffer = nullptr;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------

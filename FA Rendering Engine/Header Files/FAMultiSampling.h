@@ -8,12 +8,20 @@ namespace FARender
 {
 	/** @class MultiSampling""
 	*	@brief A wrapper for multisampling resources. Uses DirectD 12 API.
+	*	The copy constructor and assignment operators are explicitly deleted. This makes this class non-copyable.
 	*/
 	class MultiSampling
 	{
 	public:
 
-		MultiSampling() = default;
+		MultiSampling(const MultiSampling&) = delete;
+		MultiSampling& operator=(const MultiSampling&) = delete;
+
+		/**@brief Creates a multisampling object.
+		* Call the function CheckMultiSamplingSupport() to check if the desired formats and sample count is supported by a GPU.
+		* If they are supported, a mulitsampling render target buffer and a mulitsampling depth stencil buffer can be created.
+		*/
+		MultiSampling();
 
 		/**@brief Checks if the specifed format and sample count are supported by the specified device for multi-sampling.
 		* 
@@ -25,19 +33,35 @@ namespace FARender
 		* @param[in] sampleCount The number of samples for the multi-sampling render tagret and depth stencil buffers.
 		*/
 		MultiSampling(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			DXGI_FORMAT rtFormat, DXGI_FORMAT dsFormat, unsigned int sampleCount);
+			DXGI_FORMAT rtFormat, unsigned int sampleCount);
 
-		/**@brief Returns the MSAA render target buffer.
+		/**@brief Checks if the specifed format and sample count are supported by the specified device for multi-sampling.
+		*
+		* Throws a runtime_error if they are not supproted.
+		*
+		* @param[in] device A Direct3D 12 device.
+		* @param[in] rtFormat The format of the render target buffer.
+		* @param[in] dsFormat The format of the depth stencil buffer.
+		* @param[in] sampleCount The number of samples for the multi-sampling render tagret and depth stencil buffers.
+		*/
+		void CheckMultiSamplingSupport(const Microsoft::WRL::ComPtr<ID3D12Device>& device,
+			DXGI_FORMAT rtFormat, unsigned int sampleCount);
+
+		/**@brief Returns a constant refererence to the MSAA render target buffer.
 		*/
 		const Microsoft::WRL::ComPtr<ID3D12Resource>& GetRenderTargetBuffer();
 
+		/**@brief Returns the format of the MSAA render target buffer.
+		*/
 		DXGI_FORMAT GetRenderTargetFormat();
 
+		/**@brief Returns the format of the MSAA depth stencil buffer.
+		*/
 		DXGI_FORMAT GetDepthStencilFormat();
 
 		/**@brief Resets the MSAA render target buffer and MSAA depth stencil buffer.
 		*/
-		void ResetBuffers();
+		void ReleaseBuffers();
 
 		/**@brief Creates the MSAA render target buffer and a view to it.
 		* 
