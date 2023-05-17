@@ -16,6 +16,9 @@
 */
 namespace FAMath
 {
+	class Vector2D;
+	class Vector3D;
+	class Vector4D;
 
 	/**@brief Returns true if \a x and \a y are equal.
 	* 
@@ -61,9 +64,18 @@ namespace FAMath
 	class Vector2D
 	{
 	public:
+
 		/**@brief Creates a new 2D vector/point with the components initialized to the arguments.
 		*/
 		Vector2D(float x = 0.0f, float y = 0.0f);
+
+		/**@brief Creates a new 2D vector/point with the components initialized to the x and y values of the 3D vector.
+		*/
+		Vector2D(const Vector3D& v);
+
+		/**@brief Creates a new 2D vector/point with the components initialized to the x and y values of the 4D vector.
+		*/
+		Vector2D(const Vector4D& v);
 
 		/**@brief Returns the x component.
 		*/
@@ -80,6 +92,14 @@ namespace FAMath
 		/**@brief Sets the y component to the specified value.
 		*/
 		void SetY(float y);
+
+		/**@brief Sets the x and y components of this 2D vector to the x and y values of the 3D vector.
+		*/
+		Vector2D& operator=(const Vector3D& v);
+
+		/**@brief Sets the x and y components of this 2D vector to the x and y values of the 4D vector.
+		*/
+		Vector2D& operator=(const Vector4D& v);
 
 		/**@brief Adds this vector to vector \a b and stores the result in this vector.
 		*/
@@ -106,11 +126,10 @@ namespace FAMath
 
 
 	//--------------------------------------------------------------------------------------
-	//Vector2D Constructors
+	//Vector2D Constructor
 
 	inline Vector2D::Vector2D(float x, float y) : mX{ x }, mY{ y }
 	{}
-
 	//--------------------------------------------------------------------------------------
 
 	//--------------------------------------------------------------------------------------
@@ -349,6 +368,14 @@ namespace FAMath
 		*/
 		Vector3D(float x = 0.0f, float y = 0.0f, float z = 0.0f);
 
+		/**@brief Creates a new 3D vector/point with the components initialized to the x and y values of the 2D vector and the specified z value;
+		*/
+		Vector3D(const Vector2D& v, float z = 0.0f);
+
+		/**@brief Creates a new 3D vector/point with the components initialized to the x, y and z values of the 4D vector.
+		*/
+		Vector3D(const Vector4D& v);
+
 		/**@brief Returns the x component.
 		*/
 		float GetX() const;
@@ -372,6 +399,14 @@ namespace FAMath
 		/**@brief Sets the z component to the specified value.
 		*/
 		void SetZ(float z);
+
+		/**@brief Sets the x and y components of this 3D vector to the x and y values of the 2D vector and sets the z component to 0.0f.
+		*/
+		Vector3D& operator=(const Vector2D& v);
+
+		/**@brief Sets the x, y  and z components of this 3D vector to the x, y and z values of the 4D vector.
+		*/
+		Vector3D& operator=(const Vector4D& v);
 
 		/**@brief Adds this vector to vector \a b and stores the result in this vector.
 		*/
@@ -726,6 +761,14 @@ namespace FAMath
 		*/
 		Vector4D(float x = 0.0f, float y = 0.0f, float z = 0.0f, float w = 0.0f);
 
+		/**@brief Creates a new 4D vector/point with the components initialized to the x and y values of the 2D vector and the specified z and w values.
+		*/
+		Vector4D(const Vector2D& v, float z = 0.0f, float w = 0.0f);
+
+		/**@brief Creates a new 4D vector/point with the components initialized to x, y and z values of the 3D vector and the specified w value.
+		*/
+		Vector4D(const Vector3D& v, float w = 0.0f);
+
 		/**@brief Returns the x component.
 		*/
 		float GetX() const;
@@ -757,6 +800,14 @@ namespace FAMath
 		/**@brief Sets the w component to the specified value.
 		*/
 		void SetW(float w);
+
+		/**@brief Sets the x and y components of this 4D vector to the x and y values of the 2D vector and sets the z and w component to 0.0f.
+		*/
+		Vector4D& operator=(const Vector2D& v);
+
+		/**@brief Sets the x, y and z components of this 4D vector to the x, y and z values of the 3D vector and sets the w component to 0.0f.
+		*/
+		Vector4D& operator=(const Vector3D& v);
 
 		/**@brief Adds this vector to vector \a b and stores the result in this vector. 
 		*/
@@ -995,6 +1046,25 @@ namespace FAMath
 		//normalize b before projecting
 		Vector4D normB(Norm(b));
 		return Vector4D(DotProduct(a, normB) * normB);
+	}
+
+	/**@brief Orthonormalizes the specified vectors.
+	*
+	* Uses Classical Gram-Schmidt.
+	*/
+	inline void Orthonormalize(Vector4D& x, Vector4D& y, Vector4D& z)
+	{
+		FAMath::Vector3D tempX(x.GetX(), x.GetY(), x.GetZ());
+		FAMath::Vector3D tempY(y.GetX(), y.GetY(), y.GetZ());
+		FAMath::Vector3D tempZ(z.GetX(), z.GetY(), z.GetZ());
+
+		tempX = Norm(tempX);
+		tempY = Norm(CrossProduct(tempZ, tempX));
+		tempZ = Norm(CrossProduct(tempX, tempY));
+
+		x = FAMath::Vector4D(tempX.GetX(), tempX.GetY(), tempX.GetZ(), 0.0f);
+		y = FAMath::Vector4D(tempY.GetX(), tempY.GetY(), tempY.GetZ(), 0.0f);
+		z = FAMath::Vector4D(tempZ.GetX(), tempZ.GetY(), tempZ.GetZ(), 0.0f);
 	}
 
 
@@ -2276,5 +2346,64 @@ namespace FAMath
 #endif
 	//-------------------------------------------------------------------------------------
 
+	inline Vector2D::Vector2D(const Vector3D& v) : mX{ v.GetX() }, mY{ v.GetY() }
+	{}
+
+	inline Vector2D::Vector2D(const Vector4D& v) : mX{ v.GetX() }, mY{ v.GetY() }
+	{}
+
+	inline Vector3D::Vector3D(const Vector2D& v, float z) : mX{ v.GetX() }, mY{ v.GetY() }, mZ{ z }
+	{}
+
+	inline Vector3D::Vector3D(const Vector4D& v) : mX{ v.GetX() }, mY{ v.GetY() }, mZ{ v.GetZ() }
+	{}
+
+	inline Vector4D::Vector4D(const Vector2D& v, float z, float w) : mX{ v.GetX() }, mY{ v.GetY() }, mZ{ z }, mW{ w }
+	{}
+
+	inline Vector4D::Vector4D(const Vector3D& v, float w) : mX{ v.GetX() }, mY{ v.GetY() }, mZ{ v.GetZ() }, mW{ w }
+	{}
+
+	inline Vector2D& Vector2D::operator=(const Vector3D& v)
+	{
+		mX = v.GetX();
+		mY = v.GetY();
+	}
+
+	inline Vector2D& Vector2D::operator=(const Vector4D& v)
+	{
+		mX = v.GetX();
+		mY = v.GetY();
+	}
+
+	inline Vector3D& Vector3D::operator=(const Vector2D& v)
+	{
+		mX = v.GetX();
+		mY = v.GetY();
+		mZ = 0.0f;
+	}
+
+	inline Vector3D& Vector3D::operator=(const Vector4D& v)
+	{
+		mX = v.GetX();
+		mY = v.GetY();
+		mZ = v.GetZ();
+	}
+
+	inline Vector4D& Vector4D::operator=(const Vector2D& v)
+	{
+		mX = v.GetX();
+		mY = v.GetY();
+		mZ = 0.0f;
+		mW = 0.0f;
+	}
+
+	inline Vector4D& Vector4D::operator=(const Vector3D& v)
+	{
+		mX = v.GetX();
+		mY = v.GetY();
+		mZ = v.GetZ();
+		mW = 0.0f;
+	}
 //------------------------------------------------------------------------------------------------------------------------------------
 }
