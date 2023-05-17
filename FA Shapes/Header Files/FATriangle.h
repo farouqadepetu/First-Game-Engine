@@ -50,11 +50,11 @@ namespace FAShapes
 
 		/**@brief Returns the normal of the triangle.
 		*/
-		FAMath::Vector3D GetNormal() const;
+		FAMath::Vector4D GetNormal() const;
 
 		/**@brief Returns the center of the triangle.
 		*/
-		FAMath::Vector3D GetCenter() const;
+		FAMath::Vector4D GetCenter() const;
 
 		/**@brief Sets the pointer to a vertex list to the specified pointers.
 		*/

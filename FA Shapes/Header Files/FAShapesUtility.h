@@ -30,8 +30,9 @@ namespace FAShapes
 	*/
 	struct Vertex
 	{
-		FAMath::Vector3D position;
+		FAMath::Vector4D position;
 		FAColor::Color color;
-		FAMath::Vector3D normal;
+		FAMath::Vector4D normal;
+		FAMath::Vector2D texCoords;
 	};
 }

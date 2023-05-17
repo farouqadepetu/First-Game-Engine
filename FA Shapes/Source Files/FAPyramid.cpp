@@ -15,13 +15,13 @@ namespace FAShapes
 	void Pyramid::CreateVertices()
 	{
 		//top vertex
-		mLocalVertices.push_back({ FAMath::Vector3D(0.0f, 0.5f, 0.0f), mColor });
+		mLocalVertices.push_back({ FAMath::Vector4D(0.0f, 0.5f, 0.0f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.5f, 0.5f) });
 
 		//base vertices
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, 0.5f), mColor }); //0
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, 0.5f), mColor }); //1
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, -0.5f), mColor }); //2
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, -0.5f), mColor }); //3
+		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, -0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 0.0f) }); //1
+		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, -0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 0.0f) }); //2
+		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, -0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 1.0f) }); //3
+		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, -0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 1.0f) }); //4
 
 	}
 
@@ -33,7 +33,7 @@ namespace FAShapes
 		mTriangles.push_back(Triangle(mLocalVertices.data(), 0, 4, 1)); //left triangle
 
 		//Base
-		Quad(1, 4, 3, 2);
+		Quad(4, 3, 2, 1);
 
 	}
 

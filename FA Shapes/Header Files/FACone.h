@@ -28,7 +28,6 @@ namespace FAShapes
 		* @param[in] numVerticesPerCircle The number of vertices each circle has.
 		*/
 		Cone(float radius = 1.0f, float height = 1.0f, const FAColor::Color& color = FAColor::Color(0.0f, 0.0f, 0.0f, 1.0f),
-			bool fillBottom = false,
 			unsigned int numCircles = 20, unsigned int numVerticesPerCircle = 20);
 
 		/**@brief Returns the radius of the base of the cone.
@@ -69,13 +68,12 @@ namespace FAShapes
 		//The number of vertices each slice has.
 		unsigned int mNumVerticesPerCircle;
 
-		//True to fill the bottom, false to not fill the bottom.
-		bool mFillBottom;
-
 		//Creates the vertices of the cone.
 		void CreateVertices() override final;
 
 		//Creates the triangles that make up the cone.
 		void CreateTriangles() override final;
+
+		void CreateNormals() override final;
 	};
 }

@@ -16,14 +16,15 @@ namespace FAShapes
 	//strores the local vertices of the box
 	void Box::CreateVertices()
 	{
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, 0.5f, 0.5f), mColor });		//0
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, 0.5f, 0.5f), mColor });		//1
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, 0.5f), mColor });		//2
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, 0.5f), mColor });		//3
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, 0.5f, -0.5f), mColor });		//4
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, 0.5f, -0.5f), mColor });		//5
-		mLocalVertices.push_back({ FAMath::Vector3D(0.5f, -0.5f, -0.5f), mColor });		//6
-		mLocalVertices.push_back({ FAMath::Vector3D(-0.5f, -0.5f, -0.5f), mColor });	//7
+		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, 0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 0.0f) });   //0
+		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, 0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 0.0f) });	 //1
+		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, -0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 1.0f) });   //2
+		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, -0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 1.0f) });  //3
+
+		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, 0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 0.0f) });  //4
+		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, 0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 0.0f) });   //5
+		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, -0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 1.0f) });  //6
+		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, -0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 1.0f) }); //7
 	}
 
 	//creates the triangles from the local vertices

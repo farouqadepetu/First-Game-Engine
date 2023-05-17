@@ -24,19 +24,19 @@ namespace FAShapes
 
 		/**@brief Returns a constant reference to the center of the 3D shape.
 		*/
-		const FAMath::Vector3D& GetCenter() const;
+		const FAMath::Vector4D& GetCenter() const;
 
 		/**@brief Returns a constant reference to the x axis of the 3D shape.
 		*/
-		const FAMath::Vector3D& GetXAxis() const;
+		const FAMath::Vector4D& GetXAxis() const;
 
 		/**@brief Returns a constant reference to the y axis of the 3D shape.
 		*/
-		const FAMath::Vector3D& GetYAxis() const;
+		const FAMath::Vector4D& GetYAxis() const;
 
 		/**@brief Returns a constant reference to the z axis of the 3D shape.
 		*/
-		const FAMath::Vector3D& GetZAxis() const;
+		const FAMath::Vector4D& GetZAxis() const;
 
 		/**@brief Returns a constant reference to the local to world matrix of the 3D shape.
 		*/
@@ -80,7 +80,7 @@ namespace FAShapes
 
 		/**@brief Sets the center of the 3D shape to the specified vector \a center.
 		*/
-		void SetCenter(const FAMath::Vector3D& center);
+		void SetCenter(const FAMath::Vector4D& center);
 
 		/**@brief Sets the center of the 3D shape to the specified values.
 		*/
@@ -127,7 +127,7 @@ namespace FAShapes
 		* 
 		* Uses a quaternion to rotate.
 		*/
-		void RotateAxes(float angle, const FAMath::Vector3D axis);
+		void RotateAxes(float angle, const FAMath::Vector3D& axis);
 
 		/**@brief Rotates the center of the 3D shape by the specified rotation matrix \a rot.
 		*/
@@ -141,7 +141,7 @@ namespace FAShapes
 		* 
 		* Uses a quaternion to rotate.
 		*/
-		void RotateCenter(float angle, const FAMath::Vector3D axis);
+		void RotateCenter(float angle, const FAMath::Vector3D& axis);
 
 		/**@brief Translates the center by the specified values.
 		*/
@@ -159,14 +159,57 @@ namespace FAShapes
 		*/
 		virtual float Volume() = 0;
 
+#if defined(_DEBUG)
+		inline void PrintVertices()
+		{
+			int j = 0;
+			for (auto& i : mLocalVertices)
+			{
+				auto worldPos = i.position * mLocalToWorld;
+				auto worldNormal = i.normal * Transpose(Inverse(mLocalToWorld));
+
+				std::cout << "Vertex " << j << ":";
+				std::cout << std::endl;
+
+				std::cout << "Position: " << "(" << i.position.GetX() << ", " << i.position.GetY() << ", " << i.position.GetZ() 
+					<< ", " << i.position.GetW() << ")";
+				std::cout << std::endl;
+
+				std::cout << "Normal: " << "(" << i.normal.GetX() << ", " << i.normal.GetY() << ", " << i.normal.GetZ() 
+					<< ", " << i.normal.GetW() << ")";
+				std::cout << std::endl;
+
+				FAMath::Vector4D pos2 = i.position + i.normal;
+				std::cout << "2nd Position: " << "(" << pos2.GetX() << ", " << pos2.GetY() << ", " << pos2.GetZ() 
+					<< ", " << pos2.GetW() << ")";
+				std::cout << std::endl;
+
+				std::cout << "Texture Coordinates: " << "(" << i.texCoords.GetX() << ", " << i.texCoords.GetY() << ")";
+				std::cout << std::endl;
+
+				std::cout << "World Position: " << "(" << worldPos.GetX() << ", " << worldPos.GetY() << ", " <<
+					worldPos.GetZ() << ", " << worldPos.GetW() << ")";
+				std::cout << std::endl;
+
+				std::cout << "World Normal: " << "(" << worldNormal.GetX() << ", " << worldNormal.GetY() << ", " <<
+					worldNormal.GetZ() << ", " << worldNormal.GetW() << ")";
+				std::cout << std::endl;
+
+				std::cout << std::endl;
+				++j;
+			}
+		}
+#endif
+
+
 	protected:
 		//Center of the 3D shape.
-		FAMath::Vector3D mCenter;
+		FAMath::Vector4D mCenter;
 
 		//Local axes of the 3D shape.
-		FAMath::Vector3D mX;
-		FAMath::Vector3D mY;
-		FAMath::Vector3D mZ;
+		FAMath::Vector4D mX;
+		FAMath::Vector4D mY;
+		FAMath::Vector4D mZ;
 
 		//Color of the 3D shape.
 		FAColor::Color mColor;

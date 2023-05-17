@@ -3,8 +3,8 @@
 namespace FAShapes
 {
 	ThreeDimensionalShapeAbstract::ThreeDimensionalShapeAbstract(const FAColor::Color& color) :
-		mCenter{ 0.0f, 0.0f, 0.0f },
-		mX{ 1.0f, 0.0f, 0.0f }, mY{ 0.0f, 1.0f, 0.0f }, mZ{ 0.0f, 0.0f, 1.0f }, 
+		mCenter{ 0.0f, 0.0f, 0.0f, 1.0f },
+		mX{ 1.0f, 0.0f, 0.0f, 0.0f }, mY{ 0.0f, 1.0f, 0.0f, 0.0f }, mZ{ 0.0f, 0.0f, 1.0f, 0.0f },
 		mColor{ color },
 		mUpdateLocalToWorldlMatrix{ true }
 	{}
@@ -33,7 +33,7 @@ namespace FAShapes
 		//each vertex sums all the normals of the triangles they are a part of.
 		for (auto& i : mTriangles)
 		{
-			FAMath::Vector3D norm(i.GetNormal());
+			FAMath::Vector4D norm(i.GetNormal());
 			mLocalVertices[i.GetP0Index()].normal += norm;
 			mLocalVertices[i.GetP1Index()].normal += norm;
 			mLocalVertices[i.GetP2Index()].normal += norm;
@@ -46,22 +46,22 @@ namespace FAShapes
 		}
 	}
 
-	const FAMath::Vector3D& ThreeDimensionalShapeAbstract::GetCenter() const
+	const FAMath::Vector4D& ThreeDimensionalShapeAbstract::GetCenter() const
 	{
 		return mCenter;
 	}
 
-	const FAMath::Vector3D& ThreeDimensionalShapeAbstract::GetXAxis() const
+	const FAMath::Vector4D& ThreeDimensionalShapeAbstract::GetXAxis() const
 	{
 		return mX;
 	}
 
-	const FAMath::Vector3D& ThreeDimensionalShapeAbstract::GetYAxis() const
+	const FAMath::Vector4D& ThreeDimensionalShapeAbstract::GetYAxis() const
 	{
 		return mY;
 	}
 
-	const FAMath::Vector3D& ThreeDimensionalShapeAbstract::GetZAxis() const
+	const FAMath::Vector4D& ThreeDimensionalShapeAbstract::GetZAxis() const
 	{
 		return mZ;
 	}
@@ -116,7 +116,7 @@ namespace FAShapes
 		return mLocalVertices.size();
 	}
 
-	void ThreeDimensionalShapeAbstract::SetCenter(const FAMath::Vector3D& center)
+	void ThreeDimensionalShapeAbstract::SetCenter(const FAMath::Vector4D& center)
 	{
 		mCenter = center;
 		mUpdateLocalToWorldlMatrix = true;
@@ -194,17 +194,9 @@ namespace FAShapes
 
 	void ThreeDimensionalShapeAbstract::RotateAxes(const FAMath::Matrix4x4& rot)
 	{
-		FAMath::Vector4D x(mX.GetX(), mX.GetY(), mX.GetZ(), 0.0f);
-		FAMath::Vector4D y(mY.GetX(), mY.GetY(), mY.GetZ(), 0.0f);
-		FAMath::Vector4D z(mZ.GetX(), mZ.GetY(), mZ.GetZ(), 0.0f);
-
-		x = x * rot;
-		y = y * rot;
-		z = z * rot;
-
-		mX = FAMath::Vector3D(x.GetX(), x.GetY(), x.GetZ());
-		mY = FAMath::Vector3D(y.GetX(), y.GetY(), y.GetZ());
-		mZ = FAMath::Vector3D(z.GetX(), z.GetY(), z.GetZ());
+		mX = mX * rot;
+		mY = mY * rot;
+		mZ = mZ * rot;
 
 		//orthonormalize the boxs local axes.
 		Orthonormalize(mX, mY, mZ);
@@ -214,18 +206,11 @@ namespace FAShapes
 
 	void ThreeDimensionalShapeAbstract::RotateAxes(const FAMath::Quaternion& rotQuaternion)
 	{
-		FAMath::Vector4D x(mX.GetX(), mX.GetY(), mX.GetZ(), 0.0f);
-		FAMath::Vector4D y(mY.GetX(), mY.GetY(), mY.GetZ(), 0.0f);
-		FAMath::Vector4D z(mZ.GetX(), mZ.GetY(), mZ.GetZ(), 0.0f);
-
 		FAMath::Matrix4x4 rot{ QuaternionToRotationMatrixRow(rotQuaternion) };
-		x = x * rot;
-		y = y * rot;
-		z = z * rot;
 
-		mX = FAMath::Vector3D(x.GetX(), x.GetY(), x.GetZ());
-		mY = FAMath::Vector3D(y.GetX(), y.GetY(), y.GetZ());
-		mZ = FAMath::Vector3D(z.GetX(), z.GetY(), z.GetZ());
+		mX = mX * rot;
+		mY = mY * rot;
+		mZ = mZ * rot;
 
 		//orthonormalize the boxs local axes.
 		Orthonormalize(mX, mY, mZ);
@@ -233,21 +218,13 @@ namespace FAShapes
 		mUpdateLocalToWorldlMatrix = true;
 	}
 
-	void ThreeDimensionalShapeAbstract::RotateAxes(float angle, const FAMath::Vector3D axis)
+	void ThreeDimensionalShapeAbstract::RotateAxes(float angle, const FAMath::Vector3D& axis)
 	{
-		FAMath::Vector4D x(mX.GetX(), mX.GetY(), mX.GetZ(), 0.0f);
-		FAMath::Vector4D y(mY.GetX(), mY.GetY(), mY.GetZ(), 0.0f);
-		FAMath::Vector4D z(mZ.GetX(), mZ.GetY(), mZ.GetZ(), 0.0f);
-
 		FAMath::Matrix4x4 rot{ QuaternionToRotationMatrixRow(RotationQuaternion(angle, axis)) };
 
-		x = x * rot;
-		y = y * rot;
-		z = z * rot;
-
-		mX = FAMath::Vector3D(x.GetX(), x.GetY(), x.GetZ());
-		mY = FAMath::Vector3D(y.GetX(), y.GetY(), y.GetZ());
-		mZ = FAMath::Vector3D(z.GetX(), z.GetY(), z.GetZ());
+		mX = mX * rot;
+		mY = mY * rot;
+		mZ = mZ * rot;
 
 		//orthonormalize the boxs local axes.
 		Orthonormalize(mX, mY, mZ);
@@ -257,35 +234,25 @@ namespace FAShapes
 
 	void ThreeDimensionalShapeAbstract::RotateCenter(const FAMath::Matrix4x4& rot)
 	{
-		FAMath::Vector4D center(mCenter.GetX(), mCenter.GetY(), mCenter.GetZ(), 1.0f);
-
-		center = center * rot;
-
-		mCenter = FAMath::Vector3D(center.GetX(), center.GetY(), center.GetZ());
+		mCenter = mCenter * rot;
 
 		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void ThreeDimensionalShapeAbstract::RotateCenter(const FAMath::Quaternion& rotQuaternion)
 	{
-		FAMath::Vector4D center(mCenter.GetX(), mCenter.GetY(), mCenter.GetZ(), 1.0f);
-
 		FAMath::Matrix4x4 rot{ QuaternionToRotationMatrixRow(rotQuaternion) };
-		center = center * rot;
 
-		mCenter = FAMath::Vector3D(center.GetX(), center.GetY(), center.GetZ());
+		mCenter = mCenter * rot;
 
 		mUpdateLocalToWorldlMatrix = true;
 	}
 
-	void ThreeDimensionalShapeAbstract::RotateCenter(float angle, const FAMath::Vector3D axis)
+	void ThreeDimensionalShapeAbstract::RotateCenter(float angle, const FAMath::Vector3D& axis)
 	{
-		FAMath::Vector4D center(mCenter.GetX(), mCenter.GetY(), mCenter.GetZ(), 1.0f);
-
 		FAMath::Matrix4x4 rot{ QuaternionToRotationMatrixRow(RotationQuaternion(angle, axis)) };
-		center = center * rot;
 
-		mCenter = FAMath::Vector3D(center.GetX(), center.GetY(), center.GetZ());
+		mCenter = mCenter * rot;
 
 		mUpdateLocalToWorldlMatrix = true;
 	}
@@ -301,7 +268,7 @@ namespace FAShapes
 
 	void ThreeDimensionalShapeAbstract::TranslateCenter(const FAMath::Vector3D& v)
 	{
-		mCenter += v;
+		mCenter += FAMath::Vector4D(v, 0.0f);
 
 		mUpdateLocalToWorldlMatrix = true;
 	}

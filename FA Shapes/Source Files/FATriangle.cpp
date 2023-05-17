@@ -39,27 +39,31 @@ namespace FAShapes
 	}
 
 	//Normal of a traingle is (p1 - p0) x (p2 - p0)
-	FAMath::Vector3D Triangle::GetNormal() const
+	FAMath::Vector4D Triangle::GetNormal() const
 	{
-		FAMath::Vector3D p01{ mVertexList[mIndexList[1]].position - mVertexList[mIndexList[0]].position };
-		FAMath::Vector3D p02{ mVertexList[mIndexList[2]].position - mVertexList[mIndexList[0]].position };
+		FAMath::Vector4D p01{ mVertexList[mIndexList[1]].position - mVertexList[mIndexList[0]].position };
+		FAMath::Vector4D p02{ mVertexList[mIndexList[2]].position - mVertexList[mIndexList[0]].position };
 
-		return Norm(CrossProduct(p01, p02));
+		FAMath::Vector3D tempP01(p01.GetX(), p01.GetY(), p01.GetZ());
+		FAMath::Vector3D tempP02(p02.GetX(), p02.GetY(), p02.GetZ());
+		FAMath::Vector3D result(Norm(CrossProduct(tempP01, tempP02)));
+
+		return FAMath::Vector4D(result.GetX(), result.GetY(), result.GetZ(), 0.0f);
 	}
 
 	//Center of a triangle is 
 	//< (x1 + x2 + x3) / 3, (y1 + y2 + y3) / 3, (z1 + z2 + z3) / 3 >
-	FAMath::Vector3D Triangle::GetCenter() const
+	FAMath::Vector4D Triangle::GetCenter() const
 	{
-		FAMath::Vector3D p0{ mVertexList[mIndexList[0]].position };
-		FAMath::Vector3D p1{ mVertexList[mIndexList[1]].position };
-		FAMath::Vector3D p2{ mVertexList[mIndexList[2]].position };
+		FAMath::Vector4D p0{ mVertexList[mIndexList[0]].position };
+		FAMath::Vector4D p1{ mVertexList[mIndexList[1]].position };
+		FAMath::Vector4D p2{ mVertexList[mIndexList[2]].position };
 
 		float x{ (p0.GetX() + p1.GetX() + p2.GetX()) / 3.0f };
 		float y{ (p0.GetY() + p1.GetY() + p2.GetY()) / 3.0f };
 		float z{ (p0.GetZ() + p1.GetZ() + p2.GetZ()) / 3.0f };
 
-		return FAMath::Vector3D(x, y, z);
+		return FAMath::Vector4D(x, y, z, 1.0f);
 	}
 
 	void Triangle::SetVertexList(Vertex* vertexList)

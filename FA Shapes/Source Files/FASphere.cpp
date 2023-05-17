@@ -14,111 +14,73 @@ namespace FAShapes
 
 		CreateVertices();
 		CreateTriangles();
-		ThreeDimensionalShapeAbstract::CreateNormals();
-
+		Sphere::CreateNormals();
 	}
 
-	//Creates all of the vertices for a unit sphere centered around the origin.
 	void Sphere::CreateVertices()
 	{
 		/* Parametric equations of a sphere.
-		x = rsinΦcosθ
-		y = rcosΦ
-		z = -rsinΦsinθ
-		theta = [0, 360]
-		phi = [0, 180]
+		x = rsin(Φ * v)cos(θ * u)
+		y = rcos(Φ * v)
+		z = rsin(Φ * v)sin(θ * u)
+		θ = 360 or 2π
+		Φ = 180 or π
+		r = 1
+		u = [0, 1]
+		v = [0, 1]
+		(u, v) are the texture coordinates for each vertex.
 		*/
 
-		float phiStep = PI / mNumCircles;
-		float thetaStep = PI2 / mNumVerticesPerCircle;
-		float phi{ phiStep };
-		float theta{ 0.0f };
+		//(u, v) for the texture coordinates for each vertex
+		float u{ 0.0f };
+		float v{ 0.0f };
+		float uStep{ 1.0f / mNumVerticesPerCircle };
+		float vStep{ 1.0f / mNumCircles };
 
-		std::vector<float> sinPhiValues;
-		std::vector<float> cosPhiValues;
-		std::vector<float> sinThetaValues;
-		std::vector<float> cosThetaValues;
-
-		//Generate all sin(phi) and cos(phi) values between (0, PI) with step rate PI / mNumCircles.
-		for (unsigned int i = 0; i < mNumCircles - 1; ++i)
+		//Generate the vertices of the sphere
+		for (int i = 0; i <= mNumCircles; ++i)
 		{
-			sinPhiValues.push_back(sin(phi));
-			cosPhiValues.push_back(cos(phi));
-
-			phi += phiStep;
-		}
-
-		//Generate all sin(theta) and cos(theta) values between [0, 2PI) with step rate 2PI / mNumVerticesPerCircle.
-		for (unsigned int i = 0; i < mNumVerticesPerCircle; ++i)
-		{
-			sinThetaValues.push_back(sin(theta));
-			cosThetaValues.push_back(cos(theta));
-
-			theta += thetaStep;
-		}
-
-		//Top vertex
-		mLocalVertices.push_back({ FAMath::Vector3D(0.0f, 1.0f, 0.0f), mColor, FAMath::Vector3D(0.0f, 1.0f, 0.0f) });
-
-		//Generate the vertices of the sphere using the parametric equations of a sphere.
-		for(unsigned int i = 0; i < mNumCircles - 1; ++i)
-		{
-			for(unsigned int j = 0; j < mNumVerticesPerCircle; ++j)
+			for (int j = 0; j <= mNumVerticesPerCircle; ++j)
 			{
-				float x{ sinPhiValues[i] * cosThetaValues[j]};
-				float y{ cosPhiValues[i] };
-				float z{ -sinPhiValues[i] * sinThetaValues[j] };
+				float x{ sin(v * PI) * sin(u * PI2) };
+				float y{ cos(v * PI) };
+				float z{ sin(v * PI) * cos(u * PI2) };
 
-				mLocalVertices.push_back({ FAMath::Vector3D(x, y, z), mColor, FAMath::Vector3D(x, y, z) });
+				mLocalVertices.push_back({ FAMath::Vector4D(x, y, z, 1.0f), mColor, FAMath::Vector4D(x, y, z, 0.0f), FAMath::Vector2D(u, v) });
+
+				u += uStep;
 			}
+			v += vStep;
+			u = 0.0f;
 		}
-
-		//Bottom Vertex
-		mLocalVertices.push_back({ FAMath::Vector3D(0.0f, -1.0f, 0.0f), mColor, FAMath::Vector3D(0.0f, -1.0f, 0.0f) });
 	}
 
 	void Sphere::CreateTriangles()
 	{
 		/* The vertex locations of each vertex in a quad.
-		Top Left : (i * n) + j + 2
+		Top Left : (i * n) + j
 		Top Right : (i * n) + j + 1
 		Bottom Right : ((i + 1) * n) + j + 1
-		Bottom Left : ((i + 1) * n) + j + 2
+		Bottom Left : ((i + 1) * n) + j
 		i is a circle (slice) of the sphere.
 		j is a vertex of the ith circle (slice).
 		n is the number of vertices per slice.
 		*/
 
-		//make triangles with the top vertex and bottom vertex with the 1st and last circles respectively.
-		unsigned int indexLastVertex = (unsigned int)mLocalVertices.size() - 1;
-		unsigned int indexFirstVertexLastCircle = (mNumCircles - 1) * (mNumVerticesPerCircle - 1);
-		for (unsigned int i = 0; i < mNumVerticesPerCircle; ++i)
+		//Make quads with the vertices.
+		for (unsigned int i = 0; i < mNumCircles; ++i)
 		{
-			mTriangles.push_back(Triangle(mLocalVertices.data(), 0, i + 1, (i + 1) % mNumVerticesPerCircle + 1));
-
-			mTriangles.push_back(Triangle(mLocalVertices.data(), indexLastVertex,
-				(indexFirstVertexLastCircle + i) % mNumVerticesPerCircle + indexFirstVertexLastCircle,
-				indexFirstVertexLastCircle + i));
-		}
-
-		//Make quads from the vertices not including the first and last vertex.
-		for (unsigned int i = 0; i < mNumCircles - 2; ++i)
-		{
-			unsigned int indexFirstVertexFirstCircle{ i * mNumVerticesPerCircle + 1 };
-			unsigned int indexFirstVertexSecondCricle{ (i + 1) * mNumVerticesPerCircle + 1 };
-
 			for (unsigned int j = 0; j < mNumVerticesPerCircle; ++j)
 			{
-				unsigned int a{ (i * mNumVerticesPerCircle + j + 1) % mNumVerticesPerCircle + indexFirstVertexFirstCircle }; //top left
+				unsigned int a{ i * (mNumVerticesPerCircle + 1) + j }; //top left
 
-				unsigned int b{ i * mNumVerticesPerCircle + j + 1 }; //top right
+				unsigned int b{ i * (mNumVerticesPerCircle + 1) + j + 1 }; //top right
 
-				unsigned int c{ (i + 1) * mNumVerticesPerCircle + j + 1 }; //bottom right
+				unsigned int c{ (i + 1) * (mNumVerticesPerCircle + 1) + j + 1 }; //bottom right
 
-				unsigned int d{ ((i + 1) * mNumVerticesPerCircle + j + 1) % mNumVerticesPerCircle + 
-					indexFirstVertexSecondCricle }; //bottom left
+				unsigned int d{ (i + 1) * (mNumVerticesPerCircle + 1) + j }; //bottom left
 
-				Quad(a, b, c, d);
+				Quad(a, d, c, b);
 			}
 		}
 	}
