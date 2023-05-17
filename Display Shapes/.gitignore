@@ -1,8 +1,0 @@
-#ignore any directories that aren't Header Files or Source Files.
-
-#ignore all Word files.
-*.docx
-
-.vs
-
-x64
