@@ -5,42 +5,42 @@ namespace FACamera
 	Camera::Camera() : mCameraVelocity{ 0.0f }, mAngularVelocity{ 0.0f }, mUpdateViewMatrix{ true }
 	{}
 
-	Camera::Camera(vec3 cameraPosition, vec3 x, vec3 y, vec3 z,
+	Camera::Camera(vec4 cameraPosition, vec4 x, vec4 y, vec4 z,
 		float cameraVelocity, float rotateVelocity) :
-		mCameraPosition{ cameraPosition }, mN{ z }, mU{ x }, mV{ y },
+		mCameraPosition{ cameraPosition }, mX{ x }, mY{ y }, mZ{ z },
 		mCameraVelocity{ cameraVelocity }, mAngularVelocity{ rotateVelocity }, mUpdateViewMatrix{ true }
 	{}
 
-	void Camera::SetProperties(vec3 cameraPosition, vec3 x, vec3 y, vec3 z, float cameraVelocity, float angularVelocity)
+	void Camera::SetProperties(vec4 cameraPosition, vec4 x, vec4 y, vec4 z, float cameraVelocity, float angularVelocity)
 	{
 		mCameraPosition = cameraPosition;
-		mU = x;
-		mV = y;
-		mN = z;
+		mX = x;
+		mY = y;
+		mZ = z;
 		mCameraVelocity = cameraVelocity;
 		mAngularVelocity = angularVelocity;
 
 		mUpdateViewMatrix = true;
 	}
 
-	const vec3& Camera::GetCameraPosition() const
+	const vec4& Camera::GetCameraPosition() const
 	{
 		return mCameraPosition;
 	}
 
-	const vec3& Camera::GetX() const
+	const vec4& Camera::GetX() const
 	{
-		return mU;
+		return mX;
 	}
 
-	const vec3& Camera::GetY() const
+	const vec4& Camera::GetY() const
 	{
-		return mV;
+		return mY;
 	}
 
-	const vec3& Camera::GetZ() const
+	const vec4& Camera::GetZ() const
 	{
-		return mN;
+		return mZ;
 	}
 
 	const mat4& Camera::GetViewMatrix() const
@@ -62,38 +62,40 @@ namespace FACamera
 	//N = target - cameraPosition
 	//U = up x N
 	//V = N x U
-	void Camera::LookAt(vec3 cameraPosition, vec3 target, vec3 up)
+	void Camera::LookAt(vec4 cameraPosition, vec4 target, vec4 up)
 	{
-		mN = FAMath::Norm(target - cameraPosition);
+		mCameraPosition = cameraPosition;
 
-		mU = FAMath::Norm(FAMath::CrossProduct(up, mN));
+		mZ = FAMath::Norm(target - cameraPosition);
 
-		mV = FAMath::CrossProduct(mN, mU);
+		mX = vec4(FAMath::Norm(FAMath::CrossProduct(up, mZ)), 0.0f);
+
+		mY = vec4(FAMath::CrossProduct(mZ, mX), 0.0f);
 
 		mUpdateViewMatrix = true;
 	}
 
-	void Camera::SetCameraPosition(const vec3& position)
+	void Camera::SetCameraPosition(const vec4& position)
 	{
 		mCameraPosition = position;
 		mUpdateViewMatrix = true;
 	}
 
-	void Camera::SetX(const vec3& x)
+	void Camera::SetX(const vec4& x)
 	{
-		mU = x;
+		mX = x;
 		mUpdateViewMatrix = true;
 	}
 
-	void Camera::SetY(const vec3& y)
+	void Camera::SetY(const vec4& y)
 	{
-		mV = y;
+		mY = y;
 		mUpdateViewMatrix = true;
 	}
 
-	void Camera::SetZ(const vec3& z)
+	void Camera::SetZ(const vec4& z)
 	{
-		mN = z;
+		mZ = z;
 		mUpdateViewMatrix = true;
 	}
 
@@ -119,18 +121,18 @@ namespace FACamera
 		{
 			//Orthonormalize the camera space axes
 
-			Orthonormalize(mU, mV, mN);
+			Orthonormalize(mX, mY, mZ);
 
 			//update the camera's view matrix
-			mViewMatrix.SetRow(0, vec4(mU.GetX(), mV.GetX(), mN.GetX(), 0.0f));
-			mViewMatrix.SetRow(1, vec4(mU.GetY(), mV.GetY(), mN.GetY(), 0.0f));
-			mViewMatrix.SetRow(2, vec4(mU.GetZ(), mV.GetZ(), mN.GetZ(), 0.0f));
-			mViewMatrix.SetRow(3, vec4(-FAMath::DotProduct(mCameraPosition, mU), -FAMath::DotProduct(mCameraPosition, mV),
-				-FAMath::DotProduct(mCameraPosition, mN), 1.0f));
+			mViewMatrix.SetRow(0, vec4(mX.GetX(), mY.GetX(), mZ.GetX(), 0.0f));
+			mViewMatrix.SetRow(0, vec4(mX.GetX(), mY.GetX(), mZ.GetX(), 0.0f));
+			mViewMatrix.SetRow(1, vec4(mX.GetY(), mY.GetY(), mZ.GetY(), 0.0f));
+			mViewMatrix.SetRow(2, vec4(mX.GetZ(), mY.GetZ(), mZ.GetZ(), 0.0f));
+			mViewMatrix.SetRow(3, vec4(-FAMath::DotProduct(mCameraPosition, mX), -FAMath::DotProduct(mCameraPosition, mY),
+				-FAMath::DotProduct(mCameraPosition, mZ), 1.0f));
 
 			mUpdateViewMatrix = false;
 		}
-
 	}
 
 	//velocity = distance/time
@@ -140,7 +142,7 @@ namespace FACamera
 	void Camera::Left(float dt)
 	{
 		float distance{ mCameraVelocity * dt };
-		mCameraPosition -= distance * mU;
+		mCameraPosition -= distance * mX;
 
 		mUpdateViewMatrix = true;
 	}
@@ -152,7 +154,7 @@ namespace FACamera
 	void Camera::Right(float dt)
 	{
 		float distance{ mCameraVelocity * dt };
-		mCameraPosition += distance * mU;
+		mCameraPosition += distance * mX;
 
 		mUpdateViewMatrix = true;
 	}
@@ -164,7 +166,7 @@ namespace FACamera
 	void Camera::Foward(float dt)
 	{
 		float distance{ mCameraVelocity * dt };
-		mCameraPosition += distance * mN;
+		mCameraPosition += distance * mZ;
 
 		mUpdateViewMatrix = true;
 	}
@@ -176,7 +178,7 @@ namespace FACamera
 	void Camera::Backward(float dt)
 	{
 		float distance{ mCameraVelocity * dt };
-		mCameraPosition -= distance * mN;
+		mCameraPosition -= distance * mZ;
 
 		mUpdateViewMatrix = true;
 	}
@@ -188,7 +190,7 @@ namespace FACamera
 	void Camera::Up(float dt)
 	{
 		float distance{ mCameraVelocity * dt };
-		mCameraPosition += distance * mV;
+		mCameraPosition += distance * mY;
 
 		mUpdateViewMatrix = true;
 	}
@@ -200,7 +202,7 @@ namespace FACamera
 	void Camera::Down(float dt)
 	{
 		float distance{ mCameraVelocity * dt };
-		mCameraPosition -= distance * mV;
+		mCameraPosition -= distance * mY;
 
 		mUpdateViewMatrix = true;
 	}
@@ -213,18 +215,9 @@ namespace FACamera
 		//make rotation matrix
 		mat4 rotateY = FAMath::QuaternionToRotationMatrixRow(FAMath::RotationQuaternion(xDiff, vec3(0.0f, 1.0f, 0.0f)));
 
-		vec4 cameraX(mU.GetX(), mU.GetY(), mU.GetZ(), 0.0f);
-		vec4 cameraY(mV.GetX(), mV.GetY(), mV.GetZ(), 0.0f);
-		vec4 cameraZ(mN.GetX(), mN.GetY(), mN.GetZ(), 0.0f);
-
-		vec4 resX(cameraX * rotateY);
-		vec4 resY(cameraY * rotateY);
-		vec4 resZ(cameraZ * rotateY);
-
-		//rotate the x, y and z axis around the world's y-axis
-		mU = vec3(resX.GetX(), resX.GetY(), resX.GetZ());
-		mV = vec3(resY.GetX(), resY.GetY(), resY.GetZ());
-		mN = vec3(resZ.GetX(), resZ.GetY(), resZ.GetZ());
+		mX = mX * rotateY;
+		mY = mY * rotateY;
+		mZ = mZ * rotateY;
 
 		mUpdateViewMatrix = true;
 	}
@@ -235,17 +228,10 @@ namespace FACamera
 	void Camera::RotateCameraUpDown(float yDiff)
 	{
 		//make rotation matrix
-		mat4 rotateY = FAMath::QuaternionToRotationMatrixRow(FAMath::RotationQuaternion(yDiff, mU));
+		mat4 rotateX = FAMath::QuaternionToRotationMatrixRow(FAMath::RotationQuaternion(yDiff, mX));
 
-		vec4 cameraY(mV.GetX(), mV.GetY(), mV.GetZ(), 0.0f);
-		vec4 cameraZ(mN.GetX(), mN.GetY(), mN.GetZ(), 0.0f);
-
-		vec4 resY(cameraY * rotateY);
-		vec4 resZ(cameraZ * rotateY);
-
-		//rotate the camera's y and z axis around the cameras x-axis
-		mV = vec3(resY.GetX(), resY.GetY(), resY.GetZ());
-		mN = vec3(resZ.GetX(), resZ.GetY(), resZ.GetZ());
+		mY = mY * rotateX;
+		mZ = mZ * rotateX;
 
 		mUpdateViewMatrix = true;
 	}

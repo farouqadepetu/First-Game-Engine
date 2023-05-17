@@ -80,11 +80,11 @@ namespace FAProjection
 
 		/**@brief Sets the camera's near plane value to the specified value.
 		*/
-		void SetNear(float near);
+		void SetNear(float znear);
 
 		/**@brief Sets the camera's far plane value to the specified value.
 		*/
-		void SetFar(float far);
+		void SetFar(float zfar);
 
 		/**@brief Sets the camera's vertical field of view to the specified vertical field of view .
 		*/

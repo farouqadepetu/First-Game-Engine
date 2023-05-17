@@ -176,9 +176,12 @@ namespace FARender
 		* @param[in] shaderRegister The shader register the views are mapped to.
 		* 
 		* @param[in] registerSpace The space of the shader register.
+		* 
+		* @param[in] offset The offset in descriptors, from the start of the descriptor table.
 		*/
 		void CreateDescriptorRange(unsigned int descriptorRangeKey,
-			D3D12_DESCRIPTOR_RANGE_TYPE type, unsigned int numDescriptors, unsigned int shaderRegister, unsigned int registerSpace);
+			D3D12_DESCRIPTOR_RANGE_TYPE type, unsigned int numDescriptors, unsigned int shaderRegister, unsigned int registerSpace,
+			unsigned int offset);
 
 		/**@brief Creates a root descriptor table and stores it in the array mapped to the specified \a rootParameterKey.
 		*
@@ -285,7 +288,16 @@ namespace FARender
 		void SetDynamicBuffer(unsigned int bufferType, unsigned int dynamicBufferKey, unsigned int indexConstantData = 0,
 			unsigned int rootParameterIndex = 0);
 
+		/**@brief Links the texture view heap to the pipeline.
+		*/
 		void SetTextureViewHeap();
+
+		/**@brief Links the set of textures in the descriptor table to the pipeline.
+		*
+		* @param[in] rootParameterIndex The index of the root parameter in the root signature
+		* that has the register the texture will be stored in.
+		*/
+		void SetTexture(unsigned int rootParameterIndex);
 
 		/**@brief Links a texture to the pipeline.
 		*

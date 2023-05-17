@@ -53,15 +53,15 @@ namespace FAProjection
 		return mAspectRatio;
 	}
 
-	void PerspectiveProjection::SetNear(float near)
+	void PerspectiveProjection::SetNear(float znear)
 	{
-		mNear = near;
+		mNear = znear;
 		mUpdateProjectionMatrix = true;
 	}
 
-	void PerspectiveProjection::SetFar(float far)
+	void PerspectiveProjection::SetFar(float zfar)
 	{
-		mFar;
+		mFar = zfar;
 		mUpdateProjectionMatrix = true;
 	}
 

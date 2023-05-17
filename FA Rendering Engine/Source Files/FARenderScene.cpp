@@ -157,14 +157,15 @@ namespace FARender
 	}
 
 	void RenderScene::CreateDescriptorRange(unsigned int descriptorRangeKey,
-		D3D12_DESCRIPTOR_RANGE_TYPE type, unsigned int numDescriptors, unsigned int shaderRegister, unsigned int registerSpace)
+		D3D12_DESCRIPTOR_RANGE_TYPE type, unsigned int numDescriptors, unsigned int shaderRegister, unsigned int registerSpace,
+		unsigned int offset)
 	{
 		D3D12_DESCRIPTOR_RANGE dRange{};
 		dRange.RangeType = type;
 		dRange.NumDescriptors = numDescriptors;
 		dRange.BaseShaderRegister = shaderRegister;
 		dRange.RegisterSpace = registerSpace;
-		dRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+		dRange.OffsetInDescriptorsFromTableStart = offset;
 
 		mDescriptorRanges[descriptorRangeKey].emplace_back(dRange);
 	}
@@ -373,6 +374,12 @@ namespace FARender
 	{
 		ID3D12DescriptorHeap* descriptorHeaps[] = { mTextureViewHeap.Get() };
 		mDeviceResources->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
+	}
+
+	void RenderScene::SetTexture(unsigned int rootParameterIndex)
+	{
+		mDeviceResources->GetCommandList()->SetGraphicsRootDescriptorTable(rootParameterIndex,
+			mTextureViewHeap->GetGPUDescriptorHandleForHeapStart());
 	}
 
 	void RenderScene::SetTexture(unsigned int rootParameterIndex, unsigned int textureViewIndex)

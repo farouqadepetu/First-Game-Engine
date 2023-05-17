@@ -43,7 +43,7 @@ namespace FACamera
 		* @param[in] cameraVelocity The translational velocity of the camera.
 		* @param[in] angularVelocity The angular velocity of the camera.
 		*/
-		Camera(vec3 cameraPosition, vec3 x, vec3 y, vec3 z, float cameraVelocity, float angularVelocity);
+		Camera(vec4 cameraPosition, vec4 x, vec4 y, vec4 z, float cameraVelocity, float angularVelocity);
 
 		/**@brief Sets the properties of the camera.
 		* 
@@ -54,23 +54,23 @@ namespace FACamera
 		* @param[in] cameraVelocity The translational velocity of the camera.
 		* @param[in] angularVelocity The angular velocity of the camera.
 		*/
-		void SetProperties(vec3 cameraPosition, vec3 x, vec3 y, vec3 z, float cameraVelocity, float angularVelocity);
+		void SetProperties(vec4 cameraPosition, vec4 x, vec4 y, vec4 z, float cameraVelocity, float angularVelocity);
 
 		/**@brief Returns a constant reference to the position of the camera in world coordinates.
 		*/
-		const vec3& GetCameraPosition() const;
+		const vec4& GetCameraPosition() const;
 
 		/**@brief Returns a constant reference to the x-axis of the camera.
 		*/
-		const vec3& GetX() const;
+		const vec4& GetX() const;
 		
 		/**@brief Returnsa constant reference to the y-axis of the camera.
 		*/
-		const vec3& GetY() const;
+		const vec4& GetY() const;
 
 		/**@brief Returns a constant reference to the z-axis of the camera.
 		*/
-		const vec3& GetZ() const;
+		const vec4& GetZ() const;
 
 		/**@brief Returns a constant reference to the view transformation matrix of this camera.
 		*/
@@ -90,23 +90,23 @@ namespace FACamera
 		* @param[in] target The point the camera is looking at.
 		* @param[in] up The up direction of the world.
 		*/
-		void LookAt(vec3 cameraPosition, vec3 target, vec3 up);
+		void LookAt(vec4 cameraPosition, vec4 target, vec4 up);
 
 		/**@brief Sets the camera's position to the specified position.
 		*/
-		void SetCameraPosition(const vec3& position);
+		void SetCameraPosition(const vec4& position);
 
 		/**@brief Sets the camera's x-axis to the specified vector \a x.
 		*/
-		void SetX(const vec3& x);
+		void SetX(const vec4& x);
 
 		/**@brief Sets the camera's y-axis to the specified vector \a y.
 		*/
-		void SetY(const vec3& y);
+		void SetY(const vec4& y);
 
 		/**@brief Sets the camera's z-axis to the specified vector \a z.
 		*/
-		void SetZ(const vec3& z);
+		void SetZ(const vec4& z);
 
 		/**@brief Sets the camera's velocity to the specified \a velocity.
 		*/
@@ -202,16 +202,16 @@ namespace FACamera
 
 	private:
 		//camera position in world coordinates
-		vec3 mCameraPosition;
-
-		//z-axis of the camera coordinate system
-		vec3 mN;
-
-		//y-axis of the camera coordinate system
-		vec3 mV;
+		vec4 mCameraPosition;
 
 		//x-axis of the camera coordinate system
-		vec3 mU;
+		vec4 mX;
+
+		//y-axis of the camera coordinate system
+		vec4 mY;
+
+		//z-axis of the camera coordinate system
+		vec4 mZ;
 
 		//stores the world to camera transform
 		mat4 mViewMatrix;
