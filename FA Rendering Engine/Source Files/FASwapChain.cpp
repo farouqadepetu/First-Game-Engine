@@ -37,7 +37,7 @@ namespace FARender
 		swapChainDescription.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		swapChainDescription.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-		ThrowIfFailed(dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), windowHandle,
+		ExitIfFailed(dxgiFactory->CreateSwapChainForHwnd(commandQueue.Get(), windowHandle,
 			&swapChainDescription, nullptr, nullptr, &mSwapChain));
 
 		for (unsigned int i = 0; i < numRenderTargetBuffers; ++i)
@@ -109,7 +109,7 @@ namespace FARender
 		for (unsigned int i = 0; i < mNumRenderTargetBuffers; ++i)
 		{
 			//store the swap chain buffer in a render target buffer.
-			ThrowIfFailed(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mRenderTargetBuffers[i]->GetRenderTargetBuffer().GetAddressOf())));
+			ExitIfFailed(mSwapChain->GetBuffer(i, IID_PPV_ARGS(mRenderTargetBuffers[i]->GetRenderTargetBuffer().GetAddressOf())));
 
 			//Create and store a description of the render target buffer in the RTV heap.
 			device->CreateRenderTargetView(mRenderTargetBuffers[i]->GetRenderTargetBuffer().Get(), nullptr, 
@@ -158,7 +158,7 @@ namespace FARender
 	void SwapChain::Present()
 	{
 		//swap the front and back buffers
-		ThrowIfFailed(mSwapChain->Present(0, 0));
+		ExitIfFailed(mSwapChain->Present(0, 0));
 		mCurrentBackBufferIndex = (mCurrentBackBufferIndex + 1) % mNumRenderTargetBuffers;
 	}
 }

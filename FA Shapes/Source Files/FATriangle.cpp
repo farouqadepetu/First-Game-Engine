@@ -4,21 +4,21 @@
 
 namespace FAShapes
 {
-	Triangle::Triangle(Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
+	Triangle::Triangle(FAShapes::Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
 		: mVertexList{ vertexList }, mIndexList{ p0Index, p1Index, p2Index }
 	{}
 
-	const Vertex& Triangle::GetP0() const
+	const FAShapes::Vertex& Triangle::GetP0() const
 	{
 		return mVertexList[mIndexList[0]];
 	}
 
-	const Vertex& Triangle::GetP1() const
+	const FAShapes::Vertex& Triangle::GetP1() const
 	{
 		return mVertexList[mIndexList[1]];
 	}
 
-	const Vertex& Triangle::GetP2() const
+	const FAShapes::Vertex& Triangle::GetP2() const
 	{
 		return mVertexList[mIndexList[2]];
 	}
@@ -66,7 +66,7 @@ namespace FAShapes
 		return FAMath::Vector4D(x, y, z, 1.0f);
 	}
 
-	void Triangle::SetVertexList(Vertex* vertexList)
+	void Triangle::SetVertexList(FAShapes::Vertex* vertexList)
 	{
 		mVertexList = vertexList;
 	}
@@ -93,11 +93,28 @@ namespace FAShapes
 		mIndexList[2] = p2Index;
 	}
 
-	void Triangle::SetTriangle(Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
+	void Triangle::SetTriangle(FAShapes::Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index)
 	{
 		mVertexList = vertexList;
 		mIndexList[0] = p0Index;
 		mIndexList[1] = p1Index;
 		mIndexList[2] = p2Index;
+	}
+
+	/* A quad has two triangles.
+	* a		   b
+	* o--------o
+	* |  \	   |
+	* |   \	   |
+	* |    \   |
+	* |		\  |
+	* o--------o
+	* d		   c
+	* A line from a to c shows the two triangles abc and acd.
+	*/
+	void Quad(unsigned int a, unsigned int b, unsigned int c, unsigned int d, std::vector<Triangle>& triangles, FAShapes::Vertex* vertices)
+	{
+		triangles.push_back(Triangle(vertices, a, b, c));
+		triangles.push_back(Triangle(vertices, a, c, d));
 	}
 }

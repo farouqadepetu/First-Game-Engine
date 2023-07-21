@@ -4,63 +4,59 @@
 *	@brief File has a Sphere class under the namespace FAShapes.
 */
 
-#include "FAThreeDimensional.h"
+#include "FAThreeDimensionalShape.h"
 
 namespace FAShapes
 {
 	/** @class Sphere ""
 	*	@brief This is class is used to create a sphere.
 	*/
-	class Sphere : public ThreeDimensionalShapeAbstract
+	class Sphere
 	{
 	public:
 
-		/**@brief Creates a sphere with the specified radius and color and it is centered around the origin.
-		* 
-		* Uses the UV method to create the sphere.\n
-		* The more circles and vertices per cirlce, the more circular the sphere looks.
-		* 
-		* @param[in] radius The radius of the cone.
-		* @param[in] color The color of the cone.
-		* @param[in] numCircles The number of circles the cone has.
-		* @param[in] numVerticesPerCircle The number of vertices each circle has.
+		/**@brief Creates a Sphere object.
+		* Call InitializeSphere to initialize the sphere.
 		*/
-		Sphere(float radius = 1.0f, const FAColor::Color& color = FAColor::Color(0.0f, 0.0f, 0.0f, 1.0f),
-			unsigned int numCircles = 20, unsigned int numVerticesPerCircle = 20);
+		Sphere();
+
+		/**@brief Initializes the properties of the sphere.
+		*
+		* @param[in] width The radius of the sphere.
+		* @param[in] position The position of the sphere.
+		* @param[in] orientation The orientation of the sphere.
+		* @param[in] color The color of the sphere.
+		*/
+		void InitializeSphere(float radius, const FAMath::Vector4D position, const FAMath::Quaternion orientation,
+			const FAColor::Color& color);
+
+		/**@brief Returns the ThreeDimensionalShape object.
+		*/
+		const ThreeDimensionalShape& GetShape() const;
+
+		/**@brief Returns the ThreeDimensionalShape object.
+		*/
+		ThreeDimensionalShape& GetShape();
 
 		/**@brief Returns the radius of the sphere.
 		*/
 		float GetRadius() const;
-		
-		/**@brief Set the radius of the sphere to the specified value.
-		*/
-		void SetRadius(float r);
 
-		/**@brief Updates the spheres local to world transformation matrix.
+		/**@brief Sets the radius of the sphere.
 		*/
-		void UpdateLocalToWorldMatrix() override final;
+		void SetRadius(float radius);
+
+		/**@brief Updates the spheres model matrix.
+		*/
+		void UpdateModelMatrix();
 
 		/**@brief Returns the volume of the sphere.
 		*/
-		float Volume() override final;
+		float Volume();
 
 	private:
-		//Radius of the sphere.
+		FAShapes::ThreeDimensionalShape mShape;
+
 		float mRadius;
-
-		//The number of slices the sphere has.
-		unsigned int mNumCircles;
-
-		//The number of vertices each slice has.
-		unsigned int mNumVerticesPerCircle;
-
-		//Creates the vertices of the sphere.
-		void CreateVertices() override final;
-
-		//Creates the triangles that make up the sphere.
-		void CreateTriangles() override final;
-
-		//Creates the normals of the sphere.
-		void CreateNormals() override final;
 	};
 }

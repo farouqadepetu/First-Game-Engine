@@ -87,15 +87,16 @@ namespace FARender
 	{
 		//enables the debug layer for additional information
 #if defined(_DEBUG) || defined(DEBUG)
-		Microsoft::WRL::ComPtr<ID3D12Debug> debug;
-		ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debug)));
+		Microsoft::WRL::ComPtr<ID3D12Debug1> debug;
+		ExitIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debug)));
 		debug->EnableDebugLayer();
+		debug->SetEnableGPUBasedValidation(true);
 #endif
 	}
 
 	void DeviceResources::mCreateDirect3DDevice()
 	{
-		ThrowIfFailed(D3D12CreateDevice(0, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&mDirect3DDevice)));
+		ExitIfFailed(D3D12CreateDevice(0, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&mDirect3DDevice)));
 	}
 
 	void DeviceResources::mCreateDXGIFactory()
@@ -104,12 +105,12 @@ namespace FARender
 #if defined(_DEBUG) || defined(DEBUG)
 		flag = DXGI_CREATE_FACTORY_DEBUG;
 #endif
-		ThrowIfFailed(CreateDXGIFactory2(flag, IID_PPV_ARGS(&mDXGIFactory)));
+		ExitIfFailed(CreateDXGIFactory2(flag, IID_PPV_ARGS(&mDXGIFactory)));
 	}
 
 	void DeviceResources::mCreateFence()
 	{
-		ThrowIfFailed(mDirect3DDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
+		ExitIfFailed(mDirect3DDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
 	}
 
 	void DeviceResources::mQueryDescriptorSizes()
@@ -128,7 +129,7 @@ namespace FARender
 		rtvDescriptorHeapDescription.NumDescriptors = 3;
 		rtvDescriptorHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		rtvDescriptorHeapDescription.NodeMask = 0;
-		ThrowIfFailed(mDirect3DDevice->CreateDescriptorHeap(&rtvDescriptorHeapDescription, IID_PPV_ARGS(&mRTVHeap)));
+		ExitIfFailed(mDirect3DDevice->CreateDescriptorHeap(&rtvDescriptorHeapDescription, IID_PPV_ARGS(&mRTVHeap)));
 	}
 
 	void DeviceResources::mCreateDSVHeap()
@@ -140,7 +141,7 @@ namespace FARender
 		dsvDescriptorHeapDescription.NumDescriptors = 2;
 		dsvDescriptorHeapDescription.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		dsvDescriptorHeapDescription.NodeMask = 0;
-		ThrowIfFailed(mDirect3DDevice->CreateDescriptorHeap(&dsvDescriptorHeapDescription, IID_PPV_ARGS(&mDSVHeap)));
+		ExitIfFailed(mDirect3DDevice->CreateDescriptorHeap(&dsvDescriptorHeapDescription, IID_PPV_ARGS(&mDSVHeap)));
 	}
 
 	void DeviceResources::mCreateCommandObjects()
@@ -152,19 +153,21 @@ namespace FARender
 		commandQueueDescription.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		commandQueueDescription.NodeMask = 0;
 
-		ThrowIfFailed(mDirect3DDevice->CreateCommandQueue(&commandQueueDescription,
+		//This is where the initialization and resizing commands are stored.
+		ExitIfFailed(mDirect3DDevice->CreateCommandQueue(&commandQueueDescription,
 			IID_PPV_ARGS(mCommandQueue.GetAddressOf())));
 
-		ThrowIfFailed(mDirect3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+		ExitIfFailed(mDirect3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 			IID_PPV_ARGS(mDirectCommandAllocator.GetAddressOf())));
 
+		//This is where the rendering commands are stored.
 		for (UINT i = 0; i < NUM_OF_FRAMES; ++i)
 		{
-			ThrowIfFailed(mDirect3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+			ExitIfFailed(mDirect3DDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 				IID_PPV_ARGS(mCommandAllocators[i].GetAddressOf())));
 		}
 
-		ThrowIfFailed(mDirect3DDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
+		ExitIfFailed(mDirect3DDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
 			mDirectCommandAllocator.Get(), nullptr, IID_PPV_ARGS(mCommandList.GetAddressOf())));
 
 		// Start off in a closed state.  This is because the first time we refer 
@@ -178,7 +181,7 @@ namespace FARender
 		++mFenceValue;
 
 		//send a command to the command queue that says to set the given fence to the specified value
-		ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), mFenceValue));
+		ExitIfFailed(mCommandQueue->Signal(mFence.Get(), mFenceValue));
 
 		//if the signal command has not been executed, wait until it is
 		if (mFence->GetCompletedValue() < mFenceValue)
@@ -189,7 +192,7 @@ namespace FARender
 			if (eventHandle != nullptr)
 			{
 				//This function will fire(raise) an event when the signal command is executed by the GPU
-				ThrowIfFailed(mFence->SetEventOnCompletion(mFenceValue, eventHandle));
+				ExitIfFailed(mFence->SetEventOnCompletion(mFenceValue, eventHandle));
 
 				//Wait until the GPU has executed the signal command
 				WaitForSingleObject(eventHandle, INFINITE);
@@ -212,7 +215,7 @@ namespace FARender
 			if (eventHandle != nullptr)
 			{
 				//This function will fire(raise) an event when the signal command is executed by the GPU
-				ThrowIfFailed(mFence->SetEventOnCompletion(mCurrentFrameFenceValue[mCurrentFrameIndex], eventHandle));
+				ExitIfFailed(mFence->SetEventOnCompletion(mCurrentFrameFenceValue[mCurrentFrameIndex], eventHandle));
 
 				//Wait until the GPU has executed the signal command
 				WaitForSingleObject(eventHandle, INFINITE);
@@ -234,7 +237,7 @@ namespace FARender
 		FlushCommandQueue();
 
 		//reset the command list to add new commands
-		ThrowIfFailed(mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr));
+		ExitIfFailed(mCommandList->Reset(mDirectCommandAllocator.Get(), nullptr));
 
 		//Reset text buffers.
 		mTextResources.ResetBuffers();
@@ -264,7 +267,7 @@ namespace FARender
 		//Close the command list.
 		//Store all your command lists in a ID3D12CommandList array.
 		//Execute the resize commands.
-		ThrowIfFailed(mCommandList->Close());
+		ExitIfFailed(mCommandList->Close());
 		ID3D12CommandList* commandLists[] = { mCommandList.Get() };
 		UINT s = sizeof(commandLists) / sizeof(commandLists[0]);
 		mCommandQueue->ExecuteCommandLists(s, commandLists);
@@ -286,7 +289,7 @@ namespace FARender
 
 	void DeviceResources::Execute() const
 	{
-		ThrowIfFailed(mCommandList->Close());
+		ExitIfFailed(mCommandList->Close());
 		ID3D12CommandList* commandLists[] = { mCommandList.Get() };
 		UINT s = sizeof(commandLists) / sizeof(commandLists[0]);
 		mCommandQueue->ExecuteCommandLists(s, commandLists);
@@ -302,10 +305,10 @@ namespace FARender
 	{
 		//Reseting command allocator allows us to reuse the memory.
 		//Make sure all the commands in the command list is executed before calling this.
-		ThrowIfFailed(mCommandAllocators[mCurrentFrameIndex]->Reset());
+		ExitIfFailed(mCommandAllocators[mCurrentFrameIndex]->Reset());
 
 		//Reset command list
-		ThrowIfFailed(mCommandList->Reset(mCommandAllocators[mCurrentFrameIndex].Get(), nullptr));
+		ExitIfFailed(mCommandList->Reset(mCommandAllocators[mCurrentFrameIndex].Get(), nullptr));
 
 		//Link viewport to the rasterization stage
 		mCommandList->RSSetViewports(1, &mViewport);
@@ -341,7 +344,7 @@ namespace FARender
 		}
 		else
 		{
-			//Transistion the current back buffer to  render state from present state
+			//Transistion the current back buffer to render state from present state
 			mSwapChain.Transition(mCommandList, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 			//Clear the swap chains current back buffer

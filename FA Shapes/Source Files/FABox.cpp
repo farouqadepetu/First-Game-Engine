@@ -1,42 +1,29 @@
 #include "FABox.h"
-#include <unordered_map>
-#include <vector>
-#include <stdexcept>
 
 namespace FAShapes
 {
-	Box::Box(float width, float height, float depth, const FAColor::Color& color) :
-		ThreeDimensionalShapeAbstract(color), mWidth{ width }, mHeight{ height }, mDepth{ depth }
+	Box::Box() :
+		mWidth{ 1.0f }, mHeight{ 1.0f }, mDepth{ 1.0f }
+	{}
+
+	void Box::InitializeBox(float width, float height, float depth, const FAMath::Vector4D position, const FAMath::Quaternion orientation,
+		const FAColor::Color& color)
 	{
-		CreateVertices();
-		CreateTriangles();
-		CreateNormals();
+		mShape.InitializeThreeDimensionalShape(position, orientation, color);
+
+		mWidth = width;
+		mHeight = height;
+		mDepth = depth;
 	}
 
-	//strores the local vertices of the box
-	void Box::CreateVertices()
+	const ThreeDimensionalShape& Box::GetShape() const
 	{
-		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, 0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 0.0f) });   //0
-		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, 0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 0.0f) });	 //1
-		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, -0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 1.0f) });   //2
-		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, -0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 1.0f) });  //3
-
-		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, 0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 0.0f) });  //4
-		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, 0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 0.0f) });   //5
-		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, -0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 1.0f) });  //6
-		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, -0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 1.0f) }); //7
+		return mShape;
 	}
 
-	//creates the triangles from the local vertices
-	void Box::CreateTriangles()
+	ThreeDimensionalShape& Box::GetShape()
 	{
-		//the indices of the vertices that make up each face of the box
-		Quad(1, 0, 3, 2); //front face
-		Quad(4, 5, 6, 7); //back face
-		Quad(0, 1, 5, 4); //top face
-		Quad(7, 6, 2, 3); //bottom face
-		Quad(0, 4, 7, 3); //left face
-		Quad(5, 1, 2, 6); //right face
+		return mShape;
 	}
 
 	float Box::GetWidth() const
@@ -57,38 +44,27 @@ namespace FAShapes
 	void Box::SetWidth(float width)
 	{
 		mWidth = width;
-		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void Box::SetHeight(float height)
 	{
 		mHeight = height;
-		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void Box::SetDepth(float depth)
 	{
 		mDepth = depth;
-		mUpdateLocalToWorldlMatrix = true;
 	}
 
-	void Box::UpdateLocalToWorldMatrix()
+	void Box::UpdateModelMatrix()
 	{
-		if (mUpdateLocalToWorldlMatrix)
-		{
-			FAMath::Matrix4x4 scale{ Scale(FAMath::Matrix4x4(), mWidth, mHeight, mDepth) };
+		FAMath::Matrix4x4 scale{ Scale(FAMath::Matrix4x4(), mWidth, mHeight, mDepth) };
 
-			FAMath::Matrix4x4 localRotation;
-			localRotation.SetRow(0, FAMath::Vector4D(mX.GetX(), mX.GetY(), mX.GetZ(), 0.0f));
-			localRotation.SetRow(1, FAMath::Vector4D(mY.GetX(), mY.GetY(), mY.GetZ(), 0.0f));
-			localRotation.SetRow(2, FAMath::Vector4D(mZ.GetX(), mZ.GetY(), mZ.GetZ(), 0.0f));
+		FAMath::Matrix4x4 localRotation(FAMath::QuaternionToRotationMatrixRow(mShape.GetOrientation()));
 
-			FAMath::Matrix4x4 translation{ Translate(FAMath::Matrix4x4(), mCenter.GetX(), mCenter.GetY(), mCenter.GetZ()) };
+		FAMath::Matrix4x4 translation{ Translate(FAMath::Matrix4x4(), mShape.GetPosition()) };
 
-			mLocalToWorld = scale * localRotation * translation;
-
-			mUpdateLocalToWorldlMatrix = false;
-		}
+		mShape.SetModelMatrix(scale * localRotation * translation);
 	}
 
 	float Box::Volume()

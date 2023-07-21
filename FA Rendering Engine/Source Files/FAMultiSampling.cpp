@@ -20,7 +20,7 @@ namespace FARender
 		levels.Format = rtFormat;
 		levels.SampleCount = sampleCount;
 
-		ThrowIfFailed(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
+		ExitIfFailed(device->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
 			&levels, sizeof(levels)));
 
 		//The speicifed render target format and sample count is supported by the GPU.

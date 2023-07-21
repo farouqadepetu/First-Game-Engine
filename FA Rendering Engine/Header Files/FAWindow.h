@@ -199,7 +199,7 @@ namespace FAWindow
 		* @param[in, optional] additionalData A pointer to data to access in the window procedure.
 		*
 		*/
-		void CreateChildWindow(const HINSTANCE& hInstance, HWND parent, unsigned int identifier,
+		void CreateChildWindow(const HINSTANCE& hInstance, HWND parent, unsigned long long int identifier,
 			WNDPROC windowProcedure, const FAColor::Color& backgroundColor,
 			const std::wstring& windowClassName, const std::wstring& windowName, unsigned int styles,
 			unsigned int x, unsigned int y, unsigned int width, unsigned int height, void* additionalData = nullptr);
@@ -230,7 +230,7 @@ namespace FAWindow
 		* @param[in, optional] additionalData A pointer to data to access in the window procedure.
 		*
 		*/
-		void CreateControlWindow(const HINSTANCE& hInstance, HWND parent, unsigned int identifier,
+		void CreateControlWindow(const HINSTANCE& hInstance, HWND parent, unsigned long long int identifier,
 			const std::wstring& windowClassName,
 			const std::wstring& windowName, unsigned int styles,
 			unsigned int x, unsigned int y, unsigned int width, unsigned int height, void* additionalData = nullptr);

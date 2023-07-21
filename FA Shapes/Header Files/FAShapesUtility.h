@@ -1,38 +1,51 @@
 #pragma once
 
 /** @file FAShapesUtility.h
-*	@brief File has structures DrawArguments and Vertex under the namespace FAShapes.
+*	@brief File has utility functions.
 */
 
-
-#include "FAMathEngine.h"
-#include "FAColor.h"
+#include "FATriangle.h"
+#include <vector>
 
 /** @namespace FAShapes
 *	@brief Has classes that are used for creating 3D shapes.
 */
 namespace FAShapes
 {
-	/** @struct DrawArguments ""
-	*	@brief Data that are used as parameters to draw an object.
-	*/
-	struct DrawArguments
-	{
-		unsigned int indexCount;
-		unsigned int locationOfFirstIndex;
-		int indexOfFirstVertex;
-		unsigned int indexOfConstantData;
-	};
 
-
-	/** @struct Vertex ""
-	*	@brief Data that describes a vertex.
+	/**@brief Creates the vertices of a unit box and connects them using triangles.
+	* 
+	* Also computes the normal for each vertex.
 	*/
-	struct Vertex
-	{
-		FAMath::Vector4D position;
-		FAColor::Color color;
-		FAMath::Vector4D normal;
-		FAMath::Vector2D texCoords;
-	};
+	void CreateBox(std::vector<FAShapes::Vertex>& vertices, std::vector<FAShapes::Triangle>& triangles);
+
+	/**@brief Creates the vertices of a unit cone and connects them using triangles.
+	* 
+	* Also computes the normal for each vertex.
+	* Uses the UV-method to create the vertices of the cone.
+	*/
+	void CreateCone(std::vector<FAShapes::Vertex>& vertices, std::vector<FAShapes::Triangle>& triangles,
+		unsigned int numVerticesPerCircle = 20, unsigned int numCircles = 20);
+
+	/**@brief Creates the vertices of a unit cone and connects them using triangles.
+	*
+	* Also computes the normal for each vertex./n
+	* Uses the UV-method to create the vertices of the cylinder.
+	*/
+	void CreateCylinder(std::vector<FAShapes::Vertex>& vertices, std::vector<FAShapes::Triangle>& triangles,
+		unsigned int numVerticesPerCircle = 20, unsigned int numCircles = 20);
+
+	/**@brief Creates the vertices of a unit sphere and connects them using triangles.
+	*
+	* Also computes the normal for each vertex./n
+	* Uses the UV-method to create the vertices of the sphere.
+	*/
+	void CreateSphere(std::vector<FAShapes::Vertex>& vertices, std::vector<FAShapes::Triangle>& triangles,
+		unsigned int numVerticesPerCircle = 20, unsigned int numCircles = 20);
+
+	/**@brief Creates the vertices of a unit pyramid and connects them using triangles.
+	*
+	* Also computes the normal for each vertex.
+	*/
+	void CreatePyramid(std::vector<FAShapes::Vertex>& vertices, std::vector<FAShapes::Triangle>& triangles);
 }

@@ -9,12 +9,12 @@ namespace FARender
 		//-----------------------------------------------------------------------------------------------------------------------------
 		//Create a D3D11On12 Device
 
-		ThrowIfFailed(D3D11On12CreateDevice(device.Get(),
+		ExitIfFailed(D3D11On12CreateDevice(device.Get(),
 			D3D11_CREATE_DEVICE_SINGLETHREADED | D3D11_CREATE_DEVICE_DEBUG | D3D11_CREATE_DEVICE_BGRA_SUPPORT,
 			nullptr, 0, (IUnknown**)commandQueue.GetAddressOf(), 1, 0, &mDevice11, &mDevice11Context, nullptr));
 
 		//Query the 11On12 device from the 11 device.
-		ThrowIfFailed(mDevice11.As(&mDevice11on12));
+		ExitIfFailed(mDevice11.As(&mDevice11on12));
 		//-----------------------------------------------------------------------------------------------------------------------------
 
 
@@ -22,15 +22,15 @@ namespace FARender
 		//Create Direct2D factory, Direct2D device, Direct2D device context and DirectWrite factory.
 
 		D2D1_FACTORY_OPTIONS factoryOptions{ D2D1_DEBUG_LEVEL_INFORMATION };
-		ThrowIfFailed(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, factoryOptions, mDirect2DFactory.GetAddressOf()));
+		ExitIfFailed(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, factoryOptions, mDirect2DFactory.GetAddressOf()));
 
 		Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
-		ThrowIfFailed(mDevice11on12.As(&dxgiDevice));
+		ExitIfFailed(mDevice11on12.As(&dxgiDevice));
 
-		ThrowIfFailed(mDirect2DFactory->CreateDevice(dxgiDevice.Get(), &mDirect2DDevice));
-		ThrowIfFailed(mDirect2DDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &mDirect2DDeviceContext));
+		ExitIfFailed(mDirect2DFactory->CreateDevice(dxgiDevice.Get(), &mDirect2DDevice));
+		ExitIfFailed(mDirect2DDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &mDirect2DDeviceContext));
 
-		ThrowIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &mDirectWriteFactory));
+		ExitIfFailed(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &mDirectWriteFactory));
 		//-----------------------------------------------------------------------------------------------------------------------------
 
 		//-----------------------------------------------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ namespace FARender
 		//creates a wrapped resource to each of our swap chain buffers
 		for (int i = 0; i < numBuffers; ++i)
 		{
-			ThrowIfFailed(mDevice11on12->CreateWrappedResource(renderTargetBuffers[i]->GetRenderTargetBuffer().Get(), 
+			ExitIfFailed(mDevice11on12->CreateWrappedResource(renderTargetBuffers[i]->GetRenderTargetBuffer().Get(), 
 				&direct11ResourceFlags,
 				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, IID_PPV_ARGS(mWrappedBuffers[i].GetAddressOf())));
 		}
@@ -102,9 +102,9 @@ namespace FARender
 
 		for (int i = 0; i < numBuffers; ++i)
 		{
-			ThrowIfFailed(mWrappedBuffers[i].As(&mSurfaces[i]));
+			ExitIfFailed(mWrappedBuffers[i].As(&mSurfaces[i]));
 
-			ThrowIfFailed(mDirect2DDeviceContext->CreateBitmapFromDxgiSurface(mSurfaces[i].Get(), &bitmapProperties,
+			ExitIfFailed(mDirect2DDeviceContext->CreateBitmapFromDxgiSurface(mSurfaces[i].Get(), &bitmapProperties,
 				mDirect2DBuffers[i].GetAddressOf()));
 		}
 		//-----------------------------------------------------------------------------------------------------------------------------
@@ -123,7 +123,7 @@ namespace FARender
 
 	void TextResources::AfterRenderText(unsigned int currentBackBuffer)
 	{
-		ThrowIfFailed(mDirect2DDeviceContext->EndDraw());
+		ExitIfFailed(mDirect2DDeviceContext->EndDraw());
 
 		//Releasing the wrapped render target resource transitions the back buffer to present state.
 		mDevice11on12->ReleaseWrappedResources(mWrappedBuffers[currentBackBuffer].GetAddressOf(), 1);

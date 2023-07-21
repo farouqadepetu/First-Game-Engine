@@ -55,7 +55,8 @@ namespace FAWindow
 			DWORD errorCode = GetLastError();
 			std::string errorMsg = "RegisterClassEx fucntion failed. Failed to register window class.\nError Code: "
 				+ std::to_string(errorCode);
-			throw std::runtime_error(errorMsg);
+			MessageBoxA(nullptr, errorMsg.c_str(), "Registering Window Class Failed", MB_OK);
+			exit(-1);
 		}
 
 		RECT desiredClientSize{ 0, 0, (long)width,(long)height };
@@ -63,7 +64,7 @@ namespace FAWindow
 		//Calulates the required size of the window to make sure the client window size is (WIDTH, HEIGHT)
 		//When the function returns, the structure contains the coordinates of the top-left and bottom-right corners of the window 
 		//to accommodate the desired client area.
-		AdjustWindowRect(&desiredClientSize, WS_OVERLAPPEDWINDOW, false);
+		AdjustWindowRect(&desiredClientSize, styles, false);
 
 		int w = desiredClientSize.right - desiredClientSize.left;
 		int h = desiredClientSize.bottom - desiredClientSize.top;
@@ -76,20 +77,24 @@ namespace FAWindow
 			DWORD errorCode = GetLastError();
 			std::string errorMsg = "CreateWindow fucntion failed. Failed to create the window\nError Code: "
 				+ std::to_string(errorCode);
-			throw std::runtime_error(errorMsg);
+			MessageBoxA(nullptr, errorMsg.c_str(), "Creating Window Failed", MB_OK);
+			exit(-1);
 		}
 
 		ShowWindow(mWindowHandle, SW_SHOW);
 		UpdateWindow(mWindowHandle);
 
-		mX = x;
-		mY = y;
+		RECT r{};
+		GetWindowRect(mWindowHandle, &r);
+
+		mX = r.left;
+		mY = r.top;
 		mWidth = width;
 		mHeight = height;
 	}
 
 
-	void Window::CreateChildWindow(const HINSTANCE& hInstance, HWND parent, unsigned int identifier,
+	void Window::CreateChildWindow(const HINSTANCE& hInstance, HWND parent, unsigned long long int identifier,
 		WNDPROC windowProcedure, const FAColor::Color& backgroundColor,
 		const std::wstring& windowClassName, const std::wstring& windowName, unsigned int styles,
 		unsigned int x, unsigned int y, unsigned int width, unsigned int height, void* additionalData)
@@ -113,7 +118,8 @@ namespace FAWindow
 			DWORD errorCode = GetLastError();
 			std::string errorMsg = "RegisterClassEx fucntion failed. Failed to register window class.\nError Code: "
 				+ std::to_string(errorCode);
-			throw std::runtime_error(errorMsg);
+			MessageBoxA(nullptr, errorMsg.c_str(), "Registering Window Class Failed", MB_OK);
+			exit(-1);
 		}
 
 		mWindowHandle = CreateWindowEx(0, mWindowClass.lpszClassName, windowName.c_str(), styles,
@@ -124,8 +130,10 @@ namespace FAWindow
 			DWORD errorCode = GetLastError();
 			std::string errorMsg = "CreateWindow fucntion failed. Failed to create the window\nError Code: "
 				+ std::to_string(errorCode);
-			throw std::runtime_error(errorMsg);
+			MessageBoxA(nullptr, errorMsg.c_str(), "Creating Window Failed", MB_OK);
+			exit(-1);
 		}
+
 
 		mX = x;
 		mY = y;
@@ -133,7 +141,7 @@ namespace FAWindow
 		mHeight = height;
 	}
 
-	void Window::CreateControlWindow(const HINSTANCE& hInstance, HWND parent, unsigned int identifier,
+	void Window::CreateControlWindow(const HINSTANCE& hInstance, HWND parent, unsigned long long int identifier,
 		const std::wstring& windowClassName,
 		const std::wstring& windowName, unsigned int styles,
 		unsigned int x, unsigned int y, unsigned int width, unsigned int height, void* additionalData)
@@ -148,7 +156,8 @@ namespace FAWindow
 			DWORD errorCode = GetLastError();
 			std::string errorMsg = "CreateWindow fucntion failed. Failed to create the window\nError Code: "
 				+ std::to_string(errorCode);
-			throw std::runtime_error(errorMsg);
+			MessageBoxA(nullptr, errorMsg.c_str(), "Creating Window Failed", MB_OK);
+			exit(-1);
 		}
 
 		mX = x;

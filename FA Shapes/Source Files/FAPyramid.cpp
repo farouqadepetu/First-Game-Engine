@@ -1,40 +1,29 @@
 #include "FAPyramid.h"
-#include <unordered_map>
 
 namespace FAShapes
 {
-	Pyramid::Pyramid(float width, float height, float depth,
-		const FAColor::Color& color) :
-		ThreeDimensionalShapeAbstract(color), mWidth{ width }, mHeight{ height }, mDepth{ depth }
+	Pyramid::Pyramid() :
+		mWidth{ 1.0f }, mHeight{ 1.0f }, mDepth{ 1.0f }
+	{}
+
+	void Pyramid::InitializePyramid(float width, float height, float depth, const FAMath::Vector4D position, const FAMath::Quaternion orientation,
+		const FAColor::Color& color)
 	{
-		CreateVertices();
-		CreateTriangles();
-		CreateNormals();
+		mShape.InitializeThreeDimensionalShape(position, orientation, color);
+
+		mWidth = width;
+		mHeight = height;
+		mDepth = depth;
 	}
 
-	void Pyramid::CreateVertices()
+	const ThreeDimensionalShape& Pyramid::GetShape() const
 	{
-		//top vertex
-		mLocalVertices.push_back({ FAMath::Vector4D(0.0f, 0.5f, 0.0f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.5f, 0.5f) });
-
-		//base vertices
-		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, -0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 0.0f) }); //1
-		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, -0.5f, 0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 0.0f) }); //2
-		mLocalVertices.push_back({ FAMath::Vector4D(0.5f, -0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(1.0f, 1.0f) }); //3
-		mLocalVertices.push_back({ FAMath::Vector4D(-0.5f, -0.5f, -0.5f, 1.0f), mColor, FAMath::Vector4D(), FAMath::Vector2D(0.0f, 1.0f) }); //4
-
+		return mShape;
 	}
 
-	void Pyramid::CreateTriangles()
+	ThreeDimensionalShape& Pyramid::GetShape()
 	{
-		mTriangles.push_back(Triangle(mLocalVertices.data(), 0, 1, 2)); //front triangle
-		mTriangles.push_back(Triangle(mLocalVertices.data(), 0, 3, 4)); //back triangle
-		mTriangles.push_back(Triangle(mLocalVertices.data(), 0, 2, 3)); //right triangle
-		mTriangles.push_back(Triangle(mLocalVertices.data(), 0, 4, 1)); //left triangle
-
-		//Base
-		Quad(4, 3, 2, 1);
-
+		return mShape;
 	}
 
 	float Pyramid::GetWidth() const
@@ -55,38 +44,27 @@ namespace FAShapes
 	void Pyramid::SetWidth(float width)
 	{
 		mWidth = width;
-		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void Pyramid::SetHeight(float height)
 	{
 		mHeight = height;
-		mUpdateLocalToWorldlMatrix = true;
 	}
 
 	void Pyramid::SetDepth(float depth)
 	{
 		mDepth = depth;
-		mUpdateLocalToWorldlMatrix = true;
 	}
 
-	void Pyramid::UpdateLocalToWorldMatrix()
+	void Pyramid::UpdateModelMatrix()
 	{
-		if (mUpdateLocalToWorldlMatrix)
-		{
-			FAMath::Matrix4x4 scale{ Scale(FAMath::Matrix4x4(), mWidth, mHeight, mDepth) };
+		FAMath::Matrix4x4 scale{ Scale(FAMath::Matrix4x4(), mWidth, mHeight, mDepth) };
 
-			FAMath::Matrix4x4 localRotation;
-			localRotation.SetRow(0, FAMath::Vector4D(mX.GetX(), mX.GetY(), mX.GetZ(), 0.0f));
-			localRotation.SetRow(1, FAMath::Vector4D(mY.GetX(), mY.GetY(), mY.GetZ(), 0.0f));
-			localRotation.SetRow(2, FAMath::Vector4D(mZ.GetX(), mZ.GetY(), mZ.GetZ(), 0.0f));
+		FAMath::Matrix4x4 localRotation(FAMath::QuaternionToRotationMatrixRow(mShape.GetOrientation()));
 
-			FAMath::Matrix4x4 translation{ Translate(FAMath::Matrix4x4(), mCenter.GetX(), mCenter.GetY(), mCenter.GetZ()) };
+		FAMath::Matrix4x4 translation{ Translate(FAMath::Matrix4x4(), mShape.GetPosition()) };
 
-			mLocalToWorld = scale * localRotation * translation;
-
-			mUpdateLocalToWorldlMatrix = false;
-		}
+		mShape.SetModelMatrix(scale * localRotation * translation);
 	}
 
 	float Pyramid::Volume()

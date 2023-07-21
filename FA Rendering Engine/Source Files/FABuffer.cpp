@@ -61,7 +61,7 @@ namespace FARender
 		CD3DX12_HEAP_PROPERTIES rtHeapProp(D3D12_HEAP_TYPE_DEFAULT);
 
 		//Create the RT buffer resouce
-		ThrowIfFailed(device->CreateCommittedResource(&rtHeapProp, D3D12_HEAP_FLAG_NONE, &renderTargetBufferDesc,
+		ExitIfFailed(device->CreateCommittedResource(&rtHeapProp, D3D12_HEAP_FLAG_NONE, &renderTargetBufferDesc,
 			D3D12_RESOURCE_STATE_RESOLVE_SOURCE, &rtBufferClearValue, IID_PPV_ARGS(&mRenderTargetBuffer)));
 
 		//Get the address of where you want to store the view in the RTV heap.
@@ -135,7 +135,7 @@ namespace FARender
 		//Use this class to say which type of heap our buffer will be stored in.
 		CD3DX12_HEAP_PROPERTIES dHeapProp(D3D12_HEAP_TYPE_DEFAULT);
 
-		ThrowIfFailed(device->CreateCommittedResource(&dHeapProp, D3D12_HEAP_FLAG_NONE, &depthBufferDescription,
+		ExitIfFailed(device->CreateCommittedResource(&dHeapProp, D3D12_HEAP_FLAG_NONE, &depthBufferDescription,
 			D3D12_RESOURCE_STATE_DEPTH_WRITE, &depthBufferClearValue, IID_PPV_ARGS(&mDepthStencilBuffer)));
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC depthBufferViewDescription{};
@@ -224,11 +224,11 @@ namespace FARender
 
 		 //Creates the resource and allocates enough memory on the heap to contain the entire resource.
 		 //The resource is also mapped to the heap.
-		 ThrowIfFailed(device->CreateCommittedResource(&staticDefaultHeapProp,
+		 ExitIfFailed(device->CreateCommittedResource(&staticDefaultHeapProp,
 			 D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
 			 D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&mStaticDefaultBuffer)));
 
-		 ThrowIfFailed(device->CreateCommittedResource(&staticUploadHeapProp,
+		 ExitIfFailed(device->CreateCommittedResource(&staticUploadHeapProp,
 			 D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
 			 D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mStaticUploadBuffer)));
 
@@ -284,11 +284,11 @@ namespace FARender
 
 		 //Creates the resource and allocates enough memory on the heap to contain the entire resource.
 		 //The resource is also mapped to the heap.
-		 ThrowIfFailed(device->CreateCommittedResource(&staticDefaultHeapProp,
+		 ExitIfFailed(device->CreateCommittedResource(&staticDefaultHeapProp,
 			 D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
 			 D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&mStaticDefaultBuffer)));
 
-		 ThrowIfFailed(device->CreateCommittedResource(&staticUploadHeapProp,
+		 ExitIfFailed(device->CreateCommittedResource(&staticUploadHeapProp,
 			 D3D12_HEAP_FLAG_NONE, &staticBufferDescription,
 			 D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mStaticUploadBuffer)));
 
@@ -332,7 +332,7 @@ namespace FARender
 	{
 		D3D12_VERTEX_BUFFER_VIEW vBView{};
 		vBView.BufferLocation = mStaticDefaultBuffer->GetGPUVirtualAddress();
-		vBView.SizeInBytes = mStaticDefaultBuffer->GetDesc().Width;
+		vBView.SizeInBytes = (UINT)mStaticDefaultBuffer->GetDesc().Width;
 		vBView.StrideInBytes = mStride;
 
 		return vBView;
@@ -342,7 +342,7 @@ namespace FARender
 	{
 		D3D12_INDEX_BUFFER_VIEW ibView{};
 		ibView.BufferLocation = mStaticDefaultBuffer->GetGPUVirtualAddress();
-		ibView.SizeInBytes = mStaticDefaultBuffer->GetDesc().Width;
+		ibView.SizeInBytes = (UINT)mStaticDefaultBuffer->GetDesc().Width;
 		ibView.Format = mFormat;
 
 		return ibView;
@@ -437,12 +437,12 @@ namespace FARender
 		CD3DX12_HEAP_PROPERTIES dynamicBufferHeapProp(D3D12_HEAP_TYPE_UPLOAD);
 
 		//allocate memory for the dynamic buffer
-		ThrowIfFailed(device->CreateCommittedResource(&dynamicBufferHeapProp,
+		ExitIfFailed(device->CreateCommittedResource(&dynamicBufferHeapProp,
 			D3D12_HEAP_FLAG_NONE, &dynamicBufferDescription,
 			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mDynamicBuffer)));
 
 		//Map the dyanmic buffer
-		ThrowIfFailed(mDynamicBuffer->Map(0, nullptr, (void**)&mMappedData));
+		ExitIfFailed(mDynamicBuffer->Map(0, nullptr, (void**)&mMappedData));
 	}
 
 	void DynamicBuffer::CreateDynamicBuffer(const Microsoft::WRL::ComPtr<ID3D12Device>& device, 
@@ -468,12 +468,12 @@ namespace FARender
 		CD3DX12_HEAP_PROPERTIES dynamicBufferHeapProp(D3D12_HEAP_TYPE_UPLOAD);
 
 		//allocate memory for the dynamic buffer
-		ThrowIfFailed(device->CreateCommittedResource(&dynamicBufferHeapProp,
+		ExitIfFailed(device->CreateCommittedResource(&dynamicBufferHeapProp,
 			D3D12_HEAP_FLAG_NONE, &dynamicBufferDescription,
 			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&mDynamicBuffer)));
 
 		//Map the dyanmic buffer
-		ThrowIfFailed(mDynamicBuffer->Map(0, nullptr, (void**)&mMappedData));
+		ExitIfFailed(mDynamicBuffer->Map(0, nullptr, (void**)&mMappedData));
 	}
 
 	const D3D12_GPU_VIRTUAL_ADDRESS DynamicBuffer::GetGPUAddress(unsigned int index) const
@@ -514,7 +514,7 @@ namespace FARender
 	{
 		D3D12_VERTEX_BUFFER_VIEW vBView{};
 		vBView.BufferLocation = mDynamicBuffer->GetGPUVirtualAddress();
-		vBView.SizeInBytes = mDynamicBuffer->GetDesc().Width;
+		vBView.SizeInBytes = (UINT)mDynamicBuffer->GetDesc().Width;
 		vBView.StrideInBytes = mStride;
 
 		return vBView;
@@ -524,7 +524,7 @@ namespace FARender
 	{
 		D3D12_INDEX_BUFFER_VIEW ibView{};
 		ibView.BufferLocation = mDynamicBuffer->GetGPUVirtualAddress();
-		ibView.SizeInBytes = mDynamicBuffer->GetDesc().Width;
+		ibView.SizeInBytes = (UINT)mDynamicBuffer->GetDesc().Width;
 		ibView.Format = mFormat;
 
 		return ibView;

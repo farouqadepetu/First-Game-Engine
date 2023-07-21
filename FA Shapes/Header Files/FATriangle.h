@@ -1,6 +1,7 @@
 #pragma once
 
-#include "FAShapesUtility.h"
+#include "FAVertexStructure.h"
+#include <vector>
 
 /** @file FATriangle.h
 *	@brief File has a Triangle class under the namespace FAShapes.
@@ -22,19 +23,19 @@ namespace FAShapes
 		* @param[in] p1Index The index of the second point of the triangle.
 		* @param[in] p2Index The index of the third point of the triangle.
 		*/
-		Triangle(Vertex* vertexList = nullptr, unsigned int p0Index = 0, unsigned int p1Index = 0, unsigned int p2Index = 0);
+		Triangle(FAShapes::Vertex* vertexList = nullptr, unsigned int p0Index = 0, unsigned int p1Index = 0, unsigned int p2Index = 0);
 
 		/**@brief Returns a constant reference to the P0 vertex of the triangle.
 		*/
-		const Vertex& GetP0() const;
+		const FAShapes::Vertex& GetP0() const;
 
 		/**@brief Returns a constant reference to the P1 vertex of the triangle.
 		*/
-		const Vertex& GetP1() const;
+		const FAShapes::Vertex& GetP1() const;
 
 		/**@brief Returns a constant reference to the P2 vertex of the triangle.
 		*/
-		const Vertex& GetP2() const;
+		const FAShapes::Vertex& GetP2() const;
 
 		/**@brief Returns the index of where P0 is in the vertex list.
 		*/
@@ -58,7 +59,7 @@ namespace FAShapes
 
 		/**@brief Sets the pointer to a vertex list to the specified pointers.
 		*/
-		void SetVertexList(Vertex* vertexList);
+		void SetVertexList(FAShapes::Vertex* vertexList);
 
 		/**@brief Sets the P0 index to the specified \a index.
 		*/
@@ -87,10 +88,14 @@ namespace FAShapes
 		* @param[in] p1Index The index of the second point of the triangle.
 		* @param[in] p2Index The index of the third point of the triangle.
 		*/
-		void SetTriangle(Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index);
+		void SetTriangle(FAShapes::Vertex* vertexList, unsigned int p0Index, unsigned int p1Index, unsigned int p2Index);
 
 	private:
-		Vertex* mVertexList; //pointer to a vertex list
+		FAShapes::Vertex* mVertexList; //pointer to a vertex list
 		unsigned int mIndexList[3]; //indices into a vertex list
 	};
+
+	/**@brief Stores the indices of the vertices of the triangles that make up a shape.
+	*/
+	void Quad(unsigned int a, unsigned int b, unsigned int c, unsigned int d, std::vector<Triangle>& triangles, FAShapes::Vertex* vertices);
 }

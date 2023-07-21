@@ -1,0 +1,4 @@
+#ignore any directories that aren't Header Files or Source Files.
+
+.vs
+x64

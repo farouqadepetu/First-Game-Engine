@@ -266,6 +266,20 @@ namespace FAMath
 		return Vector2D(a.GetX() / k, a.GetY() / k);
 	}
 
+	/**@brief Returns true if \a a equals to \a b, false otherwise.
+	*/
+	inline bool operator==(const Vector2D& a, const Vector2D& b)
+	{
+		return CompareFloats(a.GetX(), b.GetX(), 1e-6f) && CompareFloats(a.GetY(), b.GetY(), 1e-6f);
+	}
+
+	/**@brief Returns true if \a a does not equal to \a b, false otherwise.
+	*/
+	inline bool operator!=(const Vector2D& a, const Vector2D& b)
+	{
+		return !operator==(a, b);
+	}
+
 	/**@brief Returns the dot product between \a a and \a b.
 	*/
 	inline float DotProduct(const Vector2D& a, const Vector2D& b)
@@ -344,6 +358,19 @@ namespace FAMath
 		return Vector2D(DotProduct(a, normB) * normB);
 	}
 
+	/**@brief Linear interpolate between the two vectors \a start and \a end.
+	* 
+	* t must between 0 and 1, if it is not it will get clamped.
+	*/
+	inline Vector2D Lerp(const Vector2D& start, const Vector2D& end, float t)
+	{
+		if (t < 0.0f)
+			t = 0.0f;
+		else if (t > 1.0f)
+			t = 1.0f;
+
+		return (1.0f - t) * start + t * end;
+	}
 
 #if defined(_DEBUG)
 	inline void print(const Vector2D& v)
@@ -589,6 +616,21 @@ namespace FAMath
 		return Vector3D(a.GetX() / k, a.GetY() / k, a.GetZ() / k);
 	}
 
+	/**@brief Returns true if \a a equals to \a b, false otherwise.
+	*/
+	inline bool operator==(const Vector3D& a, const Vector3D& b)
+	{
+		return CompareFloats(a.GetX(), b.GetX(), 1e-6f) && CompareFloats(a.GetY(), b.GetY(), 1e-6f) &&
+			CompareFloats(a.GetZ(), b.GetZ(), 1e-6f);
+	}
+
+	/**@brief Returns true if \a a does not equal to \a b, false otherwise.
+	*/
+	inline bool operator!=(const Vector3D& a, const Vector3D& b)
+	{
+		return !operator==(a, b);
+	}
+
 	/**@brief Returns the dot product between \a a and \a b.
 	*/
 	inline float DotProduct(const Vector3D& a, const Vector3D& b)
@@ -736,6 +778,20 @@ namespace FAMath
 		x = Norm(x);
 		y = Norm(CrossProduct(z, x));
 		z = Norm(CrossProduct(x, y));
+	}
+
+	/**@brief Linear interpolate between the two vectors \a start and \a end.
+	*
+	* t must between 0 and 1, if it is not it will get clamped.
+	*/
+	inline Vector3D Lerp(const Vector3D& start, const Vector3D& end, float t)
+	{
+		if (t < 0.0f)
+			t = 0.0f;
+		else if (t > 1.0f)
+			t = 1.0f;
+
+		return (1.0f - t) * start + t * end;
 	}
 
 
@@ -1005,6 +1061,21 @@ namespace FAMath
 		return Vector4D(a.GetX() / k, a.GetY() / k, a.GetZ() / k, a.GetW() / k);
 	}
 
+	/**@brief Returns true if \a a equals to \a b, false otherwise.
+	*/
+	inline bool operator==(const Vector4D& a, const Vector4D& b)
+	{
+		return CompareFloats(a.GetX(), b.GetX(), 1e-6f) && CompareFloats(a.GetY(), b.GetY(), 1e-6f) &&
+			CompareFloats(a.GetZ(), b.GetZ(), 1e-6f) && CompareFloats(a.GetW(), b.GetW(), 1e-6f);
+	}
+
+	/**@brief Returns true if \a a does not equal to \a b, false otherwise.
+	*/
+	inline bool operator!=(const Vector4D& a, const Vector4D& b)
+	{
+		return !operator==(a, b);
+	}
+
 	/**@brief Returns the dot product between \a a and \a b.
 	*/
 	inline float DotProduct(const Vector4D& a, const Vector4D& b)
@@ -1068,6 +1139,20 @@ namespace FAMath
 		x = FAMath::Vector4D(tempX.GetX(), tempX.GetY(), tempX.GetZ(), 0.0f);
 		y = FAMath::Vector4D(tempY.GetX(), tempY.GetY(), tempY.GetZ(), 0.0f);
 		z = FAMath::Vector4D(tempZ.GetX(), tempZ.GetY(), tempZ.GetZ(), 0.0f);
+	}
+
+	/**@brief Linear interpolate between the two vectors \a start and \a end.
+	*
+	* t must between 0 and 1, if it is not it will get clamped.
+	*/
+	inline Vector4D Lerp(const Vector4D& start, const Vector4D& end, float t)
+	{
+		if (t < 0.0f)
+			t = 0.0f;
+		else if (t > 1.0f)
+			t = 1.0f;
+
+		return (1.0f - t) * start + t * end;
 	}
 
 
@@ -2445,7 +2530,7 @@ namespace FAMath
 		{
 			for (int j = 0; j < 3; ++j)
 			{
-				std::cout << m(i, j) << " ";
+				std::cout << m(i, j) << "\t";
 			}
 
 			std::cout << std::endl;
@@ -3615,6 +3700,21 @@ namespace FAMath
 		return Quaternion(resultScalar, resultVector);
 	}
 
+	/**@brief Returns true if \a q1 equals to \a q2, false otherwise.
+	*/
+	inline bool operator==(const Quaternion& q1, const Quaternion& q2)
+	{
+		return CompareFloats(q1.GetScalar(), q2.GetScalar(), 1e-6f) && CompareFloats(q1.GetX(), q2.GetX(), 1e-6f) &&
+			CompareFloats(q1.GetY(), q2.GetY(), 1e-6f) && CompareFloats(q1.GetZ(), q2.GetZ(), 1e-6f);
+	}
+
+	/**@brief Returns true if \a q1 does not equal to \a q2, false otherwise.
+	*/
+	inline bool operator!=(const Quaternion& q1, const Quaternion& q2)
+	{
+		return !operator==(q1, q2);
+	}
+
 	/**@brief Returns true if quaternion \a q is a zero quaternion, false otherwise.
 	*/
 	inline bool IsZeroQuaternion(const Quaternion& q)
@@ -3841,6 +3941,133 @@ namespace FAMath
 		Quaternion result(q * point * Conjugate(q));
 
 		return Vector4D(result.GetVector(), p.GetW());
+	}
+
+	/**@brief Returns the dot product of the quaternions \a q1 and \a q2.
+	*
+	*/
+	inline float DotProduct(const Quaternion& q1, const Quaternion& q2)
+	{
+		return q1.GetScalar() * q2.GetScalar() + q1.GetX() * q2.GetX() + q1.GetY() * q2.GetY() + q1.GetZ() * q2.GetZ();
+	}
+
+	/**@brief Linear Interpolate between quaternions \a q0 and \a q1.
+	*
+	*  t should be betwee 0 and 1. If it is not it will get clamped.
+	*/
+	inline Quaternion Lerp(const Quaternion& q0, const Quaternion& q1, float t)
+	{
+		if (t < 0.0f)
+			t = 0.0f;
+		else if (t > 1.0f)
+			t = 1.0f;
+
+		//Compute the cosine of the angle between the quaternions
+		float cosOmega = DotProduct(q0, q1);
+
+		Quaternion newQ1;
+		//If the dot product is negative, negate q1 to so we take the shorter arc
+		if (cosOmega < 0.0f)
+		{
+			newQ1 = -q1;
+			cosOmega = -cosOmega;
+		}
+		else
+		{
+			newQ1 = q1;
+		}
+
+		return (1.0f - t) * q0 + t * q1;
+	}
+
+	/**@brief Normalize Linear Interpolate between quaternions \a q0 and \a q1.
+	*
+	*  t should be betwee 0 and 1. If it is not it will get clamped.
+	*/
+	inline Quaternion NLerp(const Quaternion& q0, const Quaternion& q1, float t)
+	{
+		if (t < 0.0f)
+			t = 0.0f;
+		else if (t > 1.0f)
+			t = 1.0f;
+
+		//Compute the cosine of the angle between the quaternions
+		float cosOmega = DotProduct(q0, q1);
+
+		Quaternion newQ1;
+		//If the dot product is negative, negate q1 to so we take the shorter arc
+		if (cosOmega < 0.0f)
+		{
+			newQ1 = -q1;
+			cosOmega = -cosOmega;
+		}
+		else
+		{
+			newQ1 = q1;
+		}
+
+		return Normalize((1.0f - t) * q0 + t * q1);
+	}
+
+	/**@brief Spherical Linear Interpolate between quaternions \a q0 and \a q1.
+	*
+	*  t should be betwee 0 and 1. If it is not it will get clamped.
+	*/
+	inline Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t)
+	{
+		//Formula used is
+		//k0 = sin((1 - t)omega) * omega) / sin(omega);
+		//k1 = (sin(tomega) * omega) / sin(omega)
+		//newQ = k0q0 * k1q1
+		//Omega is the angle between the q0 and q1.
+
+		if (t < 0.0f)
+			t = 0.0f;
+		else if (t > 1.0f)
+			t = 1.0f;
+
+		//Compute the cosine of the angle between the quaternions
+		float cosOmega = DotProduct(q0, q1);
+
+		Quaternion newQ1;
+		//If the dot product is negative, negate q1 to so we take the shorter arc
+		if (cosOmega < 0.0f)
+		{
+			newQ1 = -q1;
+			cosOmega = -cosOmega;
+		}
+		else
+		{
+			newQ1 = q1;
+		}
+
+		float k0{ 0.0f };
+		float k1{ 0.0f };
+		
+		//Linear interpolate if the quaternions are very close to protect dividing by zero.
+		if (cosOmega > 0.9999f)
+		{
+			k0 = 1.0f - t;
+			k1 = t;
+		}
+		else
+		{
+			//sin of the angle between the quaternions is
+			//sin(omega) = 1 - cos^2(omega) from the trig identity
+			//sin^2(omega) + cos^2(omega) = 1.
+			float sinOmega{ sqrt(1.0f - cosOmega * cosOmega) };
+
+			//retrieve the angle
+			float omega{ atan2(sinOmega, cosOmega) };
+
+			//Compute inverse to avoid dividng multiple times
+			float oneOverSinOmega{ 1.0f / sinOmega };
+
+			k0 = sin((1.0f - t) * omega) * oneOverSinOmega;
+			k1 = sin(t * omega) * oneOverSinOmega;
+		}
+
+		return k0 * q0 + k1 * newQ1;
 	}
 
 #if defined(_DEBUG)

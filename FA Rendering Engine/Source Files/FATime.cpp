@@ -3,7 +3,7 @@
 
 namespace FATime
 {
-	Time::Time() : mCurrTime{ 0 }, mPrevTime{ 0 }, mDeltaTime{ 0.0 }, mStopTime{ 0 }, mPausedTime{ 0 }, mBaseTime{ 0 }, mStopped{ false }
+	Time::Time() : mPrevTime{ 0 }, mCurrentTime{ 0 }, mDeltaTime{ 0 }, mSecondsPerCount{ 0.0 }, mStopped{ false }
 	{
 		//get counts per second
 		__int64 countsPerSec{ 0 };
@@ -11,26 +11,46 @@ namespace FATime
 
 		//convert to seconds per count
 		mSecondsPerCount = 1.0 / (double)countsPerSec;
+	}
 
+	float Time::GetPrevTime() const
+	{
+		return (float)mPrevTime;
+	}
+
+	float Time::GetDeltaTime() const
+	{
+		return (float)mDeltaTime;
+	}
+
+	bool Time::GetIsTimeStopped() const
+	{
+		return mStopped;
+	}
+
+	void Time::Reset()
+	{
+		//get current time
+		__int64 resetTime{ 0 };
+		QueryPerformanceCounter((LARGE_INTEGER*)&resetTime);
+
+		mPrevTime = resetTime;
 	}
 
 	void Time::Tick()
 	{
 		if (mStopped)
 		{
-			mDeltaTime = 0.0;
+			mDeltaTime = 0.0f;
 			return;
-
 		}
 
 		//get current time
-		QueryPerformanceCounter((LARGE_INTEGER*)&mCurrTime);
+		QueryPerformanceCounter((LARGE_INTEGER*)&mCurrentTime);
 
-		//time difference between this frame and the previous frame
-		mDeltaTime = (mCurrTime - mPrevTime) * mSecondsPerCount;
+		mDeltaTime = (mCurrentTime - mPrevTime) * mSecondsPerCount;
 
-		//Save current time for the next frame
-		mPrevTime = mCurrTime;
+		mPrevTime = mCurrentTime;
 
 		// Force nonnegative.  The DXSDK's CDXUTTimer mentions that if the 
 		// processor goes into a power save mode or we get shuffled to another
@@ -41,80 +61,23 @@ namespace FATime
 		}
 	}
 
-	void Time::Reset()
-	{
-		//get current time
-		__int64 resetTime{ 0 };
-		QueryPerformanceCounter((LARGE_INTEGER*)&resetTime);
-
-		//For the first frame there is no pervious frame so no previous time stamp.
-		//Need to initalize mPrevTime
-		mPrevTime = resetTime;
-
-		mBaseTime = resetTime;
-
-		mStopTime = 0;
-		mStopped = false;
-	}
-
-	float Time::DeltaTime() const
-	{
-		return (float)mDeltaTime;
-	}
-
-	void Time::Stop()
-	{
-		//if not paused already
-		if (!mStopped)
-		{
-			//get the time the game/animation was paused
-			__int64 stopTime{ 0 };
-			QueryPerformanceCounter((LARGE_INTEGER*)&stopTime);
-
-			mStopTime = stopTime;
-			mStopped = true;
-		}
-	}
-
 	void Time::Start()
 	{
-		//if paused
 		if (mStopped)
 		{
-			//get the time the game/animation was unpaused
 			__int64 startTime{ 0 };
 			QueryPerformanceCounter((LARGE_INTEGER*)&startTime);
 
-			//get how much time the game/animation was paused for
-			mPausedTime += static_cast<__int64>((startTime - mStopTime) * mSecondsPerCount);
-
-			//reset stop time and mStopped
-			mStopTime = 0;
+			mPrevTime = startTime;
 			mStopped = false;
 		}
 	}
 
-	//Returns how much time has passed since Reset() was called.
-	//Does not count any pause time
-	float Time::TotalTime() const
+	void Time::Stop()
 	{
-		//if paused
-		if (mStopped)
+		if (!mStopped)
 		{
-			//if we take the total time when the game is paused, we do not count the time that has passed since we paused
-			//If there were previous pauses we need to not include that in the total time
-			//                     |<--paused time-->|
-			// ----*---------------*-----------------*------------*------------*------> time
-			//  mBaseTime       mStopTime        startTime     mStopTime    mCurrTime
-			return static_cast<float>(((mStopTime - mPausedTime) - mBaseTime) * mSecondsPerCount);
-		}
-		else //not paused
-		{
-			//If there were previous pauses we need to not include that in the total time
-			//                     |<--paused time-->|
-			// ----*---------------*-----------------*------------*------> time
-			//  mBaseTime       mStopTime        startTime     mCurrTime
-			return static_cast<float>(((mCurrTime - mPausedTime) - mBaseTime) * mSecondsPerCount);
+			mStopped = true;
 		}
 	}
 }

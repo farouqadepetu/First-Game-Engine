@@ -212,12 +212,10 @@ namespace FACamera
 	//The x difference in mouse positions is how many degrees to rotate.
 	void Camera::RotateCameraLeftRight(float xDiff)
 	{
-		//make rotation matrix
-		mat4 rotateY = FAMath::QuaternionToRotationMatrixRow(FAMath::RotationQuaternion(xDiff, vec3(0.0f, 1.0f, 0.0f)));
-
-		mX = mX * rotateY;
-		mY = mY * rotateY;
-		mZ = mZ * rotateY;
+		FAMath::Quaternion rotateY(FAMath::RotationQuaternion(xDiff, vec3(0.0f, 1.0f, 0.0f)));
+		mX = FAMath::Rotate(rotateY, mX);
+		mY = FAMath::Rotate(rotateY, mY);
+		mZ = FAMath::Rotate(rotateY, mZ);
 
 		mUpdateViewMatrix = true;
 	}
@@ -227,11 +225,9 @@ namespace FACamera
 	//The y difference in mouse positions is how many degrees to rotate
 	void Camera::RotateCameraUpDown(float yDiff)
 	{
-		//make rotation matrix
-		mat4 rotateX = FAMath::QuaternionToRotationMatrixRow(FAMath::RotationQuaternion(yDiff, mX));
-
-		mY = mY * rotateX;
-		mZ = mZ * rotateX;
+		FAMath::Quaternion rotateX(FAMath::RotationQuaternion(yDiff, mX));
+		mY = FAMath::Rotate(rotateX, mY);
+		mZ = FAMath::Rotate(rotateX, mZ);
 
 		mUpdateViewMatrix = true;
 	}
@@ -296,12 +292,12 @@ namespace FACamera
 		POINT currMousePos{};
 		GetCursorPos(&currMousePos);
 
-		FAMath::Vector2D currentMousePosition(currMousePos.x, currMousePos.y);
+		FAMath::Vector2D currentMousePosition((float)currMousePos.x, (float)currMousePos.y);
 
 		FAMath::Vector2D mousePositionDiff(currentMousePosition - mLastMousePosition);
 
 		//if the mouse goes outside the window and comes back into the window, the camera won't be rotated.
-		if (Length(mousePositionDiff) < 5.0f && (GetAsyncKeyState(VK_LBUTTON) & 0x8000))
+		if (Length(mousePositionDiff) < 10.0f && (GetAsyncKeyState(VK_LBUTTON) & 0x8000))
 		{
 			RotateCameraLeftRight(mAngularVelocity * mousePositionDiff.GetX());
 			RotateCameraUpDown(mAngularVelocity * mousePositionDiff.GetY());
