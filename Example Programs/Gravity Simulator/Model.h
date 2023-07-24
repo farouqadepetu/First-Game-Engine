@@ -10,11 +10,12 @@
 #include "FAForceFunctions.h"
 #include "FAShapesUtility.h"
 #include "Structures.h"
-#include "FAAABB.h"
 #include <memory>
 
 namespace MVC
 {
+	enum Shapes { RIGID_BOX = 0, RIGID_PYRAMID, RIGID_SPHERE, RIGID_CYLINDER, RIGID_CONE };
+
 	class Model
 	{
 	public:
@@ -32,7 +33,6 @@ namespace MVC
 
 	private:
 		void CreateBox();
-
 		void CreateCone();
 		void CreateCylinder();
 		void CreateSphere();

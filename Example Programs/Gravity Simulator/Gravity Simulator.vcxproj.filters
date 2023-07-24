@@ -75,9 +75,6 @@
     <ClCompile Include="..\..\FA Shapes\Source Files\FAShapesUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FAAABB.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\FA Shapes\Source Files\FAThreeDimensionalShape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -103,6 +100,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\FA Physics Engine\Source Files\PolyhedralMassProperties.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\FA Shapes\Source Files\FABox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\FA Physics Engine\Source Files\FAAABB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -176,9 +179,6 @@
     <ClInclude Include="..\..\FA Shapes\Header Files\FAVertexStructure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FAAABB.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\FA Physics\Header Files\FAForceFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -207,6 +207,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\FA Physics Engine\Header Files\PolyhedralMassProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FA Shapes\Header Files\FABox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FA Physics Engine\Header Files\FAAABB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

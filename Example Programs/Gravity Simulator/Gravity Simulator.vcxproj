@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\FA Physics Engine\Source Files\FAAABB.cpp" />
     <ClCompile Include="..\..\FA Physics Engine\Source Files\FAForceFunctions.cpp" />
     <ClCompile Include="..\..\FA Physics Engine\Source Files\FARidigPyramid.cpp" />
     <ClCompile Include="..\..\FA Physics Engine\Source Files\FARigidBody.cpp" />
@@ -157,17 +158,18 @@
     <ClCompile Include="..\..\FA Rendering Engine\Source Files\FATextResources.cpp" />
     <ClCompile Include="..\..\FA Rendering Engine\Source Files\FATime.cpp" />
     <ClCompile Include="..\..\FA Rendering Engine\Source Files\FAWindow.cpp" />
+    <ClCompile Include="..\..\FA Shapes\Source Files\FABox.cpp" />
     <ClCompile Include="..\..\FA Shapes\Source Files\FAShapesUtility.cpp" />
     <ClCompile Include="..\..\FA Shapes\Source Files\FAThreeDimensionalShape.cpp" />
     <ClCompile Include="..\..\FA Shapes\Source Files\FATriangle.cpp" />
     <ClCompile Include="Controller.cpp" />
-    <ClCompile Include="FAAABB.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="View.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\FA Math Engine\Header Files\FAMathEngine.h" />
+    <ClInclude Include="..\..\FA Physics Engine\Header Files\FAAABB.h" />
     <ClInclude Include="..\..\FA Physics Engine\Header Files\FAForceFunctions.h" />
     <ClInclude Include="..\..\FA Physics Engine\Header Files\FARigidBody.h" />
     <ClInclude Include="..\..\FA Physics Engine\Header Files\FARigidBox.h" />
@@ -192,12 +194,12 @@
     <ClInclude Include="..\..\FA Rendering Engine\Header Files\FATextResources.h" />
     <ClInclude Include="..\..\FA Rendering Engine\Header Files\FATime.h" />
     <ClInclude Include="..\..\FA Rendering Engine\Header Files\FAWindow.h" />
+    <ClInclude Include="..\..\FA Shapes\Header Files\FABox.h" />
     <ClInclude Include="..\..\FA Shapes\Header Files\FAShapesUtility.h" />
     <ClInclude Include="..\..\FA Shapes\Header Files\FAThreeDimensionalShape.h" />
     <ClInclude Include="..\..\FA Shapes\Header Files\FATriangle.h" />
     <ClInclude Include="..\..\FA Shapes\Header Files\FAVertexStructure.h" />
     <ClInclude Include="Controller.h" />
-    <ClInclude Include="FAAABB.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Structures.h" />
     <ClInclude Include="View.h" />

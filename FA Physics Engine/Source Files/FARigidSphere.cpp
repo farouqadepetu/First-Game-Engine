@@ -43,11 +43,21 @@ namespace FAPhysicsShapes
 
 		//Move the center of mass to its initial location in the world.
 		mRigidBody.SetCenterOfMass(mShape.GetPosition() + mOffset);
+
+		FAMath::Vector4D radiusVector(1.0f, 1.0f, 1.0f, 0.0f);
+		//The min and max positions of the axis-alinged bounding box
+		mLocalBoundingBox.min = -radiusVector;
+		mLocalBoundingBox.max = radiusVector;
 	}
 
 	float RigidSphere::GetRadius() const
 	{
 		return mRadius;
+	}
+
+	const FACollisions::AABB& RigidSphere::GetBoundingBox() const
+	{
+		return mWorldBoundingBox;
 	}
 
 	void RigidSphere::SetRadius(float radius)
@@ -92,7 +102,12 @@ namespace FAPhysicsShapes
 
 		FAMath::Matrix4x4 translation{ Translate(FAMath::Matrix4x4(), mShape.GetPosition()) };
 
-		mShape.SetModelMatrix(scale * localRotation * translation);
+		FAMath::Matrix4x4 model(scale * localRotation * translation);
+
+		mShape.SetModelMatrix(model);
+
+		mWorldBoundingBox.min = mLocalBoundingBox.min * model;
+		mWorldBoundingBox.max = mLocalBoundingBox.max * model;
 	}
 
 	float RigidSphere::Volume()

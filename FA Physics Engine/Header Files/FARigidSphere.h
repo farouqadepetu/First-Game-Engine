@@ -2,6 +2,7 @@
 
 #include "FARigidBody.h"
 #include "FAThreeDimensionalShape.h"
+#include "FAAABB.h"
 
 namespace FAPhysicsShapes
 {
@@ -32,6 +33,10 @@ namespace FAPhysicsShapes
 		/**@brief Returns the radius of the sphere.
 		*/
 		float GetRadius() const;
+
+		/**@brief Returns the axis-aligned bounding box of the sphere.
+		*/
+		const FACollisions::AABB& GetBoundingBox() const;
 
 		/**@brief Sets the radius of the sphere.
 		*/
@@ -71,5 +76,8 @@ namespace FAPhysicsShapes
 		FAPhysics::RigidBody mRigidBody;
 		FAShapes::ThreeDimensionalShape mShape;
 		FAMath::Vector4D mOffset;
+
+		FACollisions::AABB mLocalBoundingBox;
+		FACollisions::AABB mWorldBoundingBox;
 	};
 }

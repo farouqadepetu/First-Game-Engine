@@ -287,7 +287,7 @@ namespace MVC
 
 	void Controller::CreateConstantBuffer()
 	{
-		mScene->CreateDynamicBuffer(L"Object Constant Buffer", 7 * sizeof(ObjectConstants), nullptr, sizeof(ObjectConstants));
+		mScene->CreateDynamicBuffer(L"Object Constant Buffer", 10 * sizeof(ObjectConstants), nullptr, sizeof(ObjectConstants));
 	}
 
 	void Controller::CameraMovement()

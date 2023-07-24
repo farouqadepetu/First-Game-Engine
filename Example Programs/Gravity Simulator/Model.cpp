@@ -4,24 +4,30 @@ namespace MVC
 {
 	Model::Model() : mSimulationTime{ 0.1f }, mAccumulator{ 0.0f }, mAlpha{ 0.0f }
 	{
-		mShapes.push_back(&mInterpolatedBox.GetShape());
-		mRigidBodies.push_back(&mCurrentBox.GetRigidBody());
+		for (unsigned int i = 0; i < 5; ++i)
+		{
+			mShapes.push_back(nullptr);
+			mRigidBodies.push_back(nullptr);
+		}
+
+		mShapes.at(RIGID_BOX) = &mInterpolatedBox.GetShape();
+		mRigidBodies.at(RIGID_BOX) = &mCurrentBox.GetRigidBody();
 		CreateBox();
 
-		mShapes.push_back(&mInterpolatedCone.GetShape());
-		mRigidBodies.push_back(&mCurrentCone.GetRigidBody());
+		mShapes.at(RIGID_CONE) = &mInterpolatedCone.GetShape();
+		mRigidBodies.at(RIGID_CONE) = &mCurrentCone.GetRigidBody();
 		CreateCone();
 
-		mShapes.push_back(&mInterpolatedCylinder.GetShape());
-		mRigidBodies.push_back(&mCurrentCylinder.GetRigidBody());
+		mShapes.at(RIGID_CYLINDER) = &mInterpolatedCylinder.GetShape();
+		mRigidBodies.at(RIGID_CYLINDER) = &mCurrentCylinder.GetRigidBody();
 		CreateCylinder();
 
-		mShapes.push_back(&mInterpolatedSphere.GetShape());
-		mRigidBodies.push_back(&mCurrentSphere.GetRigidBody());
+		mShapes.at(RIGID_SPHERE) = &mInterpolatedSphere.GetShape();
+		mRigidBodies.at(RIGID_SPHERE) = &mCurrentSphere.GetRigidBody();
 		CreateSphere();
 
-		mShapes.push_back(&mInterpolatedPyramid.GetShape());
-		mRigidBodies.push_back(&mCurrentPyramid.GetRigidBody());
+		mShapes.at(RIGID_PYRAMID) = &mInterpolatedPyramid.GetShape();
+		mRigidBodies.at(RIGID_PYRAMID) = &mCurrentPyramid.GetRigidBody();
 		CreatePyramid();
 	}
 
@@ -38,8 +44,8 @@ namespace MVC
 		mPreviousBox = mCurrentBox;
 		mInterpolatedBox = mCurrentBox;
 
-		mShapes.at(0)->SetDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
-			0, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		mShapes.at(RIGID_BOX)->SetDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
+			RIGID_BOX, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -64,8 +70,8 @@ namespace MVC
 		mPreviousCone = mCurrentCone;
 		mInterpolatedCone = mCurrentCone;
 
-		mShapes.at(1)->SetDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
-			1, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		mShapes.at(RIGID_CONE)->SetDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
+			RIGID_CONE, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -90,8 +96,8 @@ namespace MVC
 		mPreviousCylinder = mCurrentCylinder;
 		mInterpolatedCylinder = mCurrentCylinder;
 
-		mShapes.at(2)->SetDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
-			2, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		mShapes.at(RIGID_CYLINDER)->SetDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
+			RIGID_CYLINDER, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -116,8 +122,8 @@ namespace MVC
 		mPreviousSphere = mCurrentSphere;
 		mInterpolatedSphere = mCurrentSphere;
 
-		mShapes.at(3)->SetDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
-			3, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		mShapes.at(RIGID_SPHERE)->SetDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
+			RIGID_SPHERE, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -142,8 +148,8 @@ namespace MVC
 		mPreviousPyramid = mCurrentPyramid;
 		mInterpolatedPyramid = mCurrentPyramid;
 
-		mShapes.at(4)->SetDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
-			4, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		mShapes.at(RIGID_PYRAMID)->SetDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
+			RIGID_PYRAMID, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -206,13 +212,14 @@ namespace MVC
 		mInterpolatedSphere.UpdateModelMatrix();
 		mInterpolatedPyramid.UpdateModelMatrix();
 
+		ObjectConstants data;
 		for (const auto& i : mShapes)
 		{
-			ObjectConstants data;
 			data.MVP = FAMath::Transpose(i->GetModelMatrix() * viewMatrix * projectionMatrix);
 			data.color = i->GetColor();
 			i->UpdateShape(scene, &data, sizeof(ObjectConstants));
 		}
+
 	}
 
 	void Model::RenderModels(FARender::RenderScene* scene)
