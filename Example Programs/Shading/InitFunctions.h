@@ -1,12 +1,12 @@
 #pragma once
 
-#include "FASphere.h"
-#include "FABox.h"
-#include "FACylinder.h"
-#include "FACone.h"
-#include "FAPyramid.h"
-#include "FARenderScene.h"
-#include "FATime.h"
+#include "Sphere.h"
+#include "Box.h"
+#include "Cylinder.h"
+#include "Cone.h"
+#include "Pyramid.h"
+#include "RenderScene.h"
+#include "GameTime.h"
 #include "GlobalVariables.h"
 
 namespace Init

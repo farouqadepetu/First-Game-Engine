@@ -1,5 +1,5 @@
 #include "Direct3DLink.h"
-#include "FADirectXException.h"
+#include "DirectXException.h"
 #include "DisplayShapesGlobalVariables.h"
 #include "WindowProcedure.h"
 #include "InitFunctions.h"
@@ -23,28 +23,31 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	mainWindowClass.hIconSm = nullptr;
 
 	//The window where the shapes will be rendered to.
-	FAWindow::Window displayShapesWindow(hInstance, WindowProc::DisplayShapesWindowProc, FAColor::Color(0.4f, 0.4f, 0.4f, 1.0f),
+	RenderingEngine::Window displayShapesWindow{};
+	RenderingEngine::CreateParentWindow(displayShapesWindow, hInstance, WindowProc::DisplayShapesWindowProc, RenderingEngine::Color(0.4f, 0.4f, 0.4f, 1.0f),
 		L"Main Window Class", L"Display Shapes Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1024, 720);
 	GlobalVariables::window = &displayShapesWindow;
 
 	//The RenderScene we use to render the shapes.
-	FARender::RenderScene displayShapesScene(displayShapesWindow.GetWidth(), displayShapesWindow.GetHeight(), 
-		displayShapesWindow.GetWindowHandle(), GlobalVariables::isMSAAEnabled, GlobalVariables::isTextEnabled);
+	RenderingEngine::RenderScene displayShapesScene(RenderingEngine::GetWidth(displayShapesWindow), RenderingEngine::GetHeight(displayShapesWindow),
+		displayShapesWindow.windowHandle, GlobalVariables::isMSAAEnabled, GlobalVariables::isTextEnabled);
 	GlobalVariables::scene = &displayShapesScene;
 
 	//Initialization Functions
 	Init::BuildShapes();
 	Init::BuildCamera();
-	Init::BuildPerspectiveProjection(displayShapesWindow.GetWidth(), displayShapesWindow.GetHeight());
+	Init::BuildPerspectiveProjection(RenderingEngine::GetWidth(displayShapesWindow), RenderingEngine::GetHeight(displayShapesWindow));
 	Init::BuildShaders(displayShapesScene);
 	Init::BuildVertexAndIndexList(displayShapesScene);
 	Init::BuildVertexAndIndexBuffers(displayShapesScene);
 	Init::BuildConstantBuffers(displayShapesScene);
 	Init::BuildPSOs(displayShapesScene);
-	Init::BuildText(displayShapesWindow.GetWidth(), displayShapesWindow.GetHeight());
+	Init::BuildText(RenderingEngine::GetWidth(displayShapesWindow), RenderingEngine::GetHeight(displayShapesWindow));
 
 	MSG msg{};
-	GlobalVariables::frameTime.Reset();
+
+	RenderingEngine::InitializeTime(GlobalVariables::frameTime);
+	RenderingEngine::Reset(GlobalVariables::frameTime);
 
 	//Message Loop
 	while (msg.message != WM_QUIT)
@@ -56,7 +59,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		}
 		else
 		{
-			GlobalVariables::frameTime.Tick();
+			RenderingEngine::Tick(GlobalVariables::frameTime);
 
 			if (!GlobalVariables::isAppPaused)
 			{

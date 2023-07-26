@@ -1,5 +1,5 @@
 #include "Direct3DLink.h"
-#include "FADirectXException.h"
+#include "DirectXException.h"
 #include "GlobalVariables.h"
 #include "WindowProcedure.h"
 #include "InitFunctions.h"
@@ -27,7 +27,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	Init::BuildText();
 
 	MSG msg{};
-	GlobalVariables::frameTime.Reset();
+	RenderingEngine::InitializeTime(GlobalVariables::frameTime);
+	RenderingEngine::Reset(GlobalVariables::frameTime);
 
 	//Message Loop
 	while (msg.message != WM_QUIT)
@@ -39,7 +40,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		}
 		else
 		{
-			GlobalVariables::frameTime.Tick();
+			RenderingEngine::Tick(GlobalVariables::frameTime);
 
 			if (!GlobalVariables::isAppPaused)
 			{

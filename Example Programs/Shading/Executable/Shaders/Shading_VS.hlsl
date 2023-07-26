@@ -3,8 +3,8 @@
 //input struct
 struct vertexInput
 {
-	float4 inputPosition : POSITION;
-	float4 normal : NORMAL;
+	float3 inputPosition : POSITION;
+	float3 normal : NORMAL;
 };
 
 //output struct
@@ -12,7 +12,7 @@ struct vertexOutput
 {
 	float4 outputPosition : SV_POSITION;
 	float4 Color : COLOR;
-	float4 worldPosition: POSITION;
+	float4 worldPosition : POSITION;
 	float4 worldNormal : NORMAL;
 };
 
@@ -28,8 +28,8 @@ cbuffer PassConstantBuffer : register(b1)
 {
 	float4x4 viewMatrix;		//bytes 0-63
 	float4x4 projectionMatrix;  //bytes 64-127
-	float4 cameraPosition;		//bytes 128-143
-	uint shadingType;			//bytes 143-147
+	float3 cameraPosition;		//bytes 128-139
+	uint shadingType;			//bytes 140-143
 };
 
 //Material data
@@ -51,8 +51,8 @@ vertexOutput vsMain(vertexInput vin)
 	float3 totalColor = float3(0.0f, 0.0f, 0.0f);
 
 	//Transform the position and normal to world space.
-	float4 worldPos = mul(vin.inputPosition, localToWorldMatrix);
-	float4 worldNormal = mul(vin.normal, inverseTransposeLocalToWorldMatrix);
+    float4 worldPos = mul(float4(vin.inputPosition, 1.0f), localToWorldMatrix);
+    float4 worldNormal = mul(float4(vin.normal, 0.0f), inverseTransposeLocalToWorldMatrix);
 
 	if (shadingType == GOURAUD)
 	{
@@ -63,11 +63,11 @@ vertexOutput vsMain(vertexInput vin)
 		{
 			if (lightSources[i].lightSourceType == POINT_LIGHT)
 			{
-				totalColor += ComputePointLight(lightSources[i], mat, worldNormal, worldPos, cameraPosition, shadingType);
+				totalColor += ComputePointLight(lightSources[i], mat, worldNormal.xyz, worldPos.xyz, cameraPosition, shadingType);
 			}
 			else if(lightSources[i].lightSourceType == DIRECTIONAL_LIGHT)
 			{
-				totalColor += ComputeDirectionalLight(lightSources[i], mat, worldNormal, worldPos, cameraPosition, shadingType);
+				totalColor += ComputeDirectionalLight(lightSources[i], mat, worldNormal.xyz, worldPos.xyz, cameraPosition, shadingType);
 			}
 		}
 
@@ -84,7 +84,7 @@ vertexOutput vsMain(vertexInput vin)
 	float4x4 MVP = mul(localToWorldMatrix, mul(viewMatrix, projectionMatrix));
 
 	//Transform to homogenous clip space
-	vout.outputPosition = mul(vin.inputPosition, MVP);
+    vout.outputPosition = mul(float4(vin.inputPosition, 1.0f), MVP);
 
 	return vout;
 }

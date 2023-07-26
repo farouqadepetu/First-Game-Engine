@@ -2,57 +2,57 @@
 
 #define MAX_NUM_LIGHTS 4
 
-#include "FAWindow.h"
-#include "FATime.h"
-#include "FARenderScene.h"
-#include "FABox.h"
-#include "FAPyramid.h"
-#include "FASphere.h"
-#include "FACone.h"
-#include "FACylinder.h"
-#include "FAShapesUtility.h"
-#include "FACamera.h"
-#include "FAProjection.h"
-#include "FAText.h"
+#include "Window.h"
+#include "GameTime.h"
+#include "RenderScene.h"
+#include "Box.h"
+#include "Pyramid.h"
+#include "Sphere.h"
+#include "Cone.h"
+#include "Cylinder.h"
+#include "CreateShapes.h"
+#include "Camera.h"
+#include "PerspectiveProjection.h"
+#include "Text.h"
 
 struct ObjectConstants
 {
-	FAMath::Matrix4x4 localToWorld;		
-	FAMath::Matrix4x4 inverseTransposeLocalToWorld;
+	MathEngine::Matrix4x4 localToWorld;		
+	MathEngine::Matrix4x4 inverseTransposeLocalToWorld;
 };
 
 struct PassConstants
 {
-	FAMath::Matrix4x4 view;				//bytes 0-63
-	FAMath::Matrix4x4 projection;		//bytes 64-127
-	FAMath::Vector4D cameraPosition;	//bytes 128-143
-	unsigned int shadingType{ 0 };		//bytes 144-147
+	MathEngine::Matrix4x4 view;				//bytes 0-63
+	MathEngine::Matrix4x4 projection;		//bytes 64-127
+	MathEngine::Vector3D cameraPosition;	//bytes 128-139
+	unsigned int shadingType{ 0 };			//bytes 140-143
 };
 
 struct Material
 {
-	FAColor::Color ambient;		//bytes 0-15
-	FAColor::Color diffuse;		//bytes 16-31
-	FAColor::Color specular;	//bytes 32-47
-	float shininess{ 1.0f };	//bytes 48-51
+	RenderingEngine::Color ambient;		//bytes 0-15
+	RenderingEngine::Color diffuse;		//bytes 16-31
+	RenderingEngine::Color specular;	//bytes 32-47
+	float shininess{ 1.0f };			//bytes 48-51
 };
 
 //Light source properties
 struct Light
 {
-	FAColor::Color ambient;		//bytes 0-15
-	FAColor::Color diffuse;		//bytes 16-31
-	FAColor::Color specular;	//bytes 32-47
+	RenderingEngine::Color ambient;		//bytes 0-15
+	RenderingEngine::Color diffuse;		//bytes 16-31
+	RenderingEngine::Color specular;	//bytes 32-47
 
 	//for point lights
-	FAMath::Vector4D position;	//bytes 48-63
+	MathEngine::Vector3D position;		//bytes 48-59
+
+	int pad0{ 0 };						//bytes 60-63
 
 	//for direction lights
-	FAMath::Vector4D direction;	//bytes 64-79
+	MathEngine::Vector3D direction;		//bytes 64-75
 
-	int lightSourceType{ -1 };	//bytes 80-83
-
-	FAMath::Vector3D pad;		//bytes 84-95
+	int lightSourceType{ -1 };			//bytes 76-79
 };
 
 
@@ -61,40 +61,39 @@ struct ObjectConstantBuffer
 {
 	ObjectConstants objectConstants;					//bytes 0-127
 
-	FAMath::Matrix4x4 pad0;								//bytes 128-191
-	FAMath::Matrix4x4 pad1;								//bytes 192-255
+	MathEngine::Matrix4x4 pad0;								//bytes 128-191
+	MathEngine::Matrix4x4 pad1;								//bytes 192-255
 };
 
 //Constant data not related to objects.
 struct PassConstantBuffer
 {
-	PassConstants passConstants;		//bytes 0-147
+	PassConstants passConstants;			//bytes 0-143
 
-	FAMath::Matrix4x4 pad2;				//bytes 148-211
-	FAMath::Vector4D pad3;				//bytes 212-227
-	FAMath::Vector4D pad4;				//bytes 228-243
-	FAMath::Vector3D pad5;				//bytes 244-255
+	MathEngine::Matrix4x4 pad2;				//bytes 144-207
+	MathEngine::Matrix3x3 pad3;				//bytes 208-243
+	MathEngine::Vector3D pad4;				//bytes 244-255
 };
 
 
 //Material properties
 struct MaterialConstantBuffer
 {
-	Material material;			//bytes 0-51
+	Material material;				//bytes 0-51
 
-	FAMath::Matrix4x4 pad0;		//bytes 52-115
-	FAMath::Matrix4x4 pad1;		//bytes 116-179
-	FAMath::Matrix4x4 pad2;		//bytes 180-243
-	FAMath::Vector3D pad3;		//bytes 244-255
+	MathEngine::Matrix4x4 pad0;		//bytes 52-115
+	MathEngine::Matrix4x4 pad1;		//bytes 116-179
+	MathEngine::Matrix4x4 pad2;		//bytes 180-243
+	MathEngine::Vector3D pad3;		//bytes 244-255
 };
 
 //The struct for the light constant buffer in the hlsl shadeer
 struct LightConstantBuffer
 {
-	Light lightSources[MAX_NUM_LIGHTS]; //bytes 0-383
-	FAMath::Matrix4x4 pad0;				//bytes 384-447
-	FAMath::Matrix4x4 pad1;				//bytes 448-511
-
+	Light lightSources[MAX_NUM_LIGHTS];		//bytes 0-319
+	MathEngine::Matrix4x4 pad0;				//bytes 320-383
+	MathEngine::Matrix4x4 pad1;				//bytes 384-447
+	MathEngine::Matrix4x4 pad2;				//bytes 448-511
 };
 
 namespace GlobalVariables
@@ -113,26 +112,26 @@ namespace GlobalVariables
 	inline unsigned int buttonHeight{ 40 };
 
 	//The main window we render to
-	inline FAWindow::Window mainWindow;
+	inline RenderingEngine::Window mainWindow;
 
 	//The width and height of the client area of the main window
 	inline RECT mainWindowClientRect{};
 
 	//The window we render to
-	inline FAWindow::Window renderingWindow;
+	inline RenderingEngine::Window renderingWindow;
 
 	//The static text for each drop down list window.
-	inline FAWindow::Window staticText[4];
+	inline RenderingEngine::Window staticText[4];
 
 	//The drop down list windows to select shading, shapes, materials and light sources.
-	inline FAWindow::Window dropDownLists[4];
+	inline RenderingEngine::Window dropDownLists[4];
 
 	//Used in the window procedure to stop the time if the application is paused and starts it if the application is no longer paused.
 	//Also used to get the time between frames.
-	inline FATime::Time frameTime;
+	inline RenderingEngine::Time frameTime;
 
 	//Used in the window procedure to call the resize function when the user resizes the window.
-	inline std::unique_ptr<FARender::RenderScene> shadingScene{ nullptr };
+	inline std::unique_ptr<RenderingEngine::RenderScene> shadingScene{ nullptr };
 
 	//Enums to help keep track of the keys of mapped values.
 	enum ShaderNames { GOURAUD_VS, GOURAUD_PS, PHONG_VS, PHONG_PS, BLINN_PHONG_VS, BLINN_PHONG_PS, SHADING_VS, SHADING_PS };
@@ -144,25 +143,25 @@ namespace GlobalVariables
 	enum SelectionNames { SHADING, SHAPES, MATERIALS, LIGHT_SOURCE };
 	enum ButtonNames { PLAY_PAUSE, RESET_CAMERA, RESET_SHAPE };
 
-	inline FAShapes::Box box;
-	inline FAShapes::Pyramid pyramid;
-	inline FAShapes::Cone cone;
-	inline FAShapes::Cylinder cylinder;
-	inline FAShapes::Sphere sphere;
+	inline ShapesEngine::Box box;
+	inline ShapesEngine::Pyramid pyramid;
+	inline ShapesEngine::Cone cone;
+	inline ShapesEngine::Cylinder cylinder;
+	inline ShapesEngine::Sphere sphere;
 
 	//vector to store pointers to 3D shapes.
-	inline std::vector<FAShapes::ThreeDimensionalShape*> shapes;
+	inline std::vector<ShapesEngine::ThreeDimensionalShape*> shapes;
 
 	//Vector to store all the vertices of the 3D shapes.
-	inline std::vector<FAShapes::Vertex> vertexList;
+	inline std::vector<ShapesEngine::Vertex> vertexList;
 
 	//Vector to store all the indices of the 3D shapes.
 	inline std::vector<unsigned int> indexList;
 
 	//Camera for the scene
-	inline FACamera::Camera camera;
+	inline RenderingEngine::Camera camera;
 
-	inline FAProjection::PerspectiveProjection pProjection;
+	inline RenderingEngine::PerspectiveProjection pProjection;
 
 	//Vector store all the materials.
 	inline std::vector<Material> materials;
@@ -170,11 +169,13 @@ namespace GlobalVariables
 	//Array to store all the light sources.
 	inline std::vector<Light> lightSources(MAX_NUM_LIGHTS);
 
-	inline FARender::Text framesPerSecond;
+	inline RenderingEngine::Text framesPerSecond;
 
 	inline std::vector<unsigned int> currentSelection;
 
 	inline HFONT textFont;
 
-	inline FAWindow::Window buttons[3];
+	inline RenderingEngine::Window buttons[3];
+
+	inline vec2 lastMousePosition;
 }

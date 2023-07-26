@@ -5,32 +5,32 @@ namespace MVC
 	Model::Model()
 	{}
 
-	FARender::RenderScene* Model::GetScene()
+	RenderingEngine::RenderScene* Model::GetScene()
 	{
 		return mScene.get();
 	}
 
-	FACamera::Camera& Model::GetCamera()
+	RenderingEngine::Camera& Model::GetCamera()
 	{
 		return mCamera;
 	}
 
-	FAProjection::PerspectiveProjection& Model::GetPerspectiveProjection()
+	RenderingEngine::PerspectiveProjection& Model::GetPerspectiveProjection()
 	{
 		return mPerspectiveProjection;
 	}
 
-	FAShapes::ThreeDimensionalShape* Model::GetShape(unsigned int index)
+	ShapesEngine::ThreeDimensionalShape* Model::GetShape(unsigned int index)
 	{
 		return mShapes.at(index);
 	}
 
-	FAShapes::Sphere& Model::GetPointLight(unsigned int index)
+	ShapesEngine::Sphere& Model::GetPointLight(unsigned int index)
 	{
 		return mPointLights.at(index);
 	}
 
-	FATime::Time& Model::GetFrameTime()
+	RenderingEngine::Time& Model::GetFrameTime()
 	{
 		return mFrameTime;
 	}
@@ -52,36 +52,50 @@ namespace MVC
 
 	void Model::ResetCamera()
 	{
-		mCamera.LookAt(FAMath::Vector4D(-4.0f, 2.0f, -6.0f, 1.0f), FAMath::Vector4D(0.0f, 0.0f, 0.0f, 1.0f),
-			FAMath::Vector4D(0.0f, 1.0f, 0.0f, 0.0f));
+		LookAt(mCamera, vec3{ -4.0f, 2.0f, -6.0f }, vec3{ 0.0f, 0.0f, 0.0f },
+			vec3{ 0.0f, 1.0f, 0.0f });
 	}
 
 	void Model::ResetShape(unsigned int currentShape)
 	{
-		mShapes.at(currentShape)->SetOrientation(FAMath::Quaternion());
+		mShapes.at(currentShape)->orientation = MathEngine::Quaternion{};
 	}
 
 	void Model::ResetPointLights()
 	{
-		mPointLights.at(0).GetShape().SetPosition(FAMath::Vector4D(0.0f, 0.0f, -2.5f, 1.0f));
-		mPointLights.at(1).GetShape().SetPosition(FAMath::Vector4D(0.0f, 0.0f, 2.5f, 1.0f));
-		mPointLights.at(2).GetShape().SetPosition(FAMath::Vector4D(0.0f, -2.5f, 0.0f, 1.0f));
-		mPointLights.at(3).GetShape().SetPosition(FAMath::Vector4D(0.0f, 2.5f, 0.0f, 1.0f));
+		mPointLights.at(0).GetShape().position = vec3{ 0.0f, 0.0f, -2.5f };
+		mPointLights.at(1).GetShape().position = vec3{ 0.0f, 0.0f, 2.5f };
+		mPointLights.at(2).GetShape().position = vec3{ 0.0f, -2.5f, 0.0f };
+		mPointLights.at(3).GetShape().position = vec3{ 0.0f, 2.5f, 0.0f };
 
 		for (auto& i : mPointLights)
 		{
-			i.GetShape().SetOrientation(FAMath::Quaternion());
+			i.GetShape().orientation = MathEngine::Quaternion{};
 		}
+
+		mLightSources.at(0).position = vec3{ 0.0f, 0.0f, -2.5f };
+		mLightSources.at(1).position = vec3{ 0.0f, 0.0f, 2.5f, };
+		mLightSources.at(2).position = vec3{ 0.0f, -2.5f, 0.0f };
+		mLightSources.at(3).position = vec3{ 0.0f, 2.5f, 0.0f };
 	}
 
 	void Model::BuildShapes()
 	{
 		//Define properties of each shape.
-		box.InitializeBox(1.0f, 1.0f, 1.0f, FAMath::Vector4D(0.0f, 0.0f, 0.0f, 1.0f), FAMath::Quaternion(), FAColor::Color(0.0f, 1.0f, 0.0f, 1.0f));
-		pyramid.InitializePyramid(1.0f, 1.0f, 1.0f, FAMath::Vector4D(0.0f, 0.0f, 0.0f, 1.0f), FAMath::Quaternion(), FAColor::Color(1.0f, 1.0f, 0.0f, 1.0f));
-		sphere.InitializeSphere(1.0f, FAMath::Vector4D(0.0f, 0.0f, 0.0f, 1.0f), FAMath::Quaternion(), FAColor::Color(1.0f, 0.0f, 0.0f, 1.0f));
-		cylinder.InitializeCylinder(1.0f, 1.0f, FAMath::Vector4D(0.0f, 0.0f, 0.0f, 1.0f), FAMath::Quaternion(), FAColor::Color(0.0f, 0.0f, 1.0f, 1.0f));
-		cone.InitializeCone(1.0f, 1.0f, FAMath::Vector4D(0.0f, 0.0f, 0.0f, 1.0f), FAMath::Quaternion(), FAColor::Color(0.0f, 1.0f, 1.0f, 1.0f));
+		box.InitializeBox(1.0f, 1.0f, 1.0f, vec3{ 0.0f, 0.0f, 0.0f }, MathEngine::Quaternion{},
+			RenderingEngine::Color(0.0f, 1.0f, 0.0f, 1.0f));
+
+		pyramid.InitializePyramid(1.0f, 1.0f, 1.0f, vec3{ 0.0f, 0.0f, 0.0f }, MathEngine::Quaternion{},
+			RenderingEngine::Color(1.0f, 1.0f, 0.0f, 1.0f));
+
+		sphere.InitializeSphere(1.0f, vec3{ 0.0f, 0.0f, 0.0f }, MathEngine::Quaternion{},
+			RenderingEngine::Color(1.0f, 0.0f, 0.0f, 1.0f));
+
+		cylinder.InitializeCylinder(1.0f, 1.0f, vec3{ 0.0f, 0.0f, 0.0f }, MathEngine::Quaternion{},
+			RenderingEngine::Color(0.0f, 0.0f, 1.0f, 1.0f));
+
+		cone.InitializeCone(1.0f, 1.0f, vec3{ 0.0f, 0.0f, 0.0f }, MathEngine::Quaternion{},
+			RenderingEngine::Color(0.0f, 1.0f, 1.0f, 1.0f));
 
 		mShapes.push_back(&sphere.GetShape());
 		mShapes.push_back(&cylinder.GetShape());
@@ -94,16 +108,16 @@ namespace MVC
 	{
 		for(unsigned int i = 0; i < MAX_NUM_LIGHTS; ++i)
 		{
-			mPointLights.emplace_back(FAShapes::Sphere());
-			mPointLights.at(i).InitializeSphere(0.1f, mLightSources.at(i).position, FAMath::Quaternion(), FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f));
+			mPointLights.emplace_back(ShapesEngine::Sphere());
+			mPointLights.at(i).InitializeSphere(0.1f, mLightSources.at(i).position, MathEngine::Quaternion(), RenderingEngine::Color(1.0f, 1.0f, 1.0f, 1.0f));
 		}
 	}
 
 	void Model::BuildMaterial()
 	{
-		mMaterial.ambient = FAColor::Color(0.2f, 0.2f, 0.2f, 1.0f);
-		mMaterial.diffuse = FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f);
-		mMaterial.specular = FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f);
+		mMaterial.ambient = RenderingEngine::Color(0.2f, 0.2f, 0.2f, 1.0f);
+		mMaterial.diffuse = RenderingEngine::Color(1.0f, 1.0f, 1.0f, 1.0f);
+		mMaterial.specular = RenderingEngine::Color(1.0f, 1.0f, 1.0f, 1.0f);
 		mMaterial.shininess = 500.0f;
 	}
 
@@ -111,45 +125,42 @@ namespace MVC
 	{
 		mLightSources.resize(MAX_NUM_LIGHTS);
 
-		mLightSources.at(0).color = FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f);
-		mLightSources.at(0).position = FAMath::Vector4D(0.0f, 0.0f, -2.5f, 1.0f);
-		mLightSources.at(0).direction = FAMath::Vector4D(0.0f, 0.0f, 0.0f, 0.0f);
+		mLightSources.at(0).color = RenderingEngine::Color(1.0f, 1.0f, 1.0f, 1.0f);
+		mLightSources.at(0).position = vec3{ 0.0f, 0.0f, -2.5f };
+		mLightSources.at(0).direction = vec3{ 0.0f, 0.0f, 0.0f };
 		mLightSources.at(0).lightSourceType = POINT_LIGHT;
 
-		mLightSources.at(1).color = FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f);
-		mLightSources.at(1).position = FAMath::Vector4D(0.0f, 0.0f, 2.5f, 1.0f);
-		mLightSources.at(1).direction = FAMath::Vector4D(0.0f, 0.0f, 0.0f, 0.0f);
+		mLightSources.at(1).color = RenderingEngine::Color(1.0f, 1.0f, 1.0f, 1.0f);
+		mLightSources.at(1).position = vec3{ 0.0f, 0.0f, 2.5f, };
+		mLightSources.at(1).direction = vec3{ 0.0f, 0.0f, 0.0f };
 		mLightSources.at(1).lightSourceType = POINT_LIGHT;
 
-		mLightSources.at(2).color = FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f);
-		mLightSources.at(2).position = FAMath::Vector4D(0.0f, -2.5f, 0.0f, 1.0f);
-		mLightSources.at(2).direction = FAMath::Vector4D(0.0f, 0.0f, 0.0f, 0.0f);
+		mLightSources.at(2).color = RenderingEngine::Color(1.0f, 1.0f, 1.0f, 1.0f);
+		mLightSources.at(2).position = vec3{ 0.0f, -2.5f, 0.0f };
+		mLightSources.at(2).direction = vec3{ 0.0f, 0.0f, 0.0f };
 		mLightSources.at(2).lightSourceType = POINT_LIGHT;
 
-		mLightSources.at(3).color = FAColor::Color(1.0f, 1.0f, 1.0f, 1.0f);
-		mLightSources.at(3).position = FAMath::Vector4D(0.0f, 2.5f, 0.0f, 1.0f);
-		mLightSources.at(3).direction = FAMath::Vector4D(0.0f, 0.0f, 0.0f, 0.0f);
+		mLightSources.at(3).color = RenderingEngine::Color(1.0f, 1.0f, 1.0f, 1.0f);
+		mLightSources.at(3).position = vec3{ 0.0f, 2.5f, 0.0f };
+		mLightSources.at(3).direction = vec3{ 0.0f, 0.0f, 0.0f };
 		mLightSources.at(3).lightSourceType = POINT_LIGHT;
 	}
 
 	void Model::BuildCamera()
 	{
-		mCamera.SetProperties(FAMath::Vector4D(0.0f, 0.0f, 0.0f, 1.0f),
-			FAMath::Vector4D(1.0f, 0.0f, 0.0f, 0.0f), FAMath::Vector4D(0.0f, 1.0f, 0.0f, 0.0f), FAMath::Vector4D(0.0f, 0.0f, 1.0f, 0.0f),
-			5.0f, 0.25f);
+		SetProperties(mCamera, vec3{ 0.0f, 0.0f, 0.0f }, vec3{ 1.0f, 0.0f, 0.0f }, vec3{ 0.0f, 1.0f, 0.0f }, vec3{ 0.0f, 0.0f, 1.0f }, 5.0f, 0.25f);
 
-		mCamera.LookAt(FAMath::Vector4D(-4.0f, 2.0f, -6.0f, 1.0f), FAMath::Vector4D(0.0f, 0.0f, 0.0f, 1.0f),
-			FAMath::Vector4D(0.0f, 1.0f, 0.0f, 0.0f));
+		LookAt(mCamera, vec3{ -4.0f, 2.0f, -6.0f }, vec3{ 0.0f, 0.0f, 0.0f }, vec3{ 0.0f, 1.0f, 0.0f });
 	}
 
 	void Model::BuildPerspectiveProjection(unsigned int width, unsigned int height)
 	{
-		mPerspectiveProjection.SetProperties(1.0f, 100.0f, 45.0f, (float)width / height);
+		SetProperties(mPerspectiveProjection, 1.0f, 100.0f, 45.0f, (float)width / height);
 	}
 
 	void Model::BuildScene(unsigned int width, unsigned int height, HWND windowHandle)
 	{
-		mScene = std::make_unique<FARender::RenderScene>(width, height, windowHandle);
+		mScene = std::make_unique<RenderingEngine::RenderScene>(width, height, windowHandle);
 	}
 
 	void Model::BuildShaders()
@@ -169,9 +180,9 @@ namespace MVC
 		mScene->CompileShader(COLOR_NO_SHADING_VS, L"Shaders/Color_No_Shading_VS.hlsl", "vsMain", "vs_5_1");
 		mScene->CompileShader(COLOR_NO_SHADING_PS, L"Shaders/Color_No_Shading_PS.hlsl", "psMain", "ps_5_1");
 
-		mScene->CreateInputElementDescription(VS_INPUT_LAYOUT, "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0);
-		mScene->CreateInputElementDescription(VS_INPUT_LAYOUT, "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16);
-		mScene->CreateInputElementDescription(VS_INPUT_LAYOUT, "TEXCOORDS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32);
+		mScene->CreateInputElementDescription(VS_INPUT_LAYOUT, "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0);
+		mScene->CreateInputElementDescription(VS_INPUT_LAYOUT, "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12);
+		mScene->CreateInputElementDescription(VS_INPUT_LAYOUT, "TEXCOORDS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24);
 
 		mScene->CreateRootDescriptor(EARTH_ROOT_PARAMETER, OBJECT_REGISTER); //object cb register b0
 		mScene->CreateRootDescriptor(EARTH_ROOT_PARAMETER, PASS_REGISTER); //pass cb register b1
@@ -196,73 +207,73 @@ namespace MVC
 
 	void Model::BuildVertexAndIndexBuffers()
 	{
-		std::vector<FAShapes::Vertex> vertices;
-		std::vector<FAShapes::Triangle> triangles;
+		std::vector<ShapesEngine::Vertex> vertices;
+		std::vector<ShapesEngine::Triangle> triangles;
 
-		FAShapes::CreateBox(vertices, triangles);
-		box.GetShape().SetDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), 0, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
-
-		for (const auto& i : triangles)
-		{
-			mIndexList.push_back(i.GetP0Index());
-			mIndexList.push_back(i.GetP1Index());
-			mIndexList.push_back(i.GetP2Index());
-		}
-		vertices.clear();
-		triangles.clear();
-
-		FAShapes::CreatePyramid(vertices, triangles);
-		pyramid.GetShape().SetDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), 1, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		ShapesEngine::CreateBox(vertices, triangles);
+		SetDrawArguments(box.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), 0, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
 		for (const auto& i : triangles)
 		{
-			mIndexList.push_back(i.GetP0Index());
-			mIndexList.push_back(i.GetP1Index());
-			mIndexList.push_back(i.GetP2Index());
+			mIndexList.push_back(i.p0);
+			mIndexList.push_back(i.p1);
+			mIndexList.push_back(i.p2);
 		}
 		vertices.clear();
 		triangles.clear();
 
-		FAShapes::CreateCylinder(vertices, triangles);
-		cylinder.GetShape().SetDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), 2, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		ShapesEngine::CreatePyramid(vertices, triangles);
+		SetDrawArguments(pyramid.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), 1, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
 		for (const auto& i : triangles)
 		{
-			mIndexList.push_back(i.GetP0Index());
-			mIndexList.push_back(i.GetP1Index());
-			mIndexList.push_back(i.GetP2Index());
+			mIndexList.push_back(i.p0);
+			mIndexList.push_back(i.p1);
+			mIndexList.push_back(i.p2);
 		}
 		vertices.clear();
 		triangles.clear();
 
-		FAShapes::CreateCone(vertices, triangles);
-		cone.GetShape().SetDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), 3, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		ShapesEngine::CreateCylinder(vertices, triangles);
+		SetDrawArguments(cylinder.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), 2, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
 		for (const auto& i : triangles)
 		{
-			mIndexList.push_back(i.GetP0Index());
-			mIndexList.push_back(i.GetP1Index());
-			mIndexList.push_back(i.GetP2Index());
+			mIndexList.push_back(i.p0);
+			mIndexList.push_back(i.p1);
+			mIndexList.push_back(i.p2);
 		}
 		vertices.clear();
 		triangles.clear();
 
-		FAShapes::CreateSphere(vertices, triangles);
-		sphere.GetShape().SetDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), 4, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		ShapesEngine::CreateCone(vertices, triangles);
+		SetDrawArguments(cone.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), 3, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
+
+		for (const auto& i : triangles)
+		{
+			mIndexList.push_back(i.p0);
+			mIndexList.push_back(i.p1);
+			mIndexList.push_back(i.p2);
+		}
+		vertices.clear();
+		triangles.clear();
+
+		ShapesEngine::CreateSphere(vertices, triangles);
+		SetDrawArguments(sphere.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), 4, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		unsigned int constantDataIndex{ 5 };
 		for (auto& i : mPointLights)
 		{
 			//Describe the draw arguments for each point light.
-			i.GetShape().SetDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), constantDataIndex, L"OBJECTCB",
+			SetDrawArguments(i.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), constantDataIndex, L"OBJECTCB",
 				0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			++constantDataIndex;
@@ -272,14 +283,14 @@ namespace MVC
 
 		for (const auto& i : triangles)
 		{
-			mIndexList.push_back(i.GetP0Index());
-			mIndexList.push_back(i.GetP1Index());
-			mIndexList.push_back(i.GetP2Index());
+			mIndexList.push_back(i.p0);
+			mIndexList.push_back(i.p1);
+			mIndexList.push_back(i.p2);
 		}
 
 
 		mScene->CreateStaticBuffer(SHAPES_VERTEX_BUFFER, mVertexList.data(),
-			mVertexList.size() * sizeof(FAShapes::Vertex), sizeof(FAShapes::Vertex));
+			mVertexList.size() * sizeof(ShapesEngine::Vertex), sizeof(ShapesEngine::Vertex));
 
 		mScene->CreateStaticBuffer(SHAPES_INDEX_BUFFER, mIndexList.data(),
 			mIndexList.size() * sizeof(unsigned int), DXGI_FORMAT_R32_UINT);
@@ -298,10 +309,10 @@ namespace MVC
 	void Model::BuildTextures()
 	{
 		mScene->CreateTextureViewHeap(4);
-		mScene->CreateStaticBuffer(MOON_TEX, L"Textures/moon.dds", FARender::TEX2D, 0);
-		mScene->CreateStaticBuffer(SUN_TEX, L"Textures/sun.dds", FARender::TEX2D, 1);
-		mScene->CreateStaticBuffer(EARTH_TEX, L"Textures/earth.dds", FARender::TEX2D, 2);
-		mScene->CreateStaticBuffer(EARTH_SPECULAR_TEX, L"Textures/earthSpecular.dds", FARender::TEX2D, 3);
+		mScene->CreateStaticBuffer(MOON_TEX, L"Textures/moon.dds", RenderingEngine::TEX2D, 0);
+		mScene->CreateStaticBuffer(SUN_TEX, L"Textures/sun.dds", RenderingEngine::TEX2D, 1);
+		mScene->CreateStaticBuffer(EARTH_TEX, L"Textures/earth.dds", RenderingEngine::TEX2D, 2);
+		mScene->CreateStaticBuffer(EARTH_SPECULAR_TEX, L"Textures/earthSpecular.dds", RenderingEngine::TEX2D, 3);
 
 		mScene->CreateDescriptorRange(EARTH_DESC_RANGE, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 0, 0, 0); //texture cb register t0-t1
 		mScene->CreateDescriptorTable(EARTH_ROOT_PARAMETER, EARTH_DESC_RANGE);
@@ -348,15 +359,15 @@ namespace MVC
 			VS_INPUT_LAYOUT, COLOR_SHADING_ROOT_SIG, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 	}
 
-	void Model::InitializeScene(const FAWindow::Window& window)
+	void Model::InitializeScene(const RenderingEngine::Window& window)
 	{
 		BuildMaterial();
 		BuildLightSources();
 		BuildShapes();
 		BuildPointLights();
 		BuildCamera();
-		BuildPerspectiveProjection(window.GetWidth(), window.GetHeight());
-		BuildScene(window.GetWidth(), window.GetHeight(), window.GetWindowHandle());
+		BuildPerspectiveProjection(RenderingEngine::GetWidth(window), RenderingEngine::GetHeight(window));
+		BuildScene(RenderingEngine::GetWidth(window), RenderingEngine::GetHeight(window), window.windowHandle);
 		BuildShaders();
 		BuildVertexAndIndexBuffers();
 		BuildConstantBuffers();

@@ -1,5 +1,5 @@
 #include "Direct3DLink.h"
-#include "FADirectXException.h"
+#include "DirectXException.h"
 #include "WindowProcedure.h"
 #include "Model.h"
 #include "View.h"

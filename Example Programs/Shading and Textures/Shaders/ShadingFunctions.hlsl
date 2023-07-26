@@ -1,16 +1,16 @@
 #include "Structures.hlsl"
 
 //Make sure the worldNormal, lightVector and halfwayVector are normalized before passing them in.
-float3 BlinnPhongShading(Light light, Material mat, float4 worldNormal, float4 lightVector, float4 halfwayVector,
+float3 BlinnPhongShading(Light light, Material mat, float3 worldNormal, float3 lightVector, float3 halfwayVector,
 	float attenuation)
 {
 	//ambient color of the pixel
-	float3 ambientColor = light.color.xyz * mat.ambient.xyz;
+	float3 ambientColor = light.color * mat.ambient;
 
 	//diffuse color of the pixel
 	float kd = dot(lightVector, worldNormal);
 	kd = clamp(kd, 0.0f, 1.0f);
-	float3 diffuseColor = light.color.xyz * mat.diffuse.xyz * kd;
+	float3 diffuseColor = light.color * mat.diffuse * kd;
 
 	//specular color of the pixel
 	float3 specularColor = { 0.0f, 0.0f, 0.0f };
@@ -19,7 +19,7 @@ float3 BlinnPhongShading(Light light, Material mat, float4 worldNormal, float4 l
 	ks = pow(ks, mat.shininess);
 	if (ks > 0.0f)
 	{
-		specularColor = light.color.xyz * mat.specular.xyz * ks;
+		specularColor = light.color * mat.specular * ks;
 		diffuseColor = diffuseColor * (1.0f - ks);
 	}
 
@@ -28,10 +28,10 @@ float3 BlinnPhongShading(Light light, Material mat, float4 worldNormal, float4 l
 }
 
 //Make sure the worldNormal is normalized before passing it in.
-float3 ComputePointLightBlinnPhong(Light light, Material mat, float4 worldNormal, float4 worldPos, float4 cameraPos)
+float3 ComputePointLightBlinnPhong(Light light, Material mat, float3 worldNormal, float3 worldPos, float3 cameraPos)
 {
-	float4 lightVector = light.position - worldPos;
-	float4 viewVector = cameraPos - worldPos;
+	float3 lightVector = light.position - worldPos;
+	float3 viewVector = cameraPos - worldPos;
 
 	float distance = length(lightVector);
 	float attenuation = 1.0f / (1.0f + 0.04f * distance);
@@ -39,7 +39,7 @@ float3 ComputePointLightBlinnPhong(Light light, Material mat, float4 worldNormal
 	lightVector = normalize(lightVector);
 	viewVector = normalize(viewVector);
 
-	float4 halfwayVector = lightVector + viewVector;
+	float3 halfwayVector = lightVector + viewVector;
 	halfwayVector = normalize(halfwayVector);
 	
 	return BlinnPhongShading(light, mat, worldNormal, lightVector, halfwayVector, attenuation);

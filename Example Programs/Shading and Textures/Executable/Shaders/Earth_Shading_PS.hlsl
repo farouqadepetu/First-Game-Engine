@@ -22,7 +22,7 @@ float4 psMain(vertexOutput vout) : SV_TARGET
 
 	for (int i = 0; i < MAX_NUM_LIGHTS; ++i)
 	{
-		pColor += ComputePointLightBlinnPhong(lights[i], material, vout.worldNormal, vout.worldPosition,
+		pColor += ComputePointLightBlinnPhong(lights[i], material, vout.worldNormal.xyz, vout.worldPosition.xyz,
 			passConstantData.cameraPosition);
 	}
 

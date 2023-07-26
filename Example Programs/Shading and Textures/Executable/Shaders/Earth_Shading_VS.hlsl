@@ -7,9 +7,9 @@ vertexOutput vsMain(vertexInput vin)
 
 	float4x4 MVP = mul(objectConstantData.localToWorldMatrix, mul(passConstantData.viewMatrix, passConstantData.projectionMatrix));
 
-	vout.outputPosition = mul(vin.inputPosition, MVP);
-	vout.worldPosition = mul(vin.inputPosition, objectConstantData.localToWorldMatrix);
-	vout.worldNormal = mul(vin.normal, objectConstantData.inverseTransposeLocalToWorldMatrix);
+    vout.outputPosition = mul(float4(vin.inputPosition, 1.0f), MVP);
+    vout.worldPosition = mul(float4(vin.inputPosition, 1.0f), objectConstantData.localToWorldMatrix);
+    vout.worldNormal = mul(float4(vin.normal, 0.0f), objectConstantData.inverseTransposeLocalToWorldMatrix);
 	vout.texCoords = vin.texCoords;
 
 	return vout;

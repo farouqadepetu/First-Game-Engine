@@ -1,14 +1,14 @@
 #pragma once
 
-#include "FARenderScene.h"
-#include "FARigidBox.h"
-#include "FARigidCone.h"
-#include "FARigidCylinder.h"
-#include "FARigidSphere.h"
-#include "FARigidPyramid.h"
-#include "FATime.h"
-#include "FAForceFunctions.h"
-#include "FAShapesUtility.h"
+#include "RenderScene.h"
+#include "RigidBox.h"
+#include "RigidCone.h"
+#include "RigidCylinder.h"
+#include "RigidSphere.h"
+#include "RigidPyramid.h"
+#include "GameTime.h"
+#include "ForceFunctions.h"
+#include "CreateShapes.h"
 #include "Structures.h"
 #include <memory>
 
@@ -21,13 +21,13 @@ namespace MVC
 	public:
 		Model();
 
-		void StoreVerticesAndIndices(FARender::RenderScene* scene);
+		void StoreVerticesAndIndices(RenderingEngine::RenderScene* scene);
 
 		void Simulate(float renderTime);
 
-		void UpdateModels(FARender::RenderScene* scene, const FAMath::Matrix4x4& viewMatrix, const FAMath::Matrix4x4& projectionMatrix);
+		void UpdateModels(RenderingEngine::RenderScene* scene, const mat4& viewMatrix, const mat4& projectionMatrix);
 
-		void RenderModels(FARender::RenderScene* scene);
+		void RenderModels(RenderingEngine::RenderScene* scene);
 
 		void Reset();
 
@@ -45,30 +45,30 @@ namespace MVC
 		float mAccumulator;
 		float mAlpha;
 
-		FAPhysicsShapes::RigidBox mPreviousBox;
-		FAPhysicsShapes::RigidBox mInterpolatedBox;
-		FAPhysicsShapes::RigidBox mCurrentBox;
+		PhysicsEngine::RigidBox mPreviousBox;
+		PhysicsEngine::RigidBox mInterpolatedBox;
+		PhysicsEngine::RigidBox mCurrentBox;
 
-		FAPhysicsShapes::RigidCone mPreviousCone;
-		FAPhysicsShapes::RigidCone mInterpolatedCone;
-		FAPhysicsShapes::RigidCone mCurrentCone;
+		PhysicsEngine::RigidCone mPreviousCone;
+		PhysicsEngine::RigidCone mInterpolatedCone;
+		PhysicsEngine::RigidCone mCurrentCone;
 
-		FAPhysicsShapes::RigidCylinder mPreviousCylinder;
-		FAPhysicsShapes::RigidCylinder mInterpolatedCylinder;
-		FAPhysicsShapes::RigidCylinder mCurrentCylinder;
+		PhysicsEngine::RigidCylinder mPreviousCylinder;
+		PhysicsEngine::RigidCylinder mInterpolatedCylinder;
+		PhysicsEngine::RigidCylinder mCurrentCylinder;
 
-		FAPhysicsShapes::RigidSphere mPreviousSphere;
-		FAPhysicsShapes::RigidSphere mInterpolatedSphere;
-		FAPhysicsShapes::RigidSphere mCurrentSphere;
+		PhysicsEngine::RigidSphere mPreviousSphere;
+		PhysicsEngine::RigidSphere mInterpolatedSphere;
+		PhysicsEngine::RigidSphere mCurrentSphere;
 
-		FAPhysicsShapes::RigidPyramid mPreviousPyramid;
-		FAPhysicsShapes::RigidPyramid mInterpolatedPyramid;
-		FAPhysicsShapes::RigidPyramid mCurrentPyramid;
+		PhysicsEngine::RigidPyramid mPreviousPyramid;
+		PhysicsEngine::RigidPyramid mInterpolatedPyramid;
+		PhysicsEngine::RigidPyramid mCurrentPyramid;
 
-		std::vector<FAShapes::ThreeDimensionalShape*> mShapes;
-		std::vector<FAPhysics::RigidBody*> mRigidBodies;
+		std::vector<ShapesEngine::ThreeDimensionalShape*> mShapes;
+		std::vector<PhysicsEngine::RigidBody*> mRigidBodies;
 
-		std::vector<FAShapes::Vertex> mVertexList;
+		std::vector<ShapesEngine::Vertex> mVertexList;
 		std::vector<unsigned int> mIndexList;
 	};
 }

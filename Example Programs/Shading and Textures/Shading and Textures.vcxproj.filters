@@ -30,70 +30,73 @@
     <ClCompile Include="WindowProcedure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\DDSTextureLoader.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FABuffer.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FACamera.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Color.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FAColor.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\DDSTextureLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FADeviceResources.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\DeviceResources.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FADirectXException.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\DirectXException.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FAMultiSampling.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\GameTime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FAProjection.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Multisampling.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FARenderScene.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\OrthographicProjection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FASwapChain.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\PerspectiveProjection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FAText.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\RenderScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FATextResources.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\SwapChain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FATime.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FAWindow.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\TextResources.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Shapes\Source Files\FABox.cpp">
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Shapes\Source Files\FACone.cpp">
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Box.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Shapes\Source Files\FACylinder.cpp">
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Cone.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Shapes\Source Files\FAPyramid.cpp">
+    <ClCompile Include="..\..\Shapes Engine\Source Files\CreateShapes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Shapes\Source Files\FAShapesUtility.cpp">
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Cylinder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Shapes\Source Files\FASphere.cpp">
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Pyramid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Shapes\Source Files\FATriangle.cpp">
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Sphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\FA Shapes\Source Files\FAThreeDimensionalShape.cpp">
+    <ClCompile Include="..\..\Shapes Engine\Source Files\ThreeDimensionalShape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Triangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -111,78 +114,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Structures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Math Engine\Header Files\FAMathEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\DDSTextureLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\Direct3DLink.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FABuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FACamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FAColor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FADeviceResources.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FADirectXException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FAMultiSampling.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FAProjection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FARenderScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FASwapChain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FAText.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FATextResources.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FATime.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FAWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Shapes\Header Files\FABox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Shapes\Header Files\FACone.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Shapes\Header Files\FACylinder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Shapes\Header Files\FAPyramid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Shapes\Header Files\FAShapesUtility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Shapes\Header Files\FASphere.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Shapes\Header Files\FATriangle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\FA Shapes\Header Files\FAThreeDimensionalShape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

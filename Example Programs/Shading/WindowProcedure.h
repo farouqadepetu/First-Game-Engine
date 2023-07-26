@@ -1,8 +1,8 @@
 #pragma once
 
-#include "FAWindow.h"
-#include "FATime.h"
-#include "FARenderScene.h"
+#include "Window.h"
+#include "GameTime.h"
+#include "RenderScene.h"
 
 namespace WindowProc
 {

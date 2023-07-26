@@ -25,10 +25,10 @@ namespace WindowProc
 		{
 			case WM_ACTIVATE:
 			{
-				if (con->GetView()->GetRenderingWindow().GetWindowHandle() != nullptr)
+				if (con->GetView()->GetRenderingWindow().windowHandle != nullptr)
 				{
 					//Send message to the rendering window procedure.
-					SendMessage(con->GetView()->GetRenderingWindow().GetWindowHandle(), uMsg, wParam, lParam);
+					SendMessage(con->GetView()->GetRenderingWindow().windowHandle, uMsg, wParam, lParam);
 				}
 				
 				return 0;
@@ -36,7 +36,7 @@ namespace WindowProc
 
 			case WM_SIZE:
 			{
-				if (con->GetView()->GetRenderingWindow().GetWindowHandle() != nullptr)
+				if (con->GetView()->GetRenderingWindow().windowHandle != nullptr)
 				{
 					RECT mainWindowClientRect{};
 
@@ -48,7 +48,7 @@ namespace WindowProc
 					con->GetView()->ResizeControlWindows();
 
 					//Execute the WM_SIZE message in the rendering windows message procedure.
-					SendMessage(con->GetView()->GetRenderingWindow().GetWindowHandle(), uMsg, wParam, lParam);
+					SendMessage(con->GetView()->GetRenderingWindow().windowHandle, uMsg, wParam, lParam);
 				}
 
 				return 0;
@@ -56,7 +56,7 @@ namespace WindowProc
 
 			case WM_EXITSIZEMOVE:
 			{
-				if (con->GetView()->GetRenderingWindow().GetWindowHandle() != nullptr)
+				if (con->GetView()->GetRenderingWindow().windowHandle != nullptr)
 				{
 					RECT mainWindowClientRect{};
 
@@ -68,7 +68,7 @@ namespace WindowProc
 					con->GetView()->ResizeControlWindows();
 
 					//Execute the WM_SIZE message in the rendering windows message procedure.
-					SendMessage(con->GetView()->GetRenderingWindow().GetWindowHandle(), uMsg, wParam, lParam);
+					SendMessage(con->GetView()->GetRenderingWindow().windowHandle, uMsg, wParam, lParam);
 				}
 
 				return 0;
@@ -77,7 +77,7 @@ namespace WindowProc
 			case WM_LBUTTONDOWN:
 			{
 				//Send message to the rendering window procedure.
-				SendMessage(con->GetView()->GetRenderingWindow().GetWindowHandle(), uMsg, wParam, lParam);
+				SendMessage(con->GetView()->GetRenderingWindow().windowHandle, uMsg, wParam, lParam);
 				return 0;
 			}
 
@@ -188,12 +188,12 @@ namespace WindowProc
 			if (LOWORD(wParam) == WA_INACTIVE)
 			{
 				con->GetView()->DeactivateMainWindow();
-				con->GetModel()->GetFrameTime().Stop();
+				RenderingEngine::Stop(con->GetModel()->GetFrameTime());
 			}
 			else
 			{
 				con->GetView()->ActivateMainWindow();
-				con->GetModel()->GetFrameTime().Start();
+				RenderingEngine::Start(con->GetModel()->GetFrameTime());
 
 			}
 			return 0;
@@ -203,8 +203,8 @@ namespace WindowProc
 		{
 			if (con->GetModel()->GetScene() != nullptr)
 			{
-				int width = con->GetView()->GetRenderingWindow().GetWidth();
-				int height = con->GetView()->GetRenderingWindow().GetHeight();
+				int width = RenderingEngine::GetWidth(con->GetView()->GetRenderingWindow());
+				int height = RenderingEngine::GetHeight(con->GetView()->GetRenderingWindow());
 
 				if (wParam == SIZE_MINIMIZED) //window gets minimized
 				{
@@ -220,7 +220,7 @@ namespace WindowProc
 
 					con->GetModel()->GetScene()->Resize(width, height, windowHandle, true, true);
 
-					con->GetModel()->GetPerspectiveProjection().SetAspectRatio((float)width / height);
+					con->GetModel()->GetPerspectiveProjection().aspectRatio = (float)width / height;
 				}
 				if (wParam == SIZE_RESTORED)
 				{
@@ -232,7 +232,7 @@ namespace WindowProc
 
 						con->GetModel()->GetScene()->Resize(width, height, windowHandle, true, true);
 
-						con->GetModel()->GetPerspectiveProjection().SetAspectRatio((float)width / height);
+						con->GetModel()->GetPerspectiveProjection().aspectRatio = (float)width / height;
 					}
 					//restoring from a maximized state
 					else if (con->GetView()->GetIsMainWindowMaximized())
@@ -241,7 +241,7 @@ namespace WindowProc
 
 						con->GetModel()->GetScene()->Resize(width, height, windowHandle, true, true);
 
-						con->GetModel()->GetPerspectiveProjection().SetAspectRatio((float)width / height);
+						con->GetModel()->GetPerspectiveProjection().aspectRatio = (float)width / height;
 					}
 				}
 			}
@@ -253,7 +253,7 @@ namespace WindowProc
 		case WM_ENTERSIZEMOVE:
 		{
 			con->GetView()->DeactivateMainWindow();
-			con->GetModel()->GetFrameTime().Stop();
+			RenderingEngine::Stop(con->GetModel()->GetFrameTime());
 			return 0;
 		}
 
@@ -261,16 +261,16 @@ namespace WindowProc
 		case WM_EXITSIZEMOVE:
 		{
 			con->GetView()->ActivateMainWindow();
-			con->GetModel()->GetFrameTime().Start();
+			RenderingEngine::Start(con->GetModel()->GetFrameTime());
 
 			if (con->GetModel()->GetScene() != nullptr)
 			{
-				int width = con->GetView()->GetRenderingWindow().GetWidth();
-				int height = con->GetView()->GetRenderingWindow().GetHeight();
+				int width = RenderingEngine::GetWidth(con->GetView()->GetRenderingWindow());
+				int height = RenderingEngine::GetHeight(con->GetView()->GetRenderingWindow());
 
 				con->GetModel()->GetScene()->Resize(width, height, windowHandle, true, true);
 
-				con->GetModel()->GetPerspectiveProjection().SetAspectRatio((float)width / height);
+				con->GetModel()->GetPerspectiveProjection().aspectRatio = (float)width / height;
 			}
 
 			return 0;
@@ -278,7 +278,7 @@ namespace WindowProc
 
 		case WM_LBUTTONDOWN:
 		{
-			if (GET_X_LPARAM(lParam) > con->GetView()->GetRenderingWindow().GetWidth())
+			if (GET_X_LPARAM(lParam) > RenderingEngine::GetWidth(con->GetView()->GetRenderingWindow()))
 				con->GetView()->DisableCameraMovement();
 			else
 				con->GetView()->EnableCameraMovement();

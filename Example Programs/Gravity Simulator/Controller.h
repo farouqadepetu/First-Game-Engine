@@ -2,11 +2,11 @@
 
 #include "Model.h"
 #include "View.h"
-#include "FACamera.h"
-#include "FAProjection.h"
-#include "FATime.h"
+#include "Camera.h"
+#include "PerspectiveProjection.h"
+#include "GameTime.h"
 #include "Structures.h"
-#include "FADirectXException.h"
+#include "DirectXException.h"
 
 namespace MVC
 {
@@ -32,9 +32,6 @@ namespace MVC
 		void Update();
 		void Draw();
 
-		void LerpCamera();
-		void SlerpCamera();
-
 	private:
 		bool mPauseApplication;
 		bool mPlayAnimaton;
@@ -43,11 +40,13 @@ namespace MVC
 
 		Model mModel;
 
-		std::unique_ptr<FARender::RenderScene> mScene;
+		std::unique_ptr<RenderingEngine::RenderScene> mScene;
 
-		FATime::Time mRenderTime;
+		RenderingEngine::Time mRenderTime;
 
-		FACamera::Camera mCamera;
-		FAProjection::PerspectiveProjection mPerspectiveProjection;
+		RenderingEngine::Camera mCamera;
+		RenderingEngine::PerspectiveProjection mPerspectiveProjection;
+
+		vec2 mLastMousePosition;
 	};
 }

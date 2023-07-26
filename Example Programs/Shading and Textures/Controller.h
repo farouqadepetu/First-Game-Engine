@@ -30,5 +30,7 @@ namespace MVC
 	private:
 		Model* mModel;
 		View* mView;
+
+		vec2 mLastMousePosition;
 	};
 }

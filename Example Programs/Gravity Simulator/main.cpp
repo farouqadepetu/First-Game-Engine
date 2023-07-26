@@ -1,5 +1,5 @@
 #include "Direct3DLink.h"
-#include "FADirectXException.h"
+#include "DirectXException.h"
 #include "Controller.h"
 #include <iomanip>
 

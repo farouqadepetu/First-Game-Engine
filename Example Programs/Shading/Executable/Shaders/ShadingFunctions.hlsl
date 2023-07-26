@@ -25,27 +25,27 @@ struct Light
 	float4 lSpecular;		//bytes 32-47
 
 	//for point lights	
-	float4 lightPosition;	//bytes 48-63
+	float3 lightPosition;	//bytes 48-59
+	
+    int pad0;				//bytes 60-63
 
 	//for direction lights
-	float4 lightDirection;	//bytes 64-79
+	float3 lightDirection;	//bytes 64-75
 
-	int lightSourceType;	//bytes 80-83
-
-	float3 pad;				//bytes 84-95
+	int lightSourceType;	//bytes 76-79
 };
 
 //Make sure the worldNormal, lightVector and viewVector are normalized before passing them in.
-float3 GouraudAndPhongShading(Light light, Material mat, float4 worldNormal, float4 lightVector, 
-	float4 viewVector, float4 reflectionVector, float attenuation)
+float3 GouraudAndPhongShading(Light light, Material mat, float3 worldNormal, float3 lightVector, 
+	float3 viewVector, float3 reflectionVector, float attenuation)
 {
 	//ambient color of the vertex
-	float3 ambientColor = light.lAmbient.xyz * mat.mAmbient.xyz;
+	float3 ambientColor = light.lAmbient * mat.mAmbient;
 
 	//diffuse color of the vertex
 	float kd = dot(lightVector, worldNormal);
 	kd = clamp(kd, 0.0f, 1.0f);
-	float3 diffuseColor = light.lDiffuse.xyz * mat.mDiffuse.xyz * kd;
+	float3 diffuseColor = light.lDiffuse * mat.mDiffuse * kd;
 
 	//specular color of the vertex
 	float3 specularColor = float3(0.0f, 0.0f, 0.0f);
@@ -54,7 +54,7 @@ float3 GouraudAndPhongShading(Light light, Material mat, float4 worldNormal, flo
 		float ks = dot(reflectionVector, viewVector);
 		ks = clamp(ks, 0.0f, 1.0f);
 		ks = pow(ks, mat.mShininess);
-		specularColor = light.lSpecular.xyz * mat.mSpecular.xyz * ks;
+		specularColor = light.lSpecular * mat.mSpecular * ks;
 	}
 
 	//The color of the vertex
@@ -62,16 +62,16 @@ float3 GouraudAndPhongShading(Light light, Material mat, float4 worldNormal, flo
 }
 
 //Make sure the worldNormal, lightVector and halfwayVector are normalized before passing them in.
-float3 BlinnPhongShading(Light light, Material mat, float4 worldNormal, float4 lightVector, float4 halfwayVector,
+float3 BlinnPhongShading(Light light, Material mat, float3 worldNormal, float3 lightVector, float3 halfwayVector,
 	float attenuation)
 {
 	//ambient color of the vertex
-	float3 ambientColor = light.lAmbient.xyz * mat.mAmbient.xyz;
+	float3 ambientColor = light.lAmbient * mat.mAmbient;
 
 	//diffuse color of the vertex
 	float kd = dot(lightVector, worldNormal);
 	kd = clamp(kd, 0.0f, 1.0f);
-	float3 diffuseColor = light.lDiffuse.xyz * mat.mDiffuse.xyz * kd;
+	float3 diffuseColor = light.lDiffuse * mat.mDiffuse * kd;
 
 	//specular color of the vertex
 	float3 specularColor = float3(0.0f, 0.0f, 0.0f);
@@ -80,7 +80,7 @@ float3 BlinnPhongShading(Light light, Material mat, float4 worldNormal, float4 l
 		float ks = dot(halfwayVector, worldNormal);
 		ks = clamp(ks, 0.0f, 1.0f);
 		ks = pow(ks, mat.mShininess);
-		specularColor = light.lSpecular.xyz * mat.mSpecular.xyz * ks;
+		specularColor = light.lSpecular * mat.mSpecular * ks;
 	}
 
 	//The color of the vertex
@@ -88,10 +88,10 @@ float3 BlinnPhongShading(Light light, Material mat, float4 worldNormal, float4 l
 }
 
 //Make sure the worldNormal is normalized before passing it in.
-float3 ComputePointLight(Light light, Material mat, float4 worldNormal, float4 worldPos, float4 cameraPos, uint shadingType)
+float3 ComputePointLight(Light light, Material mat, float3 worldNormal, float3 worldPos, float3 cameraPos, uint shadingType)
 {
-	float4 lightVector = light.lightPosition - worldPos;
-	float4 viewVector = cameraPos - worldPos;
+	float3 lightVector = light.lightPosition - worldPos;
+	float3 viewVector = cameraPos - worldPos;
 
 	float distance = length(lightVector);
 	float attenuation = 1.0f / (1.0f + 0.001f * distance);
@@ -102,13 +102,13 @@ float3 ComputePointLight(Light light, Material mat, float4 worldNormal, float4 w
 	float3 col;
 	if (shadingType == BLINN_PHONG || shadingType == FLAT_BLINN)
 	{
-		float4 halfwayVector = lightVector + viewVector;
+		float3 halfwayVector = lightVector + viewVector;
 		halfwayVector = normalize(halfwayVector);
 		col = BlinnPhongShading(light, mat, worldNormal, lightVector, halfwayVector, attenuation);
 	}
 	else //gourad, phong or flat phong shading
 	{
-		float4 reflectionVector = 2.0f * dot(lightVector, worldNormal) * worldNormal - lightVector;
+		float3 reflectionVector = 2.0f * dot(lightVector, worldNormal) * worldNormal - lightVector;
 		reflectionVector = normalize(reflectionVector);
 		col = GouraudAndPhongShading(light, mat, worldNormal, lightVector, viewVector, reflectionVector, attenuation);
 	}
@@ -117,10 +117,10 @@ float3 ComputePointLight(Light light, Material mat, float4 worldNormal, float4 w
 }
 
 //Make sure the worldNormal is normalized before passing it in.
-float3 ComputeDirectionalLight(Light light, Material mat, float4 worldNormal, float4 worldPos, float4 cameraPos, uint shadingType)
+float3 ComputeDirectionalLight(Light light, Material mat, float3 worldNormal, float3 worldPos, float3 cameraPos, uint shadingType)
 {
-	float4 lightVector = -light.lightDirection;
-	float4 viewVector = cameraPos - worldPos;
+	float3 lightVector = -light.lightDirection;
+	float3 viewVector = cameraPos - worldPos;
 
 	lightVector = normalize(lightVector);
 	viewVector = normalize(viewVector);
@@ -128,13 +128,13 @@ float3 ComputeDirectionalLight(Light light, Material mat, float4 worldNormal, fl
 	float3 col;
 	if (shadingType == BLINN_PHONG || shadingType == FLAT_BLINN)
 	{
-		float4 halfwayVector = lightVector + viewVector;
+		float3 halfwayVector = lightVector + viewVector;
 		halfwayVector = normalize(halfwayVector);
 		col = BlinnPhongShading(light, mat, worldNormal, lightVector, halfwayVector, 1.0f);
 	}
 	else //gourad, phong or flat phong shading
 	{
-		float4 reflectionVector = 2.0f * dot(lightVector, worldNormal) * worldNormal - lightVector;
+		float3 reflectionVector = 2.0f * dot(lightVector, worldNormal) * worldNormal - lightVector;
 		reflectionVector = normalize(reflectionVector);
 		col = GouraudAndPhongShading(light, mat, worldNormal, lightVector, viewVector, reflectionVector, 1.0f);
 	}

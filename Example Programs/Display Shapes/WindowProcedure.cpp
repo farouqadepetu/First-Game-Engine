@@ -15,12 +15,12 @@ namespace WindowProc
 				if (LOWORD(wParam) == WA_INACTIVE)
 				{
 					isAppPaused = true;
-					frameTime.Stop();
+					RenderingEngine::Stop(frameTime);
 				}
 				else
 				{
 					isAppPaused = false;
-					frameTime.Start();
+					RenderingEngine::Start(frameTime);
 
 				}
 				return 0;
@@ -30,8 +30,8 @@ namespace WindowProc
 			{
 				if (scene != nullptr && window != nullptr)
 				{
-					window->SetWidth(LOWORD(lParam));
-					window->SetHeight(HIWORD(lParam));
+					unsigned int width{ RenderingEngine::GetWidth(*window) };
+					unsigned int height{ RenderingEngine::GetHeight(*window) };
 
 					if (wParam == SIZE_MINIMIZED) //window gets minimized
 					{
@@ -44,12 +44,13 @@ namespace WindowProc
 						isAppPaused = false;
 						isMinimized = false;
 						isMaximized = true;
-						scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
+
+						scene->Resize(width, height, windowHandle,
 							isMSAAEnabled, isTextEnabled);
 
-						pProjection.SetAspectRatio((float)window->GetWidth() / window->GetHeight());
+						pProjection.aspectRatio = (float)width / height;
 						
-						ResizeText(window->GetWidth(), window->GetHeight());
+						ResizeText(width, height);
 					}
 					if (wParam == SIZE_RESTORED)
 					{
@@ -58,23 +59,25 @@ namespace WindowProc
 						{
 							isAppPaused = false;
 							isMinimized = false;
-							scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
+
+							scene->Resize(width, height, windowHandle,
 								isMSAAEnabled, isTextEnabled);
 
-							pProjection.SetAspectRatio((float)window->GetWidth() / window->GetHeight());
+							pProjection.aspectRatio = (float)width / height;
 
-							ResizeText(window->GetWidth(), window->GetHeight());
+							ResizeText(width, height);
 						}
 						//restoring from a maximized state
 						else if (isMaximized)
 						{
 							isMaximized = false;
-							scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
+
+							scene->Resize(width, height, windowHandle,
 								isMSAAEnabled, isTextEnabled);
 
-							pProjection.SetAspectRatio((float)window->GetWidth() / window->GetHeight());
+							pProjection.aspectRatio = (float)width / height;
 
-							ResizeText(window->GetWidth(), window->GetHeight());
+							ResizeText(width, height);
 						}
 					}
 				}
@@ -86,7 +89,7 @@ namespace WindowProc
 			case WM_ENTERSIZEMOVE:
 			{
 				isAppPaused = true;
-				frameTime.Stop();
+				RenderingEngine::Stop(frameTime);
 				return 0;
 			}
 
@@ -94,37 +97,38 @@ namespace WindowProc
 			case WM_EXITSIZEMOVE:
 			{
 				isAppPaused = false;
-				frameTime.Start();
 
-				RECT windowSize{};
-				GetWindowRect(windowHandle, &windowSize);
+				RenderingEngine::Start(frameTime);
 
-				window->SetWidth(windowSize.right - windowSize.left);
-				window->SetHeight(windowSize.bottom - windowSize.top);
+				unsigned int width{ RenderingEngine::GetWidth(*window) };
+				unsigned int height{ RenderingEngine::GetHeight(*window) };
 
-				scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
+				scene->Resize(width, height, windowHandle,
 					isMSAAEnabled, isTextEnabled);
 
-				pProjection.SetAspectRatio((float)window->GetWidth()/ window->GetHeight());
+				pProjection.aspectRatio = (float)width / height;
 
-				ResizeText(window->GetWidth(), window->GetHeight());
+				ResizeText(width, height);
 
 				return 0;
 			}
 
 			case WM_CHAR: //if they user every presses a char key.
 			{
+				unsigned int width{ RenderingEngine::GetWidth(*window) };
+				unsigned int height{ RenderingEngine::GetHeight(*window) };
+
 				switch (wParam)
 				{
 				case '1':
 					isMSAAEnabled = (isMSAAEnabled) ? false : true;
-					scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
+					scene->Resize(width, height, windowHandle,
 						isMSAAEnabled, isTextEnabled);
 					break;
 
 				case '2':
 					isTextEnabled = (isTextEnabled) ? false : true;
-					scene->Resize(window->GetWidth(), window->GetHeight(), windowHandle,
+					scene->Resize(width, height, windowHandle,
 						isMSAAEnabled, isTextEnabled);
 					break;
 
@@ -146,7 +150,7 @@ namespace WindowProc
 
 	void ResizeText(unsigned int width, unsigned int height)
 	{
-		textList.at(FRAMES_PER_SECOND).SetTextLocation(FAMath::Vector4D(0.0f, 0.01f * height, 0.3f * width, 0.02f * height));
-		textList.at(INSTRUCTIONS).SetTextLocation(FAMath::Vector4D(0.7f * width, 0.0f, width, 0.0f));
+		textList.at(FRAMES_PER_SECOND).SetTextLocation(vec4{ 0.0f, 0.01f * height, 0.3f * width, 0.02f * height });
+		textList.at(INSTRUCTIONS).SetTextLocation(vec4{ 0.7f * width, 0.0f, (float)width, 0.0f });
 	}
 }

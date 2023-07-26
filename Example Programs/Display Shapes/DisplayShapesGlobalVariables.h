@@ -1,17 +1,17 @@
 #pragma once
 
-#include "FAWindow.h"
-#include "FATime.h"
-#include "FARenderScene.h"
-#include "FACamera.h"
-#include "FAProjection.h"
-#include "FASphere.h"
-#include "FABox.h"
-#include "FACylinder.h"
-#include "FACone.h"
-#include "FAPyramid.h"
-#include "FAShapesUtility.h"
-#include "FAText.h"
+#include "Window.h"
+#include "GameTime.h"
+#include "RenderScene.h"
+#include "Camera.h"
+#include "PerspectiveProjection.h"
+#include "Sphere.h"
+#include "Box.h"
+#include "Cylinder.h"
+#include "Cone.h"
+#include "Pyramid.h"
+#include "CreateShapes.h"
+#include "Text.h"
 
 namespace GlobalVariables
 {
@@ -24,33 +24,33 @@ namespace GlobalVariables
 	inline bool isTextEnabled{ true }; //true if text is enabled.
 
 	//Used in the window procedure to store the new width and height of the window when user resizes it.
-	inline FAWindow::Window* window{ nullptr };
+	inline RenderingEngine::Window* window{ nullptr };
 
 	//Used in the window procedure to stop the time if the application is paused and starts it if the application is no longer paused.
 	//Also used to get the time between frames.
-	inline FATime::Time frameTime;
+	inline RenderingEngine::Time frameTime;
 
 	//Used in the window procedure to call the resize function when the user resizes the window.
-	inline FARender::RenderScene* scene{ nullptr };
+	inline RenderingEngine::RenderScene* scene{ nullptr };
 
 	struct ObjectConstants
 	{
-		FAMath::Matrix4x4 MVP;
-		FAColor::Color color;
+		mat4 MVP;
+		RenderingEngine::Color color;
 
-		FAMath::Matrix4x4 pad0;
-		FAMath::Matrix4x4 pad1;
-		FAMath::Matrix3x3 pad2;
-		FAMath::Vector3D pad3;
+		mat4 pad0;
+		mat4 pad1;
+		mat3 pad2;
+		vec3 pad3;
 	};;
 
 	//Constant data not related to objects.
 	struct PassConstants
 	{
-		FAMath::Matrix4x4 view;
-		FAMath::Matrix4x4 projection;
-		FAMath::Matrix4x4 pad1;
-		FAMath::Matrix4x4 pad2;
+		mat4 view;
+		mat4 projection;
+		mat4 pad1;
+		mat4 pad2;
 	};
 
 	//To store the view and projection matrices of a scenes camera.
@@ -64,31 +64,33 @@ namespace GlobalVariables
 	enum PSONames { SOLID, SOLID_MSAA, WIRE, WIRE_MSAA };
 	enum TextNames { FRAMES_PER_SECOND, INSTRUCTIONS };
 
-	inline FAShapes::Box box;
-	inline FAShapes::Pyramid pyramid;
-	inline FAShapes::Cone cone;
-	inline FAShapes::Cylinder cylinder;
-	inline FAShapes::Sphere sphere;
+	inline ShapesEngine::Box box;
+	inline ShapesEngine::Pyramid pyramid;
+	inline ShapesEngine::Cone cone;
+	inline ShapesEngine::Cylinder cylinder;
+	inline ShapesEngine::Sphere sphere;
 
 	//vector to store pointers to 3D shapes.
-	inline std::vector<FAShapes::ThreeDimensionalShape*> shapes;
+	inline std::vector<ShapesEngine::ThreeDimensionalShape*> shapes;
 
 	//Vector to store all the vertices of the 3D shapes.
-	inline std::vector<FAShapes::Vertex> vertexList;
+	inline std::vector<ShapesEngine::Vertex> vertexList;
 
-	inline std::vector<FAShapes::Triangle> triangleList;
+	inline std::vector<ShapesEngine::Triangle> triangleList;
 
 	//Vector to store all the indices of the 3D shapes.
 	inline std::vector<unsigned int> indexList;
 
 	//Camera for the scene
-	inline FACamera::Camera camera;
+	inline RenderingEngine::Camera camera;
 
-	inline FAProjection::PerspectiveProjection pProjection;
+	inline RenderingEngine::PerspectiveProjection pProjection;
 
 	//Vector to store all of the text to render.
-	inline std::vector<FARender::Text> textList;
+	inline std::vector<RenderingEngine::Text> textList;
 
-	inline FAWindow::Window fpsText;
+	inline RenderingEngine::Window fpsText;
 	inline HFONT textFont;
+
+	inline vec2 lastMousePosition;
 }

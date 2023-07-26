@@ -1,9 +1,9 @@
 #pragma once
 
-#include "FARenderScene.h"
-#include "FATime.h"
-#include "FAVertexStructure.h"
-#include "FAShapesUtility.h"
+#include "RenderScene.h"
+#include "Time.h"
+#include "Vertex.h"
+#include "CreateShapes.h"
 
 namespace Init
 {
@@ -11,10 +11,10 @@ namespace Init
 	void BuildShapes();
 	void BuildCamera();
 	void BuildPerspectiveProjection(unsigned int width, unsigned int height);
-	void BuildShaders(FARender::RenderScene& scene);
-	void BuildVertexAndIndexList(FARender::RenderScene& scene);
-	void BuildVertexAndIndexBuffers(FARender::RenderScene& scene);
-	void BuildConstantBuffers(FARender::RenderScene& scene);
-	void BuildPSOs(FARender::RenderScene& scene);
+	void BuildShaders(RenderingEngine::RenderScene& scene);
+	void BuildVertexAndIndexList(RenderingEngine::RenderScene& scene);
+	void BuildVertexAndIndexBuffers(RenderingEngine::RenderScene& scene);
+	void BuildConstantBuffers(RenderingEngine::RenderScene& scene);
+	void BuildPSOs(RenderingEngine::RenderScene& scene);
 	void BuildText(unsigned int width, unsigned int height);
 }

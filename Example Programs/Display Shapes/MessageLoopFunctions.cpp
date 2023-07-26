@@ -1,5 +1,5 @@
 #include "MessageLoopFunctions.h"
-#include "FADirectXException.h"
+#include "DirectXException.h"
 #include "DisplayShapesGlobalVariables.h"
 #include <iomanip>
 
@@ -18,7 +18,7 @@ namespace MessageLoop
 		++frameCount;
 
 		//after every second display fps and frame time.
-		timeElapsed += frameTime.GetDeltaTime();
+		timeElapsed += frameTime.deltaTime;
 		if (timeElapsed >= 1.0f)
 		{
 			float fps = (float)frameCount;
@@ -46,31 +46,59 @@ namespace MessageLoop
 	void UserInput()
 	{
 		//Poll keyboard and mouse input.
-		camera.KeyboardInput(frameTime.GetDeltaTime());
-		camera.MouseInput();
+		//check if w, a, s, d or up, left, right, down, spacebar or control was pressed
+
+		if (GetAsyncKeyState('W') & 0x8000 || GetAsyncKeyState(VK_UP) & 0x8000)
+			RenderingEngine::Foward(camera, frameTime.deltaTime);
+		if (GetAsyncKeyState('A') & 0x8000 || GetAsyncKeyState(VK_LEFT) & 0x8000)
+			RenderingEngine::Left(camera, frameTime.deltaTime);
+		if (GetAsyncKeyState('S') & 0x8000 || GetAsyncKeyState(VK_DOWN) & 0x8000)
+			RenderingEngine::Backward(camera, frameTime.deltaTime);
+		if (GetAsyncKeyState('D') & 0x8000 || GetAsyncKeyState(VK_RIGHT) & 0x8000)
+			RenderingEngine::Right(camera, frameTime.deltaTime);
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+			RenderingEngine::Up(camera, frameTime.deltaTime);
+		if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
+			RenderingEngine::Down(camera, frameTime.deltaTime);
+
+		POINT currMousePos{};
+		GetCursorPos(&currMousePos);
+
+		vec2 currentMousePosition{ (float)currMousePos.x, (float)currMousePos.y };
+
+		vec2 mousePositionDiff{ currentMousePosition - lastMousePosition };
+
+		//if the mouse goes outside the window and comes back into the window, the camera won't be rotated.
+		if (Length(mousePositionDiff) < 10.0f && (GetAsyncKeyState(VK_LBUTTON) & 0x8000))
+		{
+			RenderingEngine::RotateCameraLeftRight(camera, camera.angularSpeed * mousePositionDiff.x);
+			RenderingEngine::RotateCameraUpDown(camera, camera.angularSpeed * mousePositionDiff.y);
+		}
+
+		lastMousePosition = currentMousePosition;
 	}
 
-	void Update(FARender::RenderScene& scene)
+	void Update(RenderingEngine::RenderScene& scene)
 	{
 		//Update the view matrix.
-		camera.UpdateViewMatrix();
+		RenderingEngine::UpdateViewMatrix(camera);
 
 		//Update the perspective projection matrix.
-		pProjection.UpdateProjectionMatrix();
+		RenderingEngine::UpdateProjectionMatrix(pProjection);
 
 		//Transpose and store the view and projection matrices in the PassConstants object.
-		constantData.view = Transpose(camera.GetViewMatrix());
-		constantData.projection = Transpose(pProjection.GetProjectionMatrix());
+		constantData.view = Transpose(camera.viewMatrix);
+		constantData.projection = Transpose(pProjection.projectionMatrix);
 
 		//Copy the view and perspective projection matrices into the pass constant buffer
 		scene.CopyDataIntoDynamicBuffer(L"PASSCB", 0, &constantData, sizeof(PassConstants));
 
-		static float angularVelocity{ 45.0f };
-		FAMath::Quaternion rotate(FAMath::RotationQuaternion(angularVelocity * frameTime.GetDeltaTime(), FAMath::Vector3D(0.0f, 1.0f, 0.0f)));
+		static float angularSpeed{ 45.0f };
+		MathEngine::Quaternion rotate(MathEngine::RotationQuaternion(angularSpeed * frameTime.deltaTime, vec3{ 0.0f, 1.0f, 0.0f }));
 
 		for (auto& i : shapes)
 		{
-			i->SetOrientation(FAMath::Normalize(rotate * i->GetOrientation()));
+			i->orientation = (MathEngine::Normalize(rotate * i->orientation));
 		}
 
 		box.UpdateModelMatrix();
@@ -82,13 +110,13 @@ namespace MessageLoop
 		ObjectConstants ob;
 		for (auto& i : shapes)
 		{
-			ob.MVP = Transpose(i->GetModelMatrix());
-			ob.color = i->GetColor();
-			i->UpdateShape(&scene, &ob, sizeof(ObjectConstants));
+			ob.MVP = Transpose(i->modelMatrix);
+			ob.color = i->color;
+			ShapesEngine::UpdateShape(*i, &scene, &ob, sizeof(ObjectConstants));
 		}
 	}
 
-	void Draw(FARender::RenderScene& scene)
+	void Draw(RenderingEngine::RenderScene& scene)
 	{
 		//All the commands needed before rendering the shapes.
 		scene.BeforeRenderObjects(isMSAAEnabled);
@@ -121,9 +149,10 @@ namespace MessageLoop
 		//Link pass constant buffer to the pipeline
 		scene.LinkDynamicBuffer(2, L"PASSCB", 0, 1);
 
+		//Render all the shapes
 		for (const auto& i : shapes)
 		{
-			i->RenderShape(&scene);
+			RenderShape(*i, &scene);
 		}
 
 		//All the commands needed after rendering the shapes.

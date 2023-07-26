@@ -1,7 +1,7 @@
 struct InputVertex
 {
-    float4 inputPosition : POSITION;
-    float4 inputNormal : NORMAL;
+    float3 inputPosition : POSITION;
+    float3 inputNormal : NORMAL;
     float2 inputTexCoords : TEXCOORDS;
 };
 
@@ -23,8 +23,8 @@ OutputVertex vsMain(InputVertex vin)
     OutputVertex vout;
     
     //transform to homogenous clip space
-    vout.outputPosition = mul(vin.inputPosition, MVP);
-    vout.outputNormal = vin.inputNormal;
+    vout.outputPosition = mul(float4(vin.inputPosition, 1.0f), MVP);
+    vout.outputNormal = float4(vin.inputNormal, 0.0f);
     vout.outputTexCoords = vin.inputTexCoords;
     
     return vout;

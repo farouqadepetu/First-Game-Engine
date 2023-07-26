@@ -13,80 +13,70 @@ namespace WindowProc
 			case WM_ACTIVATE:
 			{
 				//Send message to the rendering window procedure.
-				SendMessage(renderingWindow.GetWindowHandle(), uMsg, wParam, lParam);
+				SendMessage(renderingWindow.windowHandle, uMsg, wParam, lParam);
 				return 0;
 			}
 
 			case WM_SIZE:
 			{
-				//Get the new width and height of the client area of the main window
-				GetClientRect(windowHandle, &mainWindowClientRect);
-
-				//Adjust width and height of the rendering window based of the width and height of the main window
-				renderingWindow.SetWidth(mainWindowClientRect.right - dropDownListWidth);
-				renderingWindow.SetHeight(mainWindowClientRect.bottom);
-				MoveWindow(renderingWindow.GetWindowHandle(), 0, 0, renderingWindow.GetWidth(), renderingWindow.GetHeight(), TRUE);
+				SetWindowPos(renderingWindow.windowHandle, nullptr, 0, 0, RenderingEngine::GetWidth(mainWindow) - dropDownListWidth, 
+					RenderingEngine::GetHeight(mainWindow), SWP_NOMOVE | SWP_SHOWWINDOW);
 
 				//Adjust the locations of the drop down lists.
 				for (auto& i : dropDownLists)
 				{
-					i.SetX(renderingWindow.GetWidth());
-					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), TRUE);
+					SetWindowPos(i.windowHandle, nullptr, RenderingEngine::GetWidth(renderingWindow), 
+						RenderingEngine::GetY(i), 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
 				}
 
 				//Adjust the location of the static texts.
 				for (auto& i : staticText)
 				{
-					i.SetX(renderingWindow.GetWidth());
-					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), TRUE);
+					SetWindowPos(i.windowHandle, nullptr, RenderingEngine::GetWidth(renderingWindow),
+						RenderingEngine::GetY(i), 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
 				}
 
 				//Adjust the locations of the buttons.
 				for (auto& i : buttons)
 				{
-					i.SetX(renderingWindow.GetWidth() + 20);
-					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), TRUE);
+					SetWindowPos(i.windowHandle, nullptr, RenderingEngine::GetWidth(renderingWindow) + 20,
+						RenderingEngine::GetY(i), 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
 				}
 
 				//Execute the WM_SIZE message in the rendering windows message procedure.
-				SendMessage(renderingWindow.GetWindowHandle(), uMsg, wParam, lParam);
+				SendMessage(renderingWindow.windowHandle, uMsg, wParam, lParam);
 
 				return 0;
 			}
 
 			case WM_EXITSIZEMOVE:
 			{
-				//Get the new width and height of the client area of the main window
-				GetClientRect(windowHandle, &mainWindowClientRect);
-
-				//Adjust width and height of the rendering window based of the width and height of the main window
-				renderingWindow.SetWidth(mainWindowClientRect.right - dropDownListWidth);
-				renderingWindow.SetHeight(mainWindowClientRect.bottom);
-				MoveWindow(renderingWindow.GetWindowHandle(), 0, 0, renderingWindow.GetWidth(), renderingWindow.GetHeight(), TRUE);
+				SetWindowPos(renderingWindow.windowHandle, nullptr, 0, 0, RenderingEngine::GetWidth(mainWindow) - dropDownListWidth,
+					RenderingEngine::GetHeight(mainWindow), SWP_NOMOVE | SWP_SHOWWINDOW);
 
 				//Adjust the locations of the drop down lists.
 				for (auto& i : dropDownLists)
 				{
-					i.SetX(renderingWindow.GetWidth());
-					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), TRUE);
+					SetWindowPos(i.windowHandle, nullptr, RenderingEngine::GetWidth(renderingWindow),
+						RenderingEngine::GetY(i), 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
 				}
 
 				//Adjust the location of the static texts.
 				for (auto& i : staticText)
 				{
-					i.SetX(renderingWindow.GetWidth());
-					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), TRUE);
+					SetWindowPos(i.windowHandle, nullptr, RenderingEngine::GetWidth(renderingWindow),
+						RenderingEngine::GetY(i), 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
 				}
 
 				//Adjust the locations of the buttons.
 				for (auto& i : buttons)
 				{
-					i.SetX(renderingWindow.GetWidth() + 20);
-					MoveWindow(i.GetWindowHandle(), i.GetX(), i.GetY(), i.GetWidth(), i.GetHeight(), TRUE);
+					SetWindowPos(i.windowHandle, nullptr, RenderingEngine::GetWidth(renderingWindow) + 20,
+						RenderingEngine::GetY(i), 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
 				}
 
 				//Execute the WM_SIZE message in the rendering windows message procedure.
-				SendMessage(renderingWindow.GetWindowHandle(), uMsg, wParam, lParam);
+				SendMessage(renderingWindow.windowHandle, uMsg, wParam, lParam);
 
 				return 0;
 			}
@@ -94,7 +84,7 @@ namespace WindowProc
 			case WM_LBUTTONDOWN:
 			{
 				//Send message to the rendering window procedure.
-				SendMessage(renderingWindow.GetWindowHandle(), uMsg, wParam, lParam);
+				SendMessage(renderingWindow.windowHandle, uMsg, wParam, lParam);
 
 				return 0;
 			}
@@ -127,14 +117,14 @@ namespace WindowProc
 					}
 					else if (LOWORD(wParam) == RESET_CAMERA)
 					{
-						camera.SetCameraPosition(vec4(0.0f, 0.0f, -5.0f, 1.0f));
-						camera.SetX(vec4(1.0f, 0.0f, 0.0f, 0.0f));
-						camera.SetY(vec4(0.0f, 1.0f, 0.0f, 0.0f));
-						camera.SetZ(vec4(0.0f, 0.0f, 1.0f, 0.0f));
+						camera.position = vec3{ 0.0f, 0.0f, -5.0f };
+						camera.x = vec3{ 1.0f, 0.0f, 0.0f };
+						camera.y = vec3{ 0.0f, 1.0f, 0.0f };
+						camera.z = vec3{ 0.0f, 0.0f, 1.0f };
 					}
 					else if (LOWORD(wParam) == RESET_SHAPE)
 					{
-						shapes.at(currentSelection.at(SHAPES))->SetOrientation(FAMath::Quaternion());
+						shapes.at(currentSelection.at(SHAPES))->orientation = MathEngine::Quaternion{};
 					}
 
 					enableCameraUserInput = false;
@@ -176,12 +166,12 @@ namespace WindowProc
 				if (LOWORD(wParam) == WA_INACTIVE)
 				{
 					isAppPaused = true;
-					frameTime.Stop();
+					RenderingEngine::Stop(frameTime);
 				}
 				else
 				{
 					isAppPaused = false;
-					frameTime.Start();
+					RenderingEngine::Start(frameTime);
 
 				}
 				return 0;
@@ -191,8 +181,8 @@ namespace WindowProc
 			{
 				if (shadingScene != nullptr)
 				{
-					int width = renderingWindow.GetWidth();
-					int height = renderingWindow.GetHeight();
+					int width = RenderingEngine::GetWidth(renderingWindow);
+					int height = RenderingEngine::GetHeight(renderingWindow);
 
 					if (wParam == SIZE_MINIMIZED) //window gets minimized
 					{
@@ -208,7 +198,7 @@ namespace WindowProc
 
 						shadingScene->Resize(width, height, windowHandle,true, true);
 
-						pProjection.SetAspectRatio((float)width / height);
+						pProjection.aspectRatio = ((float)width / height);
 
 						ResizeText(width, height);
 					}
@@ -222,7 +212,7 @@ namespace WindowProc
 
 							shadingScene->Resize(width, height, windowHandle, true, true);
 
-							pProjection.SetAspectRatio((float)width / height);
+							pProjection.aspectRatio = ((float)width / height);
 
 							ResizeText(width, height);
 						}
@@ -233,7 +223,7 @@ namespace WindowProc
 
 							shadingScene->Resize(width, height, windowHandle, true, true);
 
-							pProjection.SetAspectRatio((float)width / height);
+							pProjection.aspectRatio = ((float)width / height);
 
 							ResizeText(width, height);
 						}
@@ -247,7 +237,7 @@ namespace WindowProc
 			case WM_ENTERSIZEMOVE:
 			{
 				isAppPaused = true;
-				frameTime.Stop();
+				RenderingEngine::Stop(frameTime);
 				return 0;
 			}
 
@@ -255,16 +245,16 @@ namespace WindowProc
 			case WM_EXITSIZEMOVE:
 			{
 				isAppPaused = false;
-				frameTime.Start();
+				RenderingEngine::Start(frameTime);
 
 				if (shadingScene != nullptr)
 				{
-					int width = renderingWindow.GetWidth();
-					int height = renderingWindow.GetHeight();
+					int width = RenderingEngine::GetWidth(renderingWindow);
+					int height = RenderingEngine::GetHeight(renderingWindow);
 
 					shadingScene->Resize(width, height, windowHandle, true, true);
 
-					pProjection.SetAspectRatio((float)width / height);
+					pProjection.aspectRatio = ((float)width / height);
 
 					ResizeText(width, height);
 				}
@@ -274,7 +264,7 @@ namespace WindowProc
 
 			case WM_LBUTTONDOWN:
 			{
-				if (GET_X_LPARAM(lParam) > renderingWindow.GetWidth())
+				if (GET_X_LPARAM(lParam) > RenderingEngine::GetWidth(renderingWindow))
 					enableCameraUserInput = false;
 				else
 					enableCameraUserInput = true;
@@ -295,6 +285,6 @@ namespace WindowProc
 	void ResizeText(unsigned int width, unsigned int height)
 	{
 		//Resize the FPS text
-		framesPerSecond.SetTextLocation(FAMath::Vector4D(0.0f, 0.0f, 300.0f, 0.0f));
+		framesPerSecond.SetTextLocation(MathEngine::Vector4D{0.0f, 0.0f, 300.0f, 0.0f});
 	}
 }

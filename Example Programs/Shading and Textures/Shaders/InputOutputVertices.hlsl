@@ -1,8 +1,8 @@
 //input struct
 struct vertexInput
 {
-	float4 inputPosition: POSITION;
-	float4 normal : NORMAL;
+	float3 inputPosition: POSITION;
+	float3 normal : NORMAL;
 	float2 texCoords : TEXCOORDS;
 };
 

@@ -26,12 +26,12 @@ namespace MVC
 			if (LOWORD(wParam) == WA_INACTIVE)
 			{
 				con->mPauseApplication = true;
-				con->mRenderTime.Stop();
+				RenderingEngine::Stop(con->mRenderTime);
 			}
 			else
 			{
 				con->mPauseApplication = false;
-				con->mRenderTime.Start();
+				RenderingEngine::Start(con->mRenderTime);
 			}
 
 			return 0;
@@ -41,8 +41,8 @@ namespace MVC
 		{
 			unsigned int newWidth = LOWORD(lParam);
 			unsigned int newHeight = HIWORD(lParam);
-			con->mView.ResizeRenderingWindow(newWidth, newHeight);
-			con->mPerspectiveProjection.SetAspectRatio((float)newWidth / newHeight);
+
+			con->mPerspectiveProjection.aspectRatio = (float)newWidth / newHeight;
 
 			if (wParam == SIZE_MAXIMIZED)
 			{
@@ -58,7 +58,7 @@ namespace MVC
 				con->mView.UnMaximizeRenderingWindow();
 				con->mView.UnMinimizeRenderingWindow();
 
-				con->mRenderTime.Stop();
+				RenderingEngine::Stop(con->mRenderTime);
 
 			}
 			else if (wParam == SIZE_RESTORED)
@@ -69,7 +69,7 @@ namespace MVC
 
 					con->mScene->Resize(newWidth, newHeight, windowHandle);
 
-					con->mRenderTime.Start();
+					RenderingEngine::Start(con->mRenderTime);
 				}
 				else if (con->mView.IsRenderingWindowMaximized())
 				{
@@ -97,7 +97,7 @@ namespace MVC
 		case WM_ENTERSIZEMOVE:
 		{
 			con->mPauseApplication = true;
-			con->mRenderTime.Stop();
+			RenderingEngine::Stop(con->mRenderTime);
 			con->mView.ResizingRenderingWindow();
 			return 0;
 		}
@@ -105,7 +105,7 @@ namespace MVC
 		case WM_EXITSIZEMOVE:
 		{
 			con->mPauseApplication = false;
-			con->mRenderTime.Start();
+			RenderingEngine::Start(con->mRenderTime);
 			con->mView.NotResizingRenderingWindow();
 
 			RECT renderingWindowClientAreaRect{};
@@ -115,11 +115,9 @@ namespace MVC
 			unsigned int newWidth = renderingWindowClientAreaRect.right;
 			unsigned int newHeight = renderingWindowClientAreaRect.bottom;
 
-			con->mView.ResizeRenderingWindow(newWidth, newHeight);
-
 			con->mScene->Resize(newWidth, newHeight, windowHandle);
 
-			con->mPerspectiveProjection.SetAspectRatio((float)newWidth / newHeight);
+			con->mPerspectiveProjection.aspectRatio = (float)newWidth / newHeight;
 
 			return 0;
 		}
@@ -169,9 +167,7 @@ namespace MVC
 		case WM_CLOSE:
 		{
 			ShowWindow(con->mView.GetSettingsWindowHandle(), SW_HIDE);
-
-			con->mView.DisplaySettingsWindow();
-
+			con->mView.HideSettingsWindow();
 			return 0;
 		}
 
@@ -237,7 +233,7 @@ namespace MVC
 	Controller::Controller(const HINSTANCE& hInstance) : mPauseApplication{ false }, mPlayAnimaton{ false },
 		mView(hInstance, RenderingWindowProc, SettingsWindowProc, this, this)
 	{
-		mScene = std::make_unique<FARender::RenderScene>(mView.GetRenderingWindowWidth(), mView.GetRenderingWindowHeight(),
+		mScene = std::make_unique<RenderingEngine::RenderScene>(mView.GetRenderingWindowWidth(), mView.GetRenderingWindowHeight(),
 			mView.GetRenderingWindowHandle());
 
 		LoadShaders();
@@ -248,10 +244,10 @@ namespace MVC
 
 		mScene->ExecuteAndFlush();
 
-		mCamera.SetProperties(vec4(10.0f, 0.0f, -25.0f, 1.0f), vec4(1.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 1.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 1.0f, 0.0f),
+		SetProperties(mCamera, vec3{ 10.0f, 0.0f, -25.0f }, vec3{ 1.0f, 0.0f, 0.0f }, vec3{ 0.0f, 1.0f, 0.0f }, vec3{ 0.0f, 0.0f, 1.0f },
 			5.0f, 0.125f);
 
-		mPerspectiveProjection.SetProperties(1.0f, 1000.0f, 45.0f, (float)mView.GetRenderingWindowWidth() / mView.GetRenderingWindowHeight());
+		SetProperties(mPerspectiveProjection, 1.0f, 1000.0f, 45.0f, (float)mView.GetRenderingWindowWidth() / mView.GetRenderingWindowHeight());
 	}
 
 	void Controller::LoadShaders()
@@ -259,9 +255,9 @@ namespace MVC
 		mScene->CompileShader(L"GS Vertex Shader", L"GravitySimulatorVS.hlsl", "vsMain", "vs_5_1");
 		mScene->CompileShader(L"GS Pixel Shader", L"GravitySimulatorPS.hlsl", "psMain", "ps_5_1");
 
-		mScene->CreateInputElementDescription(L"GS VS Input", "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0);
-		mScene->CreateInputElementDescription(L"GS VS Input", "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16);
-		mScene->CreateInputElementDescription(L"GS VS Input", "TEXCOORDS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32);
+		mScene->CreateInputElementDescription(L"GS VS Input", "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0);
+		mScene->CreateInputElementDescription(L"GS VS Input", "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12);
+		mScene->CreateInputElementDescription(L"GS VS Input", "TEXCOORDS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24);
 
 		mScene->CreateRootDescriptor(L"GS Root Parameter", 0);
 	}
@@ -292,19 +288,48 @@ namespace MVC
 
 	void Controller::CameraMovement()
 	{
-		mCamera.KeyboardInputWASD(mRenderTime.GetDeltaTime());
-		mCamera.MouseInput();
+		//Poll keyboard and mouse input.
+		//check if w, a, s, d or up, left, right, down, spacebar or control was pressed
+
+		if (GetAsyncKeyState('W') & 0x8000 || GetAsyncKeyState(VK_UP) & 0x8000)
+			RenderingEngine::Foward(mCamera, (float)mRenderTime.deltaTime);
+		if (GetAsyncKeyState('A') & 0x8000 || GetAsyncKeyState(VK_LEFT) & 0x8000)
+			RenderingEngine::Left(mCamera, (float)mRenderTime.deltaTime);
+		if (GetAsyncKeyState('S') & 0x8000 || GetAsyncKeyState(VK_DOWN) & 0x8000)
+			RenderingEngine::Backward(mCamera, (float)mRenderTime.deltaTime);
+		if (GetAsyncKeyState('D') & 0x8000 || GetAsyncKeyState(VK_RIGHT) & 0x8000)
+			RenderingEngine::Right(mCamera, (float)mRenderTime.deltaTime);
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+			RenderingEngine::Up(mCamera, (float)mRenderTime.deltaTime);
+		if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
+			RenderingEngine::Down(mCamera, (float)mRenderTime.deltaTime);
+
+		POINT currMousePos{};
+		GetCursorPos(&currMousePos);
+
+		vec2 currentMousePosition{ (float)currMousePos.x, (float)currMousePos.y };
+
+		vec2 mousePositionDiff{ currentMousePosition - mLastMousePosition };
+
+		//if the mouse goes outside the window and comes back into the window, the camera won't be rotated.
+		if (Length(mousePositionDiff) < 10.0f && (GetAsyncKeyState(VK_LBUTTON) & 0x8000))
+		{
+			RenderingEngine::RotateCameraLeftRight(mCamera, mCamera.angularSpeed * mousePositionDiff.x);
+			RenderingEngine::RotateCameraUpDown(mCamera, mCamera.angularSpeed * mousePositionDiff.y);
+		}
+
+		mLastMousePosition = currentMousePosition;
 	}
 
 	void Controller::Update()
 	{
-		mCamera.UpdateViewMatrix();
-		mPerspectiveProjection.UpdateProjectionMatrix();
+		RenderingEngine::UpdateViewMatrix(mCamera);
+		RenderingEngine::UpdateProjectionMatrix(mPerspectiveProjection);
 
 		if(mPlayAnimaton)
-			mModel.Simulate(mRenderTime.GetDeltaTime());
+			mModel.Simulate((float)mRenderTime.deltaTime);
 
-		mModel.UpdateModels(mScene.get(), mCamera.GetViewMatrix(), mPerspectiveProjection.GetProjectionMatrix());
+		mModel.UpdateModels(mScene.get(), mCamera.viewMatrix, mPerspectiveProjection.projectionMatrix);
 	}
 
 	void Controller::Draw()
@@ -313,8 +338,8 @@ namespace MVC
 
 		mScene->LinkPSOAndRootSignature(L"GS PSO WIREFRAME", L"GS Root Sig");
 
-		mScene->LinkStaticBuffer(FARender::VERTEX_BUFFER, L"Vertex Buffer");
-		mScene->LinkStaticBuffer(FARender::INDEX_BUFFER, L"Index Buffer");
+		mScene->LinkStaticBuffer(RenderingEngine::VERTEX_BUFFER, L"Vertex Buffer");
+		mScene->LinkStaticBuffer(RenderingEngine::INDEX_BUFFER, L"Index Buffer");
 
 		mModel.RenderModels(mScene.get());
 
@@ -333,7 +358,7 @@ namespace MVC
 
 		++frameCount;
 
-		timeElapsed += mRenderTime.GetDeltaTime();
+		timeElapsed += (float)mRenderTime.deltaTime;
 		if (timeElapsed >= 1.0f)
 		{
 			float fps = (float)frameCount; //fps = number of frames / 1 second
@@ -358,83 +383,12 @@ namespace MVC
 		}
 	}
 
-	void Controller::LerpCamera()
-	{
-		static float t = 0.0f;
-		static float lerpSpeed = 1.0f / 1.5f;
-		static vec4 start = mCamera.GetCameraPosition();
-		static vec4 end = mCamera.GetCameraPosition() + vec4(0.0f, 5.0f, 0.0f, 0.0f);
-		mCamera.SetCameraPosition(FAMath::Lerp(start, end, t));
-
-		t += mRenderTime.GetDeltaTime() * lerpSpeed;
-
-		if (t >= 1.0f)
-		{
-			vec4 temp = start;
-			start = end;
-			end = temp;
-			t = 0.0f;
-		}
-	}
-
-	void Controller::SlerpCamera()
-	{
-		static float t = 0.0f;
-		static float lerpSpeed = 1.0f / 1.0f;
-
-		static vec4 startPos(mCamera.GetCameraPosition());
-		static vec4 n(mCamera.GetZ());
-		static vec4 v(mCamera.GetY());
-		static vec4 u(mCamera.GetX());
-
-		static FAMath::Quaternion start(1.0f, 0.0f, 0.0f, 0.0f);
-		static FAMath::Quaternion start2(1.0f, 0.0f, 0.0f, 0.0f);
-		static FAMath::Quaternion end(FAMath::RotationQuaternion(180.0f, vec3(1.0f, 0.0f, 0.0f)));
-		static FAMath::Quaternion end2(FAMath::RotationQuaternion(180.0f, mCamera.GetX()));
-
-		static FAMath::Quaternion posQ;
-		static FAMath::Quaternion axisQ;
-
-		t += mRenderTime.GetDeltaTime() * lerpSpeed;
-
-		if (t >= 1.0f)
-		{
-			/*startPos = FAMath::Rotate(cPos, startPos);
-			u = FAMath::Rotate(axisQ, u);
-			v = FAMath::Rotate(axisQ, v);
-			n = FAMath::Rotate(axisQ, n);*/
-
-			FAMath::Quaternion temp(start);
-			start = end;
-			end = temp;
-
-			temp = start2;
-			start2 = end2;
-			end2 = temp;
-
-			t = 0.0f;
-		}
-
-		posQ = FAMath::Slerp(start, end, t);
-		axisQ = FAMath::Slerp(start2, end2, t);
-		
-		mCamera.SetCameraPosition(FAMath::Rotate(posQ, startPos));
-		mCamera.SetX(FAMath::Rotate(axisQ, u));
-		mCamera.SetY(FAMath::Rotate(axisQ, v));
-		mCamera.SetZ(FAMath::Rotate(axisQ, n));
-
-		if (mCamera.GetCameraPosition() == startPos)
-		{
-			end = FAMath::RotationQuaternion(80.0f, vec3(0.0f, -1.0f, 0.0f));
-			end2 = FAMath::RotationQuaternion(80.0f, -mCamera.GetY());
-		}
-	}
-
 	int Controller::Run()
 	{
 		MSG msg{};
 
-		mRenderTime.Reset();
+		RenderingEngine::InitializeTime(mRenderTime);
+		RenderingEngine::Reset(mRenderTime);
 
 		//Message Loop
 		while (msg.message != WM_QUIT)
@@ -446,7 +400,8 @@ namespace MVC
 			}
 			else
 			{
-				mRenderTime.Tick();
+				RenderingEngine::Tick(mRenderTime);
+
 				if (!mPauseApplication)
 				{
 					FrameStats();

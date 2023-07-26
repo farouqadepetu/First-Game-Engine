@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FAWindow.h"
+#include "Window.h"
 
 namespace WindowProc
 {

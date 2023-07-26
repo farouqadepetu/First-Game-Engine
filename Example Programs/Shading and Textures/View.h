@@ -1,8 +1,8 @@
 #pragma once
 
-#include "FAWindow.h"
-#include "FAColor.h"
-#include "FARenderScene.h"
+#include "Window.h"
+#include "Color.h"
+#include "RenderScene.h"
 #include "Model.h"
 
 namespace MVC
@@ -22,8 +22,8 @@ namespace MVC
 		View(const HINSTANCE& hInstance, WNDPROC mainWindowProcedure, WNDPROC renderingWindowProcedure,
 			void* mainWindowadditionalData, void* renderingWindowadditionalData);
 
-		FAWindow::Window& GetMainWindow();
-		FAWindow::Window& GetRenderingWindow();
+		RenderingEngine::Window& GetMainWindow();
+		RenderingEngine::Window& GetRenderingWindow();
 
 		bool GetIsMainWindowActive();
 		bool GetIsMainWindowMinimized();
@@ -76,12 +76,12 @@ namespace MVC
 		bool mIsMainWindowMinimized;
 		bool mIsMainWindowMaximized;
 
-		FAWindow::Window mMainWindow;
-		FAWindow::Window mRenderingWindow;
+		RenderingEngine::Window mMainWindow;
+		RenderingEngine::Window mRenderingWindow;
 
-		FAWindow::Window mDropDownLists[4];
-		FAWindow::Window mStaticText[4];
-		FAWindow::Window mButtons[5];
+		RenderingEngine::Window mDropDownLists[4];
+		RenderingEngine::Window mStaticText[4];
+		RenderingEngine::Window mButtons[5];
 
 		HFONT textFont;
 

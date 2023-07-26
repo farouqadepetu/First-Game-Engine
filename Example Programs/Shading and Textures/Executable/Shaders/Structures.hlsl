@@ -14,7 +14,7 @@ struct PassConstants
 {
 	float4x4 viewMatrix;		//bytes 0-63
 	float4x4 projectionMatrix;  //bytes 64-127
-	float4 cameraPosition;		//bytes 128-143
+	float3 cameraPosition;		//bytes 128-139
 };
 
 //Material properties
@@ -32,14 +32,14 @@ struct Light
 	float4 color;			//bytes 0-15
 
 	//for point lights
-	float4 position;		//bytes 16-31
+	float3 position;		//bytes 16-27
+	
+    int pad0;				//bytes 28-31
 
 	//for direction lights
-	float4 direction;		//bytes 32-47
+	float3 direction;		//bytes 32-43
 
-	int type;				//bytes 48-51
-
-	float3 pad;				//bytes	52-63
+	int type;				//bytes 44-47
 };
 
 

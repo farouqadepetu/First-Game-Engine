@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FAWindow.h"
+#include "Window.h"
 
 namespace MVC
 {
@@ -44,17 +44,16 @@ namespace MVC
 		bool IsRenderingWindowBeingResized();
 		bool IsSettingsWindowDisplayed();
 
-		void ResizeRenderingWindow(unsigned int width, unsigned int height);
 		void RepositionSettingsWindow();
 
 	private:
 	
 
 	private:
-		FAWindow::Window mRenderingWindow;
-		FAWindow::Window mSettingsWindow;
-		FAWindow::Window mPlayPauseButton;
-		FAWindow::Window mResetButton;
+		RenderingEngine::Window mRenderingWindow;
+		RenderingEngine::Window mSettingsWindow;
+		RenderingEngine::Window mPlayPauseButton;
+		RenderingEngine::Window mResetButton;
 
 		bool mDisplaySettingsWindow;
 		bool mMinimizeRenderingWindow;

@@ -2,18 +2,18 @@
 
 #include <vector>
 #include <memory>
-#include "FARenderScene.h"
-#include "FASphere.h"
-#include "FACylinder.h"
-#include "FACone.h"
-#include "FABox.h"
-#include "FAPyramid.h"
-#include "FACamera.h"
-#include "FAProjection.h"
-#include "FATime.h"
-#include "FAWindow.h"
+#include "RenderScene.h"
+#include "Sphere.h"
+#include "Cylinder.h"
+#include "Cone.h"
+#include "Box.h"
+#include "Pyramid.h"
+#include "Camera.h"
+#include "PerspectiveProjection.h"
+#include "GameTime.h"
+#include "Window.h"
 #include "Structures.h"
-#include "FAShapesUtility.h"
+#include "CreateShapes.h"
 
 namespace MVC
 {
@@ -49,23 +49,23 @@ namespace MVC
 	public:
 		Model();
 
-		FARender::RenderScene* GetScene();
+		RenderingEngine::RenderScene* GetScene();
 
-		FACamera::Camera& GetCamera();
+		RenderingEngine::Camera& GetCamera();
 
-		FAProjection::PerspectiveProjection& GetPerspectiveProjection();
+		RenderingEngine::PerspectiveProjection& GetPerspectiveProjection();
 
-		FAShapes::Box box;
-		FAShapes::Pyramid pyramid;
-		FAShapes::Cone cone;
-		FAShapes::Cylinder cylinder;
-		FAShapes::Sphere sphere;
+		ShapesEngine::Box box;
+		ShapesEngine::Pyramid pyramid;
+		ShapesEngine::Cone cone;
+		ShapesEngine::Cylinder cylinder;
+		ShapesEngine::Sphere sphere;
 
-		FAShapes::ThreeDimensionalShape* GetShape(unsigned int index);
+		ShapesEngine::ThreeDimensionalShape* GetShape(unsigned int index);
 
-		FAShapes::Sphere& GetPointLight(unsigned int index);
+		ShapesEngine::Sphere& GetPointLight(unsigned int index);
 
-		FATime::Time& GetFrameTime();
+		RenderingEngine::Time& GetFrameTime();
 
 		const Material& GetMaterial() const;
 
@@ -77,7 +77,7 @@ namespace MVC
 		void ResetShape(unsigned int currentShape);
 		void ResetPointLights();
 
-		void InitializeScene(const FAWindow::Window& window);
+		void InitializeScene(const RenderingEngine::Window& window);
 
 	private:
 		void BuildShapes();
@@ -95,23 +95,23 @@ namespace MVC
 		void BuildPSOs();
 
 	private:
-		std::unique_ptr<FARender::RenderScene> mScene;
+		std::unique_ptr<RenderingEngine::RenderScene> mScene;
 
-		std::vector<FAShapes::ThreeDimensionalShape*> mShapes;
+		std::vector<ShapesEngine::ThreeDimensionalShape*> mShapes;
 
-		std::vector<FAShapes::Sphere> mPointLights;
+		std::vector<ShapesEngine::Sphere> mPointLights;
 
-		FACamera::Camera mCamera;
-		FAProjection::PerspectiveProjection mPerspectiveProjection;
+		RenderingEngine::Camera mCamera;
+		RenderingEngine::PerspectiveProjection mPerspectiveProjection;
 
-		FATime::Time mFrameTime;
+		RenderingEngine::Time mFrameTime;
 
 		Material mMaterial;
 
 		std::vector<Light> mLightSources;
 
 		//Vector to store all the vertices of the 3D shapes.
-		std::vector<FAShapes::Vertex> mVertexList;
+		std::vector<ShapesEngine::Vertex> mVertexList;
 
 		//Vector to store all the indices of the 3D shapes.
 		std::vector<unsigned int> mIndexList;

@@ -12,10 +12,10 @@ struct vertexOutput
 //pass constant buffer
 cbuffer PassConstantBuffer : register(b1)
 {
-	float4x4 viewMatrix;		//bytes 0-63
-	float4x4 projectionMatrix;  //bytes 64-127
-	float4 cameraPosition;		//bytes 128-143
-	uint shadingType;			//bytes 143-147
+    float4x4 viewMatrix; //bytes 0-63
+    float4x4 projectionMatrix; //bytes 64-127
+    float3 cameraPosition; //bytes 128-139
+    uint shadingType; //bytes 140-143
 };
 
 //Material data
@@ -48,13 +48,13 @@ float4 psMain(vertexOutput vout) : SV_TARGET
 		{
 			if (lightSources[i].lightSourceType == POINT_LIGHT)
 			{
-				totalColor += ComputePointLight(lightSources[i], mat, vout.worldNormal,
-					vout.worldPosition, cameraPosition, shadingType);
+				totalColor += ComputePointLight(lightSources[i], mat, vout.worldNormal.xyz,
+					vout.worldPosition.xyz, cameraPosition, shadingType);
 			}
 			else if (lightSources[i].lightSourceType == DIRECTIONAL_LIGHT)
 			{
-				totalColor += ComputeDirectionalLight(lightSources[i], mat, vout.worldNormal,
-					vout.worldPosition, cameraPosition, shadingType);
+				totalColor += ComputeDirectionalLight(lightSources[i], mat, vout.worldNormal.xyz,
+					vout.worldPosition.xyz, cameraPosition, shadingType);
 			}
 		}
 
@@ -78,13 +78,13 @@ float4 psMain(vertexOutput vout) : SV_TARGET
 		{
 			if (lightSources[i].lightSourceType == POINT_LIGHT)
 			{
-				totalColor += ComputePointLight(lightSources[i], mat, pixelNormal,
-					vout.worldPosition, cameraPosition, shadingType);
+				totalColor += ComputePointLight(lightSources[i], mat, pixelNormal.xyz,
+					vout.worldPosition.xyz, cameraPosition, shadingType);
 			}
 			else if (lightSources[i].lightSourceType == DIRECTIONAL_LIGHT)
 			{
-				totalColor += ComputeDirectionalLight(lightSources[i], mat, pixelNormal,
-					vout.worldPosition, cameraPosition, shadingType);
+				totalColor += ComputeDirectionalLight(lightSources[i], mat, pixelNormal.xyz,
+					vout.worldPosition.xyz, cameraPosition, shadingType);
 			}
 		}
 

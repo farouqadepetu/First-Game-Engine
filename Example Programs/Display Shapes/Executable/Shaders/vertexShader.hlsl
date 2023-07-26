@@ -1,7 +1,7 @@
 //input struct
 struct vertexInput
 {
-	float4 inputPosition: POSITION;
+	float3 inputPosition : POSITION;
 };
 
 //output struct
@@ -32,7 +32,7 @@ vertexOutput vsMain(vertexInput vin)
 	float4x4 MVP = mul(localToWorldMatrix, mul(viewMatrix, projectionMatrix));
 	
 	//Transform to homogenous clip space
-	vout.outputPosition = mul(vin.inputPosition, MVP);
+    vout.outputPosition = mul(float4(vin.inputPosition, 1.0f), MVP);
 
 	return vout;
 }

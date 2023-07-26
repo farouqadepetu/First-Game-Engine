@@ -76,7 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\FA Math Engine\Header Files;..\..\FA Rendering Engine\Header Files;..\..\FA Shapes\Header Files;..\..\FA Rendering Engine\Header Files\directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Shapes Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Rendering Engine\directx;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Rendering Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Math Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -92,7 +92,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\FA Math Engine\Header Files;..\..\FA Rendering Engine\Header Files;..\..\FA Shapes\Header Files;..\..\FA Rendering Engine\Header Files\directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Shapes Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Rendering Engine\directx;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Rendering Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Math Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\FA Math Engine\Header Files;..\..\FA Rendering Engine\Header Files;..\..\FA Shapes\Header Files;..\..\FA Rendering Engine\Header Files\directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Shapes Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Rendering Engine\directx;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Rendering Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Math Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -124,7 +124,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\FA Math Engine\Header Files;..\..\FA Rendering Engine\Header Files;..\..\FA Shapes\Header Files;..\..\FA Rendering Engine\Header Files\directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Shapes Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Rendering Engine\directx;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Rendering Engine\Header Files;C:\Users\Work\Desktop\First Game Engine\First-Game-Engine\Math Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -135,58 +135,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\DDSTextureLoader.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FABuffer.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FACamera.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FAColor.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FADeviceResources.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FADirectXException.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FAMultiSampling.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FAProjection.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FARenderScene.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FASwapChain.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FAText.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FATextResources.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FATime.cpp" />
-    <ClCompile Include="..\..\FA Rendering Engine\Source Files\FAWindow.cpp" />
-    <ClCompile Include="..\..\FA Shapes\Source Files\FABox.cpp" />
-    <ClCompile Include="..\..\FA Shapes\Source Files\FACone.cpp" />
-    <ClCompile Include="..\..\FA Shapes\Source Files\FACylinder.cpp" />
-    <ClCompile Include="..\..\FA Shapes\Source Files\FAPyramid.cpp" />
-    <ClCompile Include="..\..\FA Shapes\Source Files\FAShapesUtility.cpp" />
-    <ClCompile Include="..\..\FA Shapes\Source Files\FASphere.cpp" />
-    <ClCompile Include="..\..\FA Shapes\Source Files\FAThreeDimensionalShape.cpp" />
-    <ClCompile Include="..\..\FA Shapes\Source Files\FATriangle.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Buffer.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Camera.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Color.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\DDSTextureLoader.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\DeviceResources.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\DirectXException.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\GameTime.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Multisampling.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\OrthographicProjection.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\PerspectiveProjection.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\RenderScene.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\SwapChain.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Text.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\TextResources.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\Window.cpp" />
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Box.cpp" />
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Cone.cpp" />
+    <ClCompile Include="..\..\Shapes Engine\Source Files\CreateShapes.cpp" />
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Cylinder.cpp" />
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Pyramid.cpp" />
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Sphere.cpp" />
+    <ClCompile Include="..\..\Shapes Engine\Source Files\ThreeDimensionalShape.cpp" />
+    <ClCompile Include="..\..\Shapes Engine\Source Files\Triangle.cpp" />
     <ClCompile Include="InitFunctions.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MessageLoopFunctions.cpp" />
     <ClCompile Include="WindowProcedure.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\FA Math Engine\Header Files\FAMathEngine.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\DDSTextureLoader.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\Direct3DLink.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FABuffer.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FACamera.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FAColor.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FADeviceResources.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FADirectXException.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FAMultiSampling.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FAProjection.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FARenderScene.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FASwapChain.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FAText.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FATextResources.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FATime.h" />
-    <ClInclude Include="..\..\FA Rendering Engine\Header Files\FAWindow.h" />
-    <ClInclude Include="..\..\FA Shapes\Header Files\FABox.h" />
-    <ClInclude Include="..\..\FA Shapes\Header Files\FACone.h" />
-    <ClInclude Include="..\..\FA Shapes\Header Files\FACylinder.h" />
-    <ClInclude Include="..\..\FA Shapes\Header Files\FAPyramid.h" />
-    <ClInclude Include="..\..\FA Shapes\Header Files\FAShapesUtility.h" />
-    <ClInclude Include="..\..\FA Shapes\Header Files\FASphere.h" />
-    <ClInclude Include="..\..\FA Shapes\Header Files\FAThreeDimensionalShape.h" />
-    <ClInclude Include="..\..\FA Shapes\Header Files\FATriangle.h" />
     <ClInclude Include="DisplayShapesGlobalVariables.h" />
     <ClInclude Include="InitFunctions.h" />
     <ClInclude Include="MessageLoopFunctions.h" />

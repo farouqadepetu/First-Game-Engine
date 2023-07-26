@@ -18,12 +18,12 @@ namespace MVC
 		CreateWindows(hInstance, mainWindowProcedure, renderingWindowProcedure, mainWindowadditionalData, renderingWindowadditionalData);
 	}
 
-	FAWindow::Window& View::GetMainWindow()
+	RenderingEngine::Window& View::GetMainWindow()
 	{
 		return mMainWindow;
 	}
 
-	FAWindow::Window& View::GetRenderingWindow()
+	RenderingEngine::Window& View::GetRenderingWindow()
 	{
 		return mRenderingWindow;
 	}
@@ -102,18 +102,18 @@ namespace MVC
 	{
 		mRotateShape = rs;
 		if(rs)
-			SetWindowText(mButtons[PLAY_PAUSE_SHAPE].GetWindowHandle(), L"Stop Rotating Shape");
+			SetWindowText(mButtons[PLAY_PAUSE_SHAPE].windowHandle, L"Stop Rotating Shape");
 		else
-			SetWindowText(mButtons[PLAY_PAUSE_SHAPE].GetWindowHandle(), L"Rotate Shape");
+			SetWindowText(mButtons[PLAY_PAUSE_SHAPE].windowHandle, L"Rotate Shape");
 	}
 
 	void View::RotatePointLight(bool rl)
 	{
 		mRotatePointLight = rl;
 		if (rl)
-			SetWindowText(mButtons[PLAY_PAUSE_POINT_LIGHT].GetWindowHandle(), L"Stop Rotating Point Light(s)");
+			SetWindowText(mButtons[PLAY_PAUSE_POINT_LIGHT].windowHandle, L"Stop Rotating Point Light(s)");
 		else
-			SetWindowText(mButtons[PLAY_PAUSE_POINT_LIGHT].GetWindowHandle(), L"Rotate Point Light(s)");
+			SetWindowText(mButtons[PLAY_PAUSE_POINT_LIGHT].windowHandle, L"Rotate Point Light(s)");
 	}
 
 	void View::CreateWindows(const HINSTANCE& hInstance, WNDPROC mainWindowProcedure, WNDPROC renderingWindowProcedure, 
@@ -128,160 +128,160 @@ namespace MVC
 
 	void View::CreateMainWindow(const HINSTANCE& hInstance, WNDPROC windowProcedure, void* additionalData)
 	{
-		mMainWindow.CreateParentWindow(hInstance, windowProcedure, FAColor::Color(0.4f, 0.4f, 0.4f), L"Main Window Class",
+		CreateParentWindow(mMainWindow, hInstance, windowProcedure, RenderingEngine::Color(0.4f, 0.4f, 0.4f), L"Main Window Class",
 			L"Shading and Textures", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, additionalData);
 	}
 
 	void View::CreateRenderingWindow(const HINSTANCE& hInstance, WNDPROC windowProcedure, void* additionalData)
 	{
-		mRenderingWindow.CreateChildWindow(hInstance, mMainWindow.GetWindowHandle(), 0, windowProcedure, FAColor::Color(), 
-			L"Rendering Window Class", L"", WS_CHILD | WS_VISIBLE, 0, 0, mMainWindow.GetWidth() - 200, 
-			mMainWindow.GetHeight(), additionalData);
+		CreateChildWindow(mRenderingWindow,hInstance, mMainWindow.windowHandle, 0, windowProcedure, RenderingEngine::Color(),
+			L"Rendering Window Class", L"", WS_CHILD | WS_VISIBLE, 0, 0, RenderingEngine::GetWidth(mMainWindow) - 200,
+			RenderingEngine::GetHeight(mMainWindow), additionalData);
 	}
 
 	void View::CreateDropDownLists(const HINSTANCE& hInstance)
 	{
-		unsigned int dropDownListWidth{ mMainWindow.GetWidth() - mRenderingWindow.GetWidth() };
+		unsigned int dropDownListWidth{ RenderingEngine::GetWidth(mMainWindow) - RenderingEngine::GetWidth(mRenderingWindow) };
 		unsigned int dropDownListHeight{ 110 };
-		unsigned int dropDownListX{ mRenderingWindow.GetWidth() };
+		unsigned int dropDownListX{ RenderingEngine::GetWidth(mRenderingWindow) };
 		unsigned int dropDownListY{ 25 };
 
-		mDropDownLists[SHAPES].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), SHAPES, WC_COMBOBOX, L"",
+		CreateControlWindow(mDropDownLists[SHAPES], hInstance, mMainWindow.windowHandle, SHAPES, WC_COMBOBOX, L"",
 			CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_TILED,
 			dropDownListX, dropDownListY, dropDownListWidth, dropDownListHeight);
 
-		SendMessage(mDropDownLists[SHAPES].GetWindowHandle(), CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Sphere");
-		SendMessage(mDropDownLists[SHAPES].GetWindowHandle(), CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Cylinder");
-		SendMessage(mDropDownLists[SHAPES].GetWindowHandle(), CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Cone");
-		SendMessage(mDropDownLists[SHAPES].GetWindowHandle(), CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Box");
-		SendMessage(mDropDownLists[SHAPES].GetWindowHandle(), CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Pyramid");
-		SendMessage(mDropDownLists[SHAPES].GetWindowHandle(), CB_SETCURSEL, (WPARAM) 0, (LPARAM) 0);
+		SendMessage(mDropDownLists[SHAPES].windowHandle, CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Sphere");
+		SendMessage(mDropDownLists[SHAPES].windowHandle, CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Cylinder");
+		SendMessage(mDropDownLists[SHAPES].windowHandle, CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Cone");
+		SendMessage(mDropDownLists[SHAPES].windowHandle, CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Box");
+		SendMessage(mDropDownLists[SHAPES].windowHandle, CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Pyramid");
+		SendMessage(mDropDownLists[SHAPES].windowHandle, CB_SETCURSEL, (WPARAM) 0, (LPARAM) 0);
 
 		dropDownListY += dropDownListHeight;
-		mDropDownLists[TEXTURES].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), TEXTURES, WC_COMBOBOX, L"",
+		CreateControlWindow(mDropDownLists[TEXTURES], hInstance, mMainWindow.windowHandle, TEXTURES, WC_COMBOBOX, L"",
 			CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_TILED,
 			dropDownListX, dropDownListY, dropDownListWidth, dropDownListHeight);
 
-		SendMessage(mDropDownLists[TEXTURES].GetWindowHandle(), CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Earth");
-		SendMessage(mDropDownLists[TEXTURES].GetWindowHandle(), CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Moon");
-		SendMessage(mDropDownLists[TEXTURES].GetWindowHandle(), CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Sun");
-		SendMessage(mDropDownLists[TEXTURES].GetWindowHandle(), CB_SETCURSEL, (WPARAM) 0, (LPARAM) 0);
+		SendMessage(mDropDownLists[TEXTURES].windowHandle, CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Earth");
+		SendMessage(mDropDownLists[TEXTURES].windowHandle, CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Moon");
+		SendMessage(mDropDownLists[TEXTURES].windowHandle, CB_ADDSTRING, (WPARAM) 0, (LPARAM) L"Sun");
+		SendMessage(mDropDownLists[TEXTURES].windowHandle, CB_SETCURSEL, (WPARAM) 0, (LPARAM) 0);
 
 		dropDownListY += dropDownListHeight;
-		mDropDownLists[RENDER_OPTIONS].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), RENDER_OPTIONS, WC_COMBOBOX, L"",
+		CreateControlWindow(mDropDownLists[RENDER_OPTIONS], hInstance, mMainWindow.windowHandle, RENDER_OPTIONS, WC_COMBOBOX, L"",
 			CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_TILED,
 			dropDownListX, dropDownListY, dropDownListWidth, dropDownListHeight);
 
-		SendMessage(mDropDownLists[RENDER_OPTIONS].GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Textures + Shading");
-		SendMessage(mDropDownLists[RENDER_OPTIONS].GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Textures + No Shading");
-		SendMessage(mDropDownLists[RENDER_OPTIONS].GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Color + Shading");
-		SendMessage(mDropDownLists[RENDER_OPTIONS].GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Color + No Shading");
-		SendMessage(mDropDownLists[RENDER_OPTIONS].GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Wireframe");
-		SendMessage(mDropDownLists[RENDER_OPTIONS].GetWindowHandle(), CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
+		SendMessage(mDropDownLists[RENDER_OPTIONS].windowHandle, CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Textures + Shading");
+		SendMessage(mDropDownLists[RENDER_OPTIONS].windowHandle, CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Textures + No Shading");
+		SendMessage(mDropDownLists[RENDER_OPTIONS].windowHandle, CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Color + Shading");
+		SendMessage(mDropDownLists[RENDER_OPTIONS].windowHandle, CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Color + No Shading");
+		SendMessage(mDropDownLists[RENDER_OPTIONS].windowHandle, CB_ADDSTRING, (WPARAM)0, (LPARAM)L"Wireframe");
+		SendMessage(mDropDownLists[RENDER_OPTIONS].windowHandle, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
 
 		dropDownListY += dropDownListHeight;
-		mDropDownLists[LIGHT_SOURCE].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), LIGHT_SOURCE, WC_COMBOBOX, L"",
+		CreateControlWindow(mDropDownLists[LIGHT_SOURCE], hInstance, mMainWindow.windowHandle, LIGHT_SOURCE, WC_COMBOBOX, L"",
 			CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_SIMPLE | WS_CHILD | WS_VISIBLE | WS_TILED,
 			dropDownListX, dropDownListY, dropDownListWidth, dropDownListHeight);
 
-		SendMessage(mDropDownLists[LIGHT_SOURCE].GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"1 Point Light");
-		SendMessage(mDropDownLists[LIGHT_SOURCE].GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"2 Point Light");
-		SendMessage(mDropDownLists[LIGHT_SOURCE].GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"3 Point Light");
-		SendMessage(mDropDownLists[LIGHT_SOURCE].GetWindowHandle(), CB_ADDSTRING, (WPARAM)0, (LPARAM)L"4 Point Light");
-		SendMessage(mDropDownLists[LIGHT_SOURCE].GetWindowHandle(), CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
+		SendMessage(mDropDownLists[LIGHT_SOURCE].windowHandle, CB_ADDSTRING, (WPARAM)0, (LPARAM)L"1 Point Light");
+		SendMessage(mDropDownLists[LIGHT_SOURCE].windowHandle, CB_ADDSTRING, (WPARAM)0, (LPARAM)L"2 Point Light");
+		SendMessage(mDropDownLists[LIGHT_SOURCE].windowHandle, CB_ADDSTRING, (WPARAM)0, (LPARAM)L"3 Point Light");
+		SendMessage(mDropDownLists[LIGHT_SOURCE].windowHandle, CB_ADDSTRING, (WPARAM)0, (LPARAM)L"4 Point Light");
+		SendMessage(mDropDownLists[LIGHT_SOURCE].windowHandle, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);
 	}
 
 	void View::CreateStaticText(const HINSTANCE& hInstance)
 	{
 		//Font for the static texts
-		HDC hdc = GetDC(mMainWindow.GetWindowHandle());
+		HDC hdc = GetDC(mMainWindow.windowHandle);
 		LOGFONT logF{ 0 };
 		logF.lfHeight = -MulDiv(15, GetDeviceCaps(hdc, LOGPIXELSY), 72);
 		logF.lfWeight = FW_BOLD;
 		textFont = CreateFontIndirect(&logF);
 
-		unsigned int staticTextWidth{ mMainWindow.GetWidth() - mRenderingWindow.GetWidth() };
+		unsigned int staticTextWidth{ RenderingEngine::GetWidth(mMainWindow) - RenderingEngine::GetWidth(mRenderingWindow) };
 		unsigned int staticTextHeight{ 20 };
-		unsigned int staticTextX{ mRenderingWindow.GetWidth() };
+		unsigned int staticTextX{ RenderingEngine::GetWidth(mRenderingWindow) };
 		unsigned int staticTextY{ 0 };
 
-		mStaticText[SHAPES].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), SHAPES, L"STATIC", L"",
+		CreateControlWindow(mStaticText[SHAPES], hInstance, mMainWindow.windowHandle, SHAPES, L"STATIC", L"",
 			WS_VISIBLE | WS_CHILD | SS_CENTER, staticTextX, staticTextY, staticTextWidth, staticTextHeight);
 
-		SendMessage(mStaticText[SHAPES].GetWindowHandle(), WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
-		SetWindowText(mStaticText[SHAPES].GetWindowHandle(), L"SHAPES");
+		SendMessage(mStaticText[SHAPES].windowHandle, WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
+		SetWindowText(mStaticText[SHAPES].windowHandle, L"SHAPES");
 
 		staticTextY += 110;
-		mStaticText[TEXTURES].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), TEXTURES, L"STATIC", L"",
+		CreateControlWindow(mStaticText[TEXTURES], hInstance, mMainWindow.windowHandle, TEXTURES, L"STATIC", L"",
 			WS_VISIBLE | WS_CHILD | SS_CENTER, staticTextX, staticTextY, staticTextWidth, staticTextHeight);
 
-		SendMessage(mStaticText[TEXTURES].GetWindowHandle(), WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
-		SetWindowText(mStaticText[TEXTURES].GetWindowHandle(), L"TEXTURES");
+		SendMessage(mStaticText[TEXTURES].windowHandle, WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
+		SetWindowText(mStaticText[TEXTURES].windowHandle, L"TEXTURES");
 
 		staticTextY += 110;
-		mStaticText[RENDER_OPTIONS].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), TEXTURES, L"STATIC", L"",
+		CreateControlWindow(mStaticText[RENDER_OPTIONS], hInstance, mMainWindow.windowHandle, TEXTURES, L"STATIC", L"",
 			WS_VISIBLE | WS_CHILD | SS_CENTER, staticTextX, staticTextY, staticTextWidth, staticTextHeight);
 
-		SendMessage(mStaticText[RENDER_OPTIONS].GetWindowHandle(), WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
-		SetWindowText(mStaticText[RENDER_OPTIONS].GetWindowHandle(), L"RENDER OPTIONS");
+		SendMessage(mStaticText[RENDER_OPTIONS].windowHandle, WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
+		SetWindowText(mStaticText[RENDER_OPTIONS].windowHandle, L"RENDER OPTIONS");
 
 		staticTextY += 110;
-		mStaticText[LIGHT_SOURCE].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), TEXTURES, L"STATIC", L"",
+		CreateControlWindow(mStaticText[LIGHT_SOURCE], hInstance, mMainWindow.windowHandle, TEXTURES, L"STATIC", L"",
 			WS_VISIBLE | WS_CHILD | SS_CENTER, staticTextX, staticTextY, staticTextWidth, staticTextHeight);
 
-		SendMessage(mStaticText[LIGHT_SOURCE].GetWindowHandle(), WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
-		SetWindowText(mStaticText[LIGHT_SOURCE].GetWindowHandle(), L"POINT LIGHTS");
+		SendMessage(mStaticText[LIGHT_SOURCE].windowHandle, WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
+		SetWindowText(mStaticText[LIGHT_SOURCE].windowHandle, L"POINT LIGHTS");
 
-		ReleaseDC(mMainWindow.GetWindowHandle(), hdc);
+		ReleaseDC(mMainWindow.windowHandle, hdc);
 	}
 
 	void View::CreateButtons(const HINSTANCE& hInstance)
 	{
 		//Font for the button text
-		HDC hdc = GetDC(mMainWindow.GetWindowHandle());
+		HDC hdc = GetDC(mMainWindow.windowHandle);
 		LOGFONT logF{ 0 };
 		logF.lfHeight = -MulDiv(11, GetDeviceCaps(hdc, LOGPIXELSY), 72);
 		logF.lfWeight = FW_BOLD;
 		textFont = CreateFontIndirect(&logF);
 
-		unsigned int buttonX{ mRenderingWindow.GetWidth() + 10 };
-		unsigned int buttonY{ mDropDownLists[3].GetY() + 50 };
-		unsigned int buttonWidth{ mMainWindow.GetWidth() - mRenderingWindow.GetWidth() - 20 };
+		unsigned int buttonX{ RenderingEngine::GetWidth(mRenderingWindow) + 10 };
+		unsigned int buttonY{ RenderingEngine::GetY(mDropDownLists[3]) + 50 };
+		unsigned int buttonWidth{ RenderingEngine::GetWidth(mMainWindow) - RenderingEngine::GetWidth(mRenderingWindow) - 20 };
 		unsigned int buttonHeight{ 35 };
 
-		mButtons[PLAY_PAUSE_SHAPE].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), PLAY_PAUSE_SHAPE, 
+		CreateControlWindow(mButtons[PLAY_PAUSE_SHAPE], hInstance, mMainWindow.windowHandle, PLAY_PAUSE_SHAPE,
 			L"BUTTON", L"Rotate Shape",
 			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE | BS_TEXT, buttonX, buttonY, buttonWidth, buttonHeight);
 
-		SendMessage(mButtons[PLAY_PAUSE_SHAPE].GetWindowHandle(), WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
+		SendMessage(mButtons[PLAY_PAUSE_SHAPE].windowHandle, WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
 
 		buttonY += buttonHeight + 5;
-		mButtons[PLAY_PAUSE_POINT_LIGHT].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), PLAY_PAUSE_POINT_LIGHT,
+		CreateControlWindow(mButtons[PLAY_PAUSE_POINT_LIGHT], hInstance, mMainWindow.windowHandle, PLAY_PAUSE_POINT_LIGHT,
 			L"BUTTON", L"Rotate Point Light(s)",
 			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE | BS_TEXT, buttonX, buttonY, buttonWidth, buttonHeight + 5);
 
-		SendMessage(mButtons[PLAY_PAUSE_POINT_LIGHT].GetWindowHandle(), WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
+		SendMessage(mButtons[PLAY_PAUSE_POINT_LIGHT].windowHandle, WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
 
 		buttonY += buttonHeight + 10;
-		mButtons[RESET_CAMERA].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), RESET_CAMERA,
+		CreateControlWindow(mButtons[RESET_CAMERA], hInstance, mMainWindow.windowHandle, RESET_CAMERA,
 			L"BUTTON", L"Reset Camera to Original Position",
 			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE | BS_TEXT, buttonX, buttonY, buttonWidth, buttonHeight + 5);
 
-		SendMessage(mButtons[RESET_CAMERA].GetWindowHandle(), WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
+		SendMessage(mButtons[RESET_CAMERA].windowHandle, WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
 
 		buttonY += buttonHeight + 10;
-		mButtons[RESET_SHAPE].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), RESET_SHAPE,
+		CreateControlWindow(mButtons[RESET_SHAPE], hInstance, mMainWindow.windowHandle, RESET_SHAPE,
 			L"BUTTON", L"Reset Shape to Original Position",
 			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE | BS_TEXT, buttonX, buttonY, buttonWidth, buttonHeight + 5);
 
-		SendMessage(mButtons[RESET_SHAPE].GetWindowHandle(), WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
+		SendMessage(mButtons[RESET_SHAPE].windowHandle, WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
 
 		buttonY += buttonHeight + 10;
-		mButtons[RESET_POINT_LIGHT].CreateControlWindow(hInstance, mMainWindow.GetWindowHandle(), RESET_POINT_LIGHT,
+		CreateControlWindow(mButtons[RESET_POINT_LIGHT], hInstance, mMainWindow.windowHandle, RESET_POINT_LIGHT,
 			L"BUTTON", L"Reset Point Light(s) to Original Position(s)",
 			WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_MULTILINE | BS_TEXT, buttonX, buttonY, buttonWidth, buttonHeight + 5);
 
-		SendMessage(mButtons[RESET_POINT_LIGHT].GetWindowHandle(), WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
+		SendMessage(mButtons[RESET_POINT_LIGHT].windowHandle, WM_SETFONT, (WPARAM)textFont, (LPARAM)TRUE);
 	}
 
 	void View::ActivateMainWindow()
@@ -316,34 +316,28 @@ namespace MVC
 
 	void View::ResizeRenderingWindow(unsigned int width, unsigned int height)
 	{
-		mRenderingWindow.SetWidth(width);
-		mRenderingWindow.SetHeight(height);
-
-		MoveWindow(mRenderingWindow.GetWindowHandle(), 0, 0, mRenderingWindow.GetWidth(), mRenderingWindow.GetHeight(), FALSE);
+		SetWindowPos(mRenderingWindow.windowHandle, nullptr, 0, 0, RenderingEngine::GetWidth(mMainWindow) - RenderingEngine::GetWidth(mDropDownLists[0]),
+			RenderingEngine::GetHeight(mMainWindow), SWP_NOMOVE | SWP_SHOWWINDOW);
 	}
 
 	void View::ResizeControlWindows()
 	{
 		for (unsigned int i = 0; i < 4; ++i)
 		{
-			mDropDownLists[i].SetX(mRenderingWindow.GetWidth());
-			MoveWindow(mDropDownLists[i].GetWindowHandle(), mDropDownLists[i].GetX(), mDropDownLists[i].GetY(),
-				mDropDownLists[i].GetWidth(), mDropDownLists[i].GetHeight(), TRUE);
+			MoveWindow(mDropDownLists[i].windowHandle, RenderingEngine::GetWidth(mRenderingWindow), RenderingEngine::GetY(mDropDownLists[i]),
+				RenderingEngine::GetWidth(mDropDownLists[i]), RenderingEngine::GetHeight(mDropDownLists[i]), TRUE);
 
-			mStaticText[i].SetX(mRenderingWindow.GetWidth());
-			MoveWindow(mStaticText[i].GetWindowHandle(), mStaticText[i].GetX(), mStaticText[i].GetY(),
-				mStaticText[i].GetWidth(), mStaticText[i].GetHeight(), TRUE);
+			MoveWindow(mStaticText[i].windowHandle, RenderingEngine::GetWidth(mRenderingWindow), RenderingEngine::GetY(mStaticText[i]),
+				RenderingEngine::GetWidth(mStaticText[i]), RenderingEngine::GetHeight(mStaticText[i]), TRUE);
 
-			mButtons[i].SetX(mRenderingWindow.GetWidth() + 10);
-			MoveWindow(mButtons[i].GetWindowHandle(), mButtons[i].GetX(), mButtons[i].GetY(),
-				mButtons[i].GetWidth(), mButtons[i].GetHeight(), TRUE);
+			MoveWindow(mButtons[i].windowHandle, RenderingEngine::GetWidth(mRenderingWindow) + 10, RenderingEngine::GetY(mButtons[i]),
+				RenderingEngine::GetWidth(mButtons[i]), RenderingEngine::GetHeight(mButtons[i]), TRUE);
 		}
 
 		for (unsigned int i = 0; i < 5; ++i)
 		{
-			mButtons[i].SetX(mRenderingWindow.GetWidth() + 10);
-			MoveWindow(mButtons[i].GetWindowHandle(), mButtons[i].GetX(), mButtons[i].GetY(),
-				mButtons[i].GetWidth(), mButtons[i].GetHeight(), TRUE);
+			MoveWindow(mButtons[i].windowHandle, RenderingEngine::GetWidth(mRenderingWindow) + 10, RenderingEngine::GetY(mButtons[i]),
+				RenderingEngine::GetWidth(mButtons[i]), RenderingEngine::GetHeight(mButtons[i]), TRUE);
 		}
 	}
 

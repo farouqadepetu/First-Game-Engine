@@ -1,5 +1,5 @@
 #include "MessageLoopFunctions.h"
-#include "FADirectXException.h"
+#include "DirectXException.h"
 #include "GlobalVariables.h"
 #include <iomanip>
 
@@ -18,7 +18,7 @@ namespace MessageLoop
 		++frameCount;
 
 		//after every second display fps and frame time.
-		timeElapsed += frameTime.GetDeltaTime();
+		timeElapsed += frameTime.deltaTime;
 		if (timeElapsed >= 1.0f)
 		{
 			float fps = (float)frameCount;
@@ -48,24 +48,52 @@ namespace MessageLoop
 		if (enableCameraUserInput)
 		{
 			//Poll keyboard and mouse input.
-			camera.KeyboardInputWASD(frameTime.GetDeltaTime());
-			camera.MouseInput();
+			//check if w, a, s, d or up, left, right, down, spacebar or control was pressed
+
+			if (GetAsyncKeyState('W') & 0x8000 || GetAsyncKeyState(VK_UP) & 0x8000)
+				RenderingEngine::Foward(camera, frameTime.deltaTime);
+			if (GetAsyncKeyState('A') & 0x8000 || GetAsyncKeyState(VK_LEFT) & 0x8000)
+				RenderingEngine::Left(camera, frameTime.deltaTime);
+			if (GetAsyncKeyState('S') & 0x8000 || GetAsyncKeyState(VK_DOWN) & 0x8000)
+				RenderingEngine::Backward(camera, frameTime.deltaTime);
+			if (GetAsyncKeyState('D') & 0x8000 || GetAsyncKeyState(VK_RIGHT) & 0x8000)
+				RenderingEngine::Right(camera, frameTime.deltaTime);
+			if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+				RenderingEngine::Up(camera, frameTime.deltaTime);
+			if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
+				RenderingEngine::Down(camera, frameTime.deltaTime);
+
+			POINT currMousePos{};
+			GetCursorPos(&currMousePos);
+
+			vec2 currentMousePosition{ (float)currMousePos.x, (float)currMousePos.y };
+
+			vec2 mousePositionDiff{ currentMousePosition - lastMousePosition };
+
+			//if the mouse goes outside the window and comes back into the window, the camera won't be rotated.
+			if (Length(mousePositionDiff) < 10.0f && (GetAsyncKeyState(VK_LBUTTON) & 0x8000))
+			{
+				RenderingEngine::RotateCameraLeftRight(camera, camera.angularSpeed * mousePositionDiff.x);
+				RenderingEngine::RotateCameraUpDown(camera, camera.angularSpeed * mousePositionDiff.y);
+			}
+
+			lastMousePosition = currentMousePosition;
 		}
 	}
 
 	void Update()
 	{
 		//Update the view matrix.
-		camera.UpdateViewMatrix();
+		UpdateViewMatrix(camera);
 
 		//Update the perspective projection matrix.
-		pProjection.UpdateProjectionMatrix();
+		UpdateProjectionMatrix(pProjection);
 
 		//Copy the pass data into the pass constant buffer.
 		PassConstantBuffer passConstantData;
-		passConstantData.passConstants.view = Transpose(camera.GetViewMatrix());
-		passConstantData.passConstants.projection = Transpose(pProjection.GetProjectionMatrix());
-		passConstantData.passConstants.cameraPosition = camera.GetCameraPosition();
+		passConstantData.passConstants.view = Transpose(camera.viewMatrix);
+		passConstantData.passConstants.projection = Transpose(pProjection.projectionMatrix);
+		passConstantData.passConstants.cameraPosition = camera.position;
 		passConstantData.passConstants.shadingType = currentSelection.at(SHADING);
 		shadingScene->CopyDataIntoDynamicBuffer(PASSCB, 0, &passConstantData, sizeof(PassConstantBuffer));
 
@@ -104,9 +132,9 @@ namespace MessageLoop
 		//Rotate each shape around their local +y-axis.
 		if (playAnimation)
 		{
-			shapes.at(currentSelection.at(SHAPES))->SetOrientation(Normalize(
-				FAMath::RotationQuaternion(angularVelocity * frameTime.GetDeltaTime(), FAMath::Vector3D(0.0f, 1.0f, 0.0f)) *
-				shapes.at(currentSelection.at(SHAPES))->GetOrientation()));
+			shapes.at(currentSelection.at(SHAPES))->orientation = MathEngine::Normalize(
+				MathEngine::RotationQuaternion(angularVelocity * frameTime.deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
+				shapes.at(currentSelection.at(SHAPES))->orientation);
 		}
 
 		//Update each shapes local to world matrix
@@ -117,17 +145,14 @@ namespace MessageLoop
 		cone.UpdateModelMatrix();
 
 		ObjectConstantBuffer objectConstantData;
-		objectConstantData.objectConstants.localToWorld = Transpose(shapes.at(currentSelection.at(SHAPES))->GetModelMatrix());
+		objectConstantData.objectConstants.localToWorld = Transpose(shapes.at(currentSelection.at(SHAPES))->modelMatrix);
 
 		//Don't transpose because hlsl will transpose when copying the data over.
 		objectConstantData.objectConstants.inverseTransposeLocalToWorld = 
-			Inverse(shapes.at(currentSelection.at(SHAPES))->GetModelMatrix());
+			Inverse(shapes.at(currentSelection.at(SHAPES))->modelMatrix);
 
 		//Copy the shapes local to world matrix into the object constant buffer.
-		shapes.at(currentSelection.at(SHAPES))->UpdateShape(shadingScene.get(), &objectConstantData, sizeof(ObjectConstantBuffer));
-
-		//shadingScene->CopyDataIntoDynamicBuffer(OBJECTCB, shapes.at(currentSelection.at(SHAPES))->GetDrawArguments().indexOfConstantData,
-			//&objectConstantData, sizeof(ObjectConstantBuffer));
+		ShapesEngine::UpdateShape(*shapes.at(currentSelection.at(SHAPES)), shadingScene.get(), &objectConstantData, sizeof(ObjectConstantBuffer));
 	}
 
 	void Draw()
@@ -138,29 +163,19 @@ namespace MessageLoop
 		shadingScene->LinkPSOAndRootSignature(SHADING_PSO, 0);
 	
 		//Link the vertex and index buffer to the pipeline
-		shadingScene->LinkStaticBuffer(FARender::VERTEX_BUFFER, SHAPES_VERTEX_BUFFER);
-		shadingScene->LinkStaticBuffer(FARender::INDEX_BUFFER, SHAPES_INDEX_BUFFER);
+		shadingScene->LinkStaticBuffer(RenderingEngine::VERTEX_BUFFER, SHAPES_VERTEX_BUFFER);
+		shadingScene->LinkStaticBuffer(RenderingEngine::INDEX_BUFFER, SHAPES_INDEX_BUFFER);
 
 		//Link pass constant data to the pipeline
-		shadingScene->LinkDynamicBuffer(FARender::CONSTANT_BUFFER, PASSCB, 0, 1);
+		shadingScene->LinkDynamicBuffer(RenderingEngine::CONSTANT_BUFFER, PASSCB, 0, 1);
 		
 		//Link material constant data to the pipeline
-		shadingScene->LinkDynamicBuffer(FARender::CONSTANT_BUFFER, MATERIALCB, 0, 2);
+		shadingScene->LinkDynamicBuffer(RenderingEngine::CONSTANT_BUFFER, MATERIALCB, 0, 2);
 
 		//Link light constant data to the pipeline
-		shadingScene->LinkDynamicBuffer(FARender::CONSTANT_BUFFER, LIGHTCB, 0, 3);
+		shadingScene->LinkDynamicBuffer(RenderingEngine::CONSTANT_BUFFER, LIGHTCB, 0, 3);
 
-		//Get the draw arguments of the current shape.
-		/*FAShapes::DrawArguments currentShapeDrawArguments{ shapes.at(currentSelection.at(SHAPES))->GetDrawArguments() };
-
-		//Link the shapes constant data to the pipeline.
-		shadingScene->LinkDynamicBuffer(FARender::CONSTANT_BUFFER, OBJECTCB, currentShapeDrawArguments.indexOfConstantData, 0);
-
-		//Render the current shape.
-		shadingScene->RenderObject(currentShapeDrawArguments.indexCount, currentShapeDrawArguments.locationOfFirstIndex,
-			currentShapeDrawArguments.indexOfFirstVertex, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);*/
-
-		shapes.at(currentSelection.at(SHAPES))->RenderShape(shadingScene.get());
+		RenderShape(*shapes.at(currentSelection.at(SHAPES)), shadingScene.get());
 		
 		//All the commands needed after rendering the shapes.
 		shadingScene->AfterRenderObjects(true, true);
