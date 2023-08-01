@@ -1,5 +1,5 @@
 # First-Game-Engine
-Game engine that uses a self-made math, rendering and physics engines.
+Game engine that uses a self-made math, rendering shapes and physics engines.
 The rendering engine uses the Direct3D 12 API.
 
 
