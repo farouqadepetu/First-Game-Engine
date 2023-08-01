@@ -2,29 +2,48 @@
 
 namespace ShapesEngine
 {
-	void SetDrawArguments(ThreeDimensionalShape& shape, unsigned int indexCount, unsigned int locationFirstIndex, int indexFirstVertex, 
-		unsigned int indexConstantData, const std::wstring& constantBufferKey, unsigned int rootParameterIndex, D3D_PRIMITIVE_TOPOLOGY primitive)
+	const RenderingEngine::Color& ThreeDimensionalShapeAbstract::GetColor() const
 	{
-		shape.drawArguments.indexCount = indexCount;
-		shape.drawArguments.locationOfFirstIndex = locationFirstIndex;
-		shape.drawArguments.indexOfFirstVertex = indexFirstVertex;
-		shape.drawArguments.indexOfConstantData = indexConstantData;
-		shape.drawArguments.constantBufferKey = constantBufferKey;
-		shape.drawArguments.rootParameterIndex = rootParameterIndex;
-		shape.drawArguments.primtive = primitive;
+		return mRenderObject.color;
 	}
 
-	void UpdateShape(const ThreeDimensionalShape& shape, RenderingEngine::RenderScene* scene, const void* data, unsigned int size)
+	const RenderingEngine::DrawArguments& ThreeDimensionalShapeAbstract::GetDrawArguments() const
 	{
-		scene->CopyDataIntoDynamicBuffer(shape.drawArguments.constantBufferKey, shape.drawArguments.indexOfConstantData, data, (unsigned long long)size);
+		return mRenderObject.drawArguments;
 	}
 
-	void RenderShape(const ThreeDimensionalShape& shape, RenderingEngine::RenderScene* scene)
+	const mat4& ThreeDimensionalShapeAbstract::GetModelMatrix() const
 	{
-		scene->LinkDynamicBuffer(RenderingEngine::CONSTANT_BUFFER, shape.drawArguments.constantBufferKey, shape.drawArguments.indexOfConstantData,
-			shape.drawArguments.rootParameterIndex);
+		return mRenderObject.modelMatrix;
+	}
 
-		scene->RenderObject(shape.drawArguments.indexCount, shape.drawArguments.locationOfFirstIndex, shape.drawArguments.indexOfFirstVertex,
-			shape.drawArguments.primtive);
+	const vec3& ThreeDimensionalShapeAbstract::GetPosition() const
+	{
+		return mRenderObject.position;
+	}
+
+	const MathEngine::Quaternion& ThreeDimensionalShapeAbstract::GetOrientation() const
+	{
+		return mRenderObject.orientation;
+	}
+
+	void ThreeDimensionalShapeAbstract::SetPosition(const vec3& position)
+	{
+		mRenderObject.position = position;
+	}
+
+	void ThreeDimensionalShapeAbstract::SetOrientation(const MathEngine::Quaternion& orientation)
+	{
+		mRenderObject.orientation = orientation;
+	}
+
+	void ThreeDimensionalShapeAbstract::SetColor(const RenderingEngine::Color& color)
+	{
+		mRenderObject.color = color;
+	}
+
+	void ThreeDimensionalShapeAbstract::SetDrawArguments(const RenderingEngine::DrawArguments& drawArgs)
+	{
+		mRenderObject.drawArguments = drawArgs;
 	}
 }

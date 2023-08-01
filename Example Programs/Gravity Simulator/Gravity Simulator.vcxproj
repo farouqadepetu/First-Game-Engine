@@ -135,25 +135,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Physics Engine\Source Files\AABB.cpp" />
+    <ClCompile Include="..\..\Physics Engine\Source Files\BoundingBox.cpp" />
+    <ClCompile Include="..\..\Physics Engine\Source Files\BoundingSphere.cpp" />
+    <ClCompile Include="..\..\Physics Engine\Source Files\BoundingVolume.cpp" />
     <ClCompile Include="..\..\Physics Engine\Source Files\ForceFunctions.cpp" />
     <ClCompile Include="..\..\Physics Engine\Source Files\PolyhedralMassProperties.cpp" />
     <ClCompile Include="..\..\Physics Engine\Source Files\RigidBody.cpp" />
-    <ClCompile Include="..\..\Physics Engine\Source Files\RigidBox.cpp" />
-    <ClCompile Include="..\..\Physics Engine\Source Files\RigidCone.cpp" />
-    <ClCompile Include="..\..\Physics Engine\Source Files\RigidCylinder.cpp" />
-    <ClCompile Include="..\..\Physics Engine\Source Files\RigidPyramid.cpp" />
-    <ClCompile Include="..\..\Physics Engine\Source Files\RigidSphere.cpp" />
+    <ClCompile Include="..\..\Physics Engine\Source Files\RigidShape.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\Buffer.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\Camera.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\Color.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\DDSTextureLoader.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\DeviceResources.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\DirectXException.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\DrawArguments.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\GameTime.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\Multisampling.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\OrthographicProjection.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\PerspectiveProjection.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\RenderingEngineUtility.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\RenderScene.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\SwapChain.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\Text.cpp" />

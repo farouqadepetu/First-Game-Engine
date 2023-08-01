@@ -1,11 +1,13 @@
 #pragma once
 
-#include "RenderScene.h"
-#include "RigidBox.h"
-#include "RigidCone.h"
-#include "RigidCylinder.h"
-#include "RigidSphere.h"
-#include "RigidPyramid.h"
+#include "Box.h"
+#include "Cone.h"
+#include "Cylinder.h"
+#include "Sphere.h"
+#include "Pyramid.h"
+#include "RigidShape.h"
+#include "BoundingBox.h"
+#include "BoundingSphere.h"
 #include "GameTime.h"
 #include "ForceFunctions.h"
 #include "CreateShapes.h"
@@ -14,7 +16,7 @@
 
 namespace MVC
 {
-	enum Shapes { RIGID_BOX = 0, RIGID_PYRAMID, RIGID_SPHERE, RIGID_CYLINDER, RIGID_CONE };
+	enum Shapes { RIGID_BOX = 0, RIGID_CONE, RIGID_CYLINDER, RIGID_SPHERE, RIGID_PYRAMID };
 
 	class Model
 	{
@@ -37,36 +39,20 @@ namespace MVC
 		void CreateCylinder();
 		void CreateSphere();
 		void CreatePyramid();
+		void CreateBoundingVolumes();
 
-		void SimulateRigidBodies();
+		vec3 NetForce(float mass, const vec3& linearVelocity);
+		vec3 NetTorque(const vec3& force, const vec3& angularVelocity, const vec3& centerOfMass, const vec3& point);
 
 	private:
 		float mSimulationTime;
 		float mAccumulator;
 		float mAlpha;
 
-		PhysicsEngine::RigidBox mPreviousBox;
-		PhysicsEngine::RigidBox mInterpolatedBox;
-		PhysicsEngine::RigidBox mCurrentBox;
 
-		PhysicsEngine::RigidCone mPreviousCone;
-		PhysicsEngine::RigidCone mInterpolatedCone;
-		PhysicsEngine::RigidCone mCurrentCone;
-
-		PhysicsEngine::RigidCylinder mPreviousCylinder;
-		PhysicsEngine::RigidCylinder mInterpolatedCylinder;
-		PhysicsEngine::RigidCylinder mCurrentCylinder;
-
-		PhysicsEngine::RigidSphere mPreviousSphere;
-		PhysicsEngine::RigidSphere mInterpolatedSphere;
-		PhysicsEngine::RigidSphere mCurrentSphere;
-
-		PhysicsEngine::RigidPyramid mPreviousPyramid;
-		PhysicsEngine::RigidPyramid mInterpolatedPyramid;
-		PhysicsEngine::RigidPyramid mCurrentPyramid;
-
-		std::vector<ShapesEngine::ThreeDimensionalShape*> mShapes;
-		std::vector<PhysicsEngine::RigidBody*> mRigidBodies;
+		std::vector<PhysicsEngine::RigidShape> mPreviousRigidShapes;
+		std::vector<PhysicsEngine::RigidShape> mInterpolatedRigidShapes;
+		std::vector<PhysicsEngine::RigidShape> mCurrentRigidShapes;
 
 		std::vector<ShapesEngine::Vertex> mVertexList;
 		std::vector<unsigned int> mIndexList;

@@ -145,10 +145,12 @@
     <ClCompile Include="..\..\Rendering Engine\Source Files\DDSTextureLoader.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\DeviceResources.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\DirectXException.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\DrawArguments.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\GameTime.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\Multisampling.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\OrthographicProjection.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\PerspectiveProjection.cpp" />
+    <ClCompile Include="..\..\Rendering Engine\Source Files\RenderingEngineUtility.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\RenderScene.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\SwapChain.cpp" />
     <ClCompile Include="..\..\Rendering Engine\Source Files\Text.cpp" />

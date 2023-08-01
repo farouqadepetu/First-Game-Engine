@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PolyhedralMassProperties.h"
-#include <vector>
 
 /** @namespace PhysicsEngine
 * @brief An engine for physics simulations.
@@ -19,13 +18,16 @@ namespace PhysicsEngine
 		/**brief Initializes the properties of a rigid body.
 		*
 		* If you want the rigid body to have infinite mass, so it can't be moved, pass in 0.0f for the mass density and the inverse mass will be set to 0.0f
-		* to indicate infinite mass.
+		* to indicate infinite mass.\n
 		*
-		* If the specified mass density is negative, the mass and inverse mass will be set to 0.0f.
+		* If the specified mass density is negative, the mass and inverse mass will be set to 0.0f.\n
 		*
-		* Computes the center of mass and inertia tensors from the given triangles that make up a solid polyhedron if the object does not have infinite mass.
+		* Computes the center of mass and inertia tensors from the given triangles that make up a solid polyhedron if the object does not have infinite mass.\n
+		* 
+		* Stores the local space bounding volumes used for collision detection.
 		*/
-		void InitializeRigidBody(float massDensity, const MathEngine::Quaternion& initialOrientation, const std::vector<ShapesEngine::Triangle>& triangles);
+		void InitializeRigidBody(float massDensity, const MathEngine::Quaternion& initialOrientation, 
+			const std::vector<ShapesEngine::Triangle>& triangles, const mat3& scale);
 
 		/**brief Returns the mass of the rigid body.
 		*/
@@ -135,6 +137,11 @@ namespace PhysicsEngine
 		* Uses semi-implicit Euler method to compute the new position and orientation of a rigid body.
 		*/
 		void Integrate(float dt);
+
+		/**brief A numerical integrator using semi-implicit Euler method.
+		* Uses semi-implicit Euler method to compute the new position and orientation of a rigid body.
+		*/
+		void Integrate(const vec3& netForce, const vec3& netTorque, float dt);
 
 	private:
 		float mMass;

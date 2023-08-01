@@ -1,21 +1,26 @@
 #pragma once
 
-
 #include "ThreeDimensionalShape.h"
+#include "RenderingEngineUtility.h"
 
 namespace ShapesEngine
 {
 	/** @class Cylinder ""
-	*	@brief This class is used to create a cylinder.
+	*	@brief This class is used to render a cylinder.
 	*/
-	class Cylinder
+	class Cylinder : public ThreeDimensionalShapeAbstract
 	{
 	public:
 
 		/**@brief Creates a Cylinder object.
-		* Call InitializeCylinder to initialize the cylinder.
+		* @param[in] radius The radius of the cylinder.
+		* @param[in] height The height of the cylinder.
+		* @param[in] position The position of the cylinder.
+		* @param[in] orientation The orientation of the cylinder.
+		* @param[in] color The color of the cylinder.
 		*/
-		Cylinder();
+		Cylinder(float radius, float height, const vec3& position, const MathEngine::Quaternion& orientation,
+			const RenderingEngine::Color& color);
 
 		/**@brief Initializes the properties of the cylinder.
 		*
@@ -25,44 +30,28 @@ namespace ShapesEngine
 		* @param[in] orientation The orientation of the cylinder.
 		* @param[in] color The color of the cylinder.
 		*/
-		void InitializeCylinder(float radius, float height, const vec3 position, const MathEngine::Quaternion orientation,
+		void InitializeCylinder(float radius, float height, const vec3& position, const MathEngine::Quaternion& orientation,
 			const RenderingEngine::Color& color);
 
-		/**@brief Returns the ThreeDimensionalShape object.
+		/**@brief Returns the dimensions of the cylinder.
+		* The x component is the radius, the y component is the height and the z component is the radius.
 		*/
-		const ThreeDimensionalShape& GetShape() const;
+		vec3 GetDimensions() const override;
 
-		/**@brief Returns the ThreeDimensionalShape object.
+		/**@brief Sets the dimensions of the cylinder.
+		* The x component should be the radius, the y component should be the height and the z component should be the radius.
 		*/
-		ThreeDimensionalShape& GetShape();
-
-		/**@brief Returns the radius of the cylinder.
-		*/
-		float GetRadius() const;
-
-		/**@brief Returns the height of the cylinder.
-		*/
-		float GetHeight() const;
-
-		/**@brief Sets the radius of the cylinder.
-		*/
-		void SetRadius(float radius);
-
-		/**@brief Sets the height of the cylinder.
-		*/
-		void SetHeight(float height);
+		void SetDimensions(const vec3& dimensions) override;
 
 		/**@brief Updates the cylinders model matrix.
 		*/
-		void UpdateModelMatrix();
+		void UpdateModelMatrix() override;
 
 		/**@brief Returns the volume of the cylinder.
 		*/
-		float Volume();
+		float Volume() const override;
 
 	private:
-		ThreeDimensionalShape mShape;
-
 		float mRadius;
 		float mHeight;
 	};

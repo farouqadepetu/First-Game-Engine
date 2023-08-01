@@ -20,7 +20,7 @@ namespace MVC
 		return mPerspectiveProjection;
 	}
 
-	ShapesEngine::ThreeDimensionalShape* Model::GetShape(unsigned int index)
+	RenderingEngine::DrawArguments Model::GetShape(unsigned int index)
 	{
 		return mShapes.at(index);
 	}
@@ -58,19 +58,55 @@ namespace MVC
 
 	void Model::ResetShape(unsigned int currentShape)
 	{
-		mShapes.at(currentShape)->orientation = MathEngine::Quaternion{};
+		switch (currentShape)
+		{
+			case BOX:
+			{
+				box.SetOrientation(MathEngine::Quaternion{});
+
+				break;
+			}
+
+			case PYRAMID:
+			{
+				pyramid.SetOrientation(MathEngine::Quaternion{});
+
+				break;
+			}
+
+			case SPHERE:
+			{
+				sphere.SetOrientation(MathEngine::Quaternion{});
+
+				break;
+			}
+
+			case CYLINDER:
+			{
+				cylinder.SetOrientation(MathEngine::Quaternion{});
+
+				break;
+			}
+
+			case CONE:
+			{
+				cone.SetOrientation(MathEngine::Quaternion{});
+
+				break;
+			}
+		}
 	}
 
 	void Model::ResetPointLights()
 	{
-		mPointLights.at(0).GetShape().position = vec3{ 0.0f, 0.0f, -2.5f };
-		mPointLights.at(1).GetShape().position = vec3{ 0.0f, 0.0f, 2.5f };
-		mPointLights.at(2).GetShape().position = vec3{ 0.0f, -2.5f, 0.0f };
-		mPointLights.at(3).GetShape().position = vec3{ 0.0f, 2.5f, 0.0f };
+		mPointLights.at(0).SetPosition(vec3{ 0.0f, 0.0f, -2.5f });
+		mPointLights.at(1).SetPosition(vec3{ 0.0f, 0.0f, 2.5f });
+		mPointLights.at(2).SetPosition({ 0.0f, -2.5f, 0.0f });
+		mPointLights.at(3).SetPosition(vec3{ 0.0f, 2.5f, 0.0f });
 
 		for (auto& i : mPointLights)
 		{
-			i.GetShape().orientation = MathEngine::Quaternion{};
+			i.SetOrientation(MathEngine::Quaternion{});
 		}
 
 		mLightSources.at(0).position = vec3{ 0.0f, 0.0f, -2.5f };
@@ -96,12 +132,6 @@ namespace MVC
 
 		cone.InitializeCone(1.0f, 1.0f, vec3{ 0.0f, 0.0f, 0.0f }, MathEngine::Quaternion{},
 			RenderingEngine::Color(0.0f, 1.0f, 1.0f, 1.0f));
-
-		mShapes.push_back(&sphere.GetShape());
-		mShapes.push_back(&cylinder.GetShape());
-		mShapes.push_back(&cone.GetShape());
-		mShapes.push_back(&box.GetShape());
-		mShapes.push_back(&pyramid.GetShape());
 	}
 
 	void Model::BuildPointLights()
@@ -211,7 +241,8 @@ namespace MVC
 		std::vector<ShapesEngine::Triangle> triangles;
 
 		ShapesEngine::CreateBox(vertices, triangles);
-		SetDrawArguments(box.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), 0, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		box.SetDrawArguments(RenderingEngine::MakeDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), BOX,
+			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -225,7 +256,8 @@ namespace MVC
 		triangles.clear();
 
 		ShapesEngine::CreatePyramid(vertices, triangles);
-		SetDrawArguments(pyramid.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), 1, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		pyramid.SetDrawArguments(RenderingEngine::MakeDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), PYRAMID,
+			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -239,7 +271,8 @@ namespace MVC
 		triangles.clear();
 
 		ShapesEngine::CreateCylinder(vertices, triangles);
-		SetDrawArguments(cylinder.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), 2, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		cylinder.SetDrawArguments(RenderingEngine::MakeDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), CYLINDER,
+			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -253,7 +286,8 @@ namespace MVC
 		triangles.clear();
 
 		ShapesEngine::CreateCone(vertices, triangles);
-		SetDrawArguments(cone.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), 3, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		cone.SetDrawArguments(RenderingEngine::MakeDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), CONE,
+			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -267,14 +301,23 @@ namespace MVC
 		triangles.clear();
 
 		ShapesEngine::CreateSphere(vertices, triangles);
-		SetDrawArguments(sphere.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), 4, L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		sphere.SetDrawArguments(RenderingEngine::MakeDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), SPHERE,
+			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+
+		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
+
+		for (const auto& i : triangles)
+		{
+			mIndexList.push_back(i.p0);
+			mIndexList.push_back(i.p1);
+			mIndexList.push_back(i.p2);
+		}
 
 		unsigned int constantDataIndex{ 5 };
 		for (auto& i : mPointLights)
 		{
-			//Describe the draw arguments for each point light.
-			SetDrawArguments(i.GetShape(), triangles.size() * 3, mIndexList.size(), mVertexList.size(), constantDataIndex, L"OBJECTCB",
-				0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			i.SetDrawArguments(RenderingEngine::MakeDrawArguments(triangles.size() * 3, mIndexList.size(), mVertexList.size(), constantDataIndex,
+				L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 			++constantDataIndex;
 		}

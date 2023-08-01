@@ -14,6 +14,7 @@
 #include "Window.h"
 #include "Structures.h"
 #include "CreateShapes.h"
+#include "DrawArguments.h"
 
 namespace MVC
 {
@@ -44,6 +45,8 @@ namespace MVC
 
 	enum LightSourceNames { POINT_LIGHT, DIRECTIONAL_LIGHT, POINT_PLUS_DIRECTIONAL_LIGHT };
 
+	enum ShapeNames { SPHERE, CYLINDER, CONE, BOX, PYRAMID };
+
 	class Model
 	{
 	public:
@@ -61,7 +64,7 @@ namespace MVC
 		ShapesEngine::Cylinder cylinder;
 		ShapesEngine::Sphere sphere;
 
-		ShapesEngine::ThreeDimensionalShape* GetShape(unsigned int index);
+		RenderingEngine::DrawArguments GetShape(unsigned int index);
 
 		ShapesEngine::Sphere& GetPointLight(unsigned int index);
 
@@ -97,7 +100,7 @@ namespace MVC
 	private:
 		std::unique_ptr<RenderingEngine::RenderScene> mScene;
 
-		std::vector<ShapesEngine::ThreeDimensionalShape*> mShapes;
+		std::vector<RenderingEngine::DrawArguments> mShapes;
 
 		std::vector<ShapesEngine::Sphere> mPointLights;
 

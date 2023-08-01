@@ -1,58 +1,52 @@
 #pragma once
 
 #include "ThreeDimensionalShape.h"
+#include "RenderingEngineUtility.h"
 
 namespace ShapesEngine
 {
 	/** @class Sphere ""
-	*	@brief This class is used to create a sphere.
+	*	@brief This class is used to render a sphere.
 	*/
-	class Sphere
+	class Sphere : public ThreeDimensionalShapeAbstract
 	{
 	public:
 
 		/**@brief Creates a Sphere object.
 		* Call InitializeSphere to initialize the sphere.
 		*/
-		Sphere();
+		Sphere(float radius, const vec3& position, const MathEngine::Quaternion& orientation,
+			const RenderingEngine::Color& color);
 
 		/**@brief Initializes the properties of the sphere.
 		*
-		* @param[in] width The radius of the sphere.
+		* @param[in] radius The radius of the sphere.
 		* @param[in] position The position of the sphere.
 		* @param[in] orientation The orientation of the sphere.
 		* @param[in] color The color of the sphere.
 		*/
-		void InitializeSphere(float radius, const vec3 position, const MathEngine::Quaternion orientation,
+		void InitializeSphere(float radius, const vec3& position, const MathEngine::Quaternion& orientation,
 			const RenderingEngine::Color& color);
 
-		/**@brief Returns the ThreeDimensionalShape object.
+		/**@brief Returns the dimensions of the sphere.
+		* The x component is the radius, the y component is the radius and the z component is the radius.
 		*/
-		const ThreeDimensionalShape& GetShape() const;
+		vec3 GetDimensions() const override;
 
-		/**@brief Returns the ThreeDimensionalShape object.
+		/**@brief Sets the dimensions of the sphere.
+		* The x component should be the radius, the y component should be the radius and the z component should be the radius.
 		*/
-		ThreeDimensionalShape& GetShape();
-
-		/**@brief Returns the radius of the sphere.
-		*/
-		float GetRadius() const;
-
-		/**@brief Sets the radius of the sphere.
-		*/
-		void SetRadius(float radius);
+		void SetDimensions(const vec3& dimensions) override;
 
 		/**@brief Updates the spheres model matrix.
 		*/
-		void UpdateModelMatrix();
+		void UpdateModelMatrix() override;
 
 		/**@brief Returns the volume of the sphere.
 		*/
-		float Volume();
+		float Volume() const override;
 
 	private:
-		ThreeDimensionalShape mShape;
-
 		float mRadius;
 	};
 }

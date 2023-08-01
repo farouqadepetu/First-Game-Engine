@@ -2,58 +2,42 @@
 
 namespace ShapesEngine
 {
-	Cone::Cone() :
-		mRadius{ 1.0f }, mHeight{ 1.0f }
-	{}
-
-	void Cone::InitializeCone(float radius, float height, const vec3 position, const MathEngine::Quaternion orientation,
+	Cone::Cone(float radius, float height, const vec3& position, const MathEngine::Quaternion& orientation,
 		const RenderingEngine::Color& color)
 	{
-		mShape.position = position;
-		mShape.orientation = orientation;
-		mShape.color = color;
-
-		mRadius = radius;
-		mHeight = height;
+		InitializeCone(radius, height, position, orientation, color);
 	}
 
-	const ThreeDimensionalShape& Cone::GetShape() const
+	void Cone::InitializeCone(float radius, float height, const vec3& position, const MathEngine::Quaternion& orientation,
+		const RenderingEngine::Color& color)
 	{
-		return mShape;
+		mRenderObject.position = position;
+		mRenderObject.orientation = orientation;
+		mRenderObject.color = color;
+
+		mRadius = (radius <= 0.0f) ? 1.0f : radius;
+		mHeight = (height <= 0.0f) ? 1.0f : height;
 	}
 
-	ThreeDimensionalShape& Cone::GetShape()
+	vec3 Cone::GetDimensions() const
 	{
-		return mShape;
+		return vec3{ mRadius, mHeight, mRadius };
 	}
 
-	float Cone::GetRadius() const
+	void Cone::SetDimensions(const vec3& dimensions)
 	{
-		return mRadius;
-	}
-
-	float Cone::GetHeight() const
-	{
-		return mHeight;
-	}
-
-	void Cone::SetRadius(float radius)
-	{
-		mRadius = radius;
-	}
-
-	void Cone::SetHeight(float height)
-	{
-		mHeight = height;
+		mRadius = (dimensions.x <= 0.0f) ? 1.0f : dimensions.x;
+		mHeight = (dimensions.y <= 0.0f) ? 1.0f : dimensions.y;
+		mRadius = (dimensions.z <= 0.0f) ? 1.0f : dimensions.z;
 	}
 
 	void Cone::UpdateModelMatrix()
 	{
-		mShape.modelMatrix = MathEngine::Scale4x4(mRadius, mHeight, mRadius) * MathEngine::QuaternionToRotationMatrixRow4x4(mShape.orientation) *
-			MathEngine::Translate(mShape.position);
+		mRenderObject.modelMatrix = MathEngine::Scale4x4(mRadius, mHeight, mRadius) * MathEngine::QuaternionToRotationMatrixRow4x4(mRenderObject.orientation) *
+			MathEngine::Translate(mRenderObject.position);
 	}
 
-	float Cone::Volume()
+	float Cone::Volume() const
 	{
 		return PI * mRadius * mRadius * (mHeight / 3.0f);
 	}

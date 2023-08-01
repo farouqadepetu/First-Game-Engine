@@ -138,9 +138,53 @@ namespace MVC
 
 		if (mView->GetRotateShape())
 		{
-			mModel->GetShape(mView->GetCurrentShape())->orientation =
-				MathEngine::Normalize(MathEngine::RotationQuaternion(angularVelocity * mModel->GetFrameTime().deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
-					mModel->GetShape(mView->GetCurrentShape())->orientation);
+			switch (mView->GetCurrentShape())
+			{
+				case BOX:
+				{
+					mModel->box.SetOrientation(MathEngine::Normalize(
+						MathEngine::RotationQuaternion(angularVelocity * mModel->GetFrameTime().deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
+						mModel->box.GetOrientation()));
+
+					break;
+				}
+
+				case PYRAMID:
+				{
+					mModel->pyramid.SetOrientation(MathEngine::Normalize(
+						MathEngine::RotationQuaternion(angularVelocity * mModel->GetFrameTime().deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
+						mModel->pyramid.GetOrientation()));
+
+					break;
+				}
+
+				case SPHERE:
+				{
+					mModel->sphere.SetOrientation(MathEngine::Normalize(
+						MathEngine::RotationQuaternion(angularVelocity * mModel->GetFrameTime().deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
+						mModel->sphere.GetOrientation()));
+
+					break;
+				}
+
+				case CYLINDER:
+				{
+					mModel->cylinder.SetOrientation(MathEngine::Normalize(
+						MathEngine::RotationQuaternion(angularVelocity * mModel->GetFrameTime().deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
+						mModel->cylinder.GetOrientation()));
+
+					break;
+				}
+
+				case CONE:
+				{
+					mModel->cone.SetOrientation(MathEngine::Normalize(
+						MathEngine::RotationQuaternion(angularVelocity * mModel->GetFrameTime().deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
+						mModel->cone.GetOrientation()));
+
+					break;
+				}
+			}
 		}
 
 		mModel->box.UpdateModelMatrix();
@@ -150,12 +194,89 @@ namespace MVC
 		mModel->cone.UpdateModelMatrix();
 
 		ObjectConstantBuffer objectConstantData;
-		MathEngine::Matrix4x4 modelTrans(mModel->GetShape(mView->GetCurrentShape())->modelMatrix);
-		objectConstantData.objectConstants.localToWorld = Transpose(modelTrans);
-		objectConstantData.objectConstants.inverseTransposeLocalToWorld = Inverse(modelTrans);
-		objectConstantData.objectConstants.color = mModel->GetShape(mView->GetCurrentShape())->color;
+		switch (mView->GetCurrentShape())
+		{
+			case BOX:
+			{
+				objectConstantData.objectConstants.localToWorld = Transpose(mModel->box.GetModelMatrix());
 
-		ShapesEngine::UpdateShape(*mModel->GetShape(mView->GetCurrentShape()), mModel->GetScene(), &objectConstantData, sizeof(ObjectConstantBuffer));
+				//Don't transpose because hlsl will transpose when copying the data over.
+				objectConstantData.objectConstants.inverseTransposeLocalToWorld =
+					Inverse(mModel->box.GetModelMatrix());
+
+				objectConstantData.objectConstants.color = mModel->box.GetColor();
+
+				//Copy the shapes local to world matrix into the object constant buffer.
+				RenderingEngine::Update(mModel->GetScene(), mModel->box.GetDrawArguments(), &objectConstantData, sizeof(ObjectConstantBuffer));
+
+				break;
+			}
+
+			case PYRAMID:
+			{
+				objectConstantData.objectConstants.localToWorld = Transpose(mModel->pyramid.GetModelMatrix());
+
+				//Don't transpose because hlsl will transpose when copying the data over.
+				objectConstantData.objectConstants.inverseTransposeLocalToWorld =
+					Inverse(mModel->pyramid.GetModelMatrix());
+
+				objectConstantData.objectConstants.color = mModel->pyramid.GetColor();
+
+				//Copy the shapes local to world matrix into the object constant buffer.
+				RenderingEngine::Update(mModel->GetScene(), mModel->pyramid.GetDrawArguments(), &objectConstantData, sizeof(ObjectConstantBuffer));
+
+				break;
+			}
+
+			case SPHERE:
+			{
+				objectConstantData.objectConstants.localToWorld = Transpose(mModel->sphere.GetModelMatrix());
+
+				//Don't transpose because hlsl will transpose when copying the data over.
+				objectConstantData.objectConstants.inverseTransposeLocalToWorld =
+					Inverse(mModel->sphere.GetModelMatrix());
+
+				objectConstantData.objectConstants.color = mModel->sphere.GetColor();
+
+				//Copy the shapes local to world matrix into the object constant buffer.
+				RenderingEngine::Update(mModel->GetScene(), mModel->sphere.GetDrawArguments(), &objectConstantData, sizeof(ObjectConstantBuffer));
+
+				break;
+			}
+
+			case CYLINDER:
+			{
+				objectConstantData.objectConstants.localToWorld = Transpose(mModel->cylinder.GetModelMatrix());
+
+				//Don't transpose because hlsl will transpose when copying the data over.
+				objectConstantData.objectConstants.inverseTransposeLocalToWorld =
+					Inverse(mModel->cylinder.GetModelMatrix());
+
+				objectConstantData.objectConstants.color = mModel->cylinder.GetColor();
+
+				//Copy the shapes local to world matrix into the object constant buffer.
+				RenderingEngine::Update(mModel->GetScene(), mModel->cylinder.GetDrawArguments(), &objectConstantData, sizeof(ObjectConstantBuffer));
+
+				break;
+			}
+
+			case CONE:
+			{
+				objectConstantData.objectConstants.localToWorld = Transpose(mModel->cone.GetModelMatrix());
+
+				//Don't transpose because hlsl will transpose when copying the data over.
+				objectConstantData.objectConstants.inverseTransposeLocalToWorld =
+					Inverse(mModel->cone.GetModelMatrix());
+
+				objectConstantData.objectConstants.color = mModel->cone.GetColor();
+
+				//Copy the shapes local to world matrix into the object constant buffer.
+				RenderingEngine::Update(mModel->GetScene(), mModel->cone.GetDrawArguments(), &objectConstantData, sizeof(ObjectConstantBuffer));
+
+				break;
+			}
+		}
+
 
 		for (unsigned int i = 0; i < MAX_NUM_LIGHTS; ++i)
 		{
@@ -167,7 +288,7 @@ namespace MVC
 						MathEngine::Rotate(MathEngine::RotationQuaternion(angularVelocity * mModel->GetFrameTime().deltaTime, 0.0f, 1.0f, 0.0f),
 						mModel->GetLightSources().at(i).position);
 
-					mModel->GetPointLight(i).GetShape().position = mModel->GetLightSources().at(i).position;
+					mModel->GetPointLight(i).SetPosition(mModel->GetLightSources().at(i).position);
 				}
 				else
 				{
@@ -175,19 +296,19 @@ namespace MVC
 						MathEngine::Rotate(MathEngine::RotationQuaternion(angularVelocity * mModel->GetFrameTime().deltaTime, 1.0f, 0.0f, 0.0f),
 							mModel->GetLightSources().at(i).position);
 
-					mModel->GetPointLight(i).GetShape().position = mModel->GetLightSources().at(i).position;
+					mModel->GetPointLight(i).SetPosition(mModel->GetLightSources().at(i).position);
 				}
 			}
 
 			mModel->GetPointLight(i).UpdateModelMatrix();
 
 			ObjectConstantBuffer pointLightConstantData;
-			MathEngine::Matrix4x4 modelTrans(mModel->GetPointLight(i).GetShape().modelMatrix);
+			MathEngine::Matrix4x4 modelTrans(mModel->GetPointLight(i).GetModelMatrix());
 			pointLightConstantData.objectConstants.localToWorld = Transpose(modelTrans);
 			pointLightConstantData.objectConstants.inverseTransposeLocalToWorld = Inverse(modelTrans);
-			pointLightConstantData.objectConstants.color = mModel->GetPointLight(i).GetShape().color;
+			pointLightConstantData.objectConstants.color = mModel->GetPointLight(i).GetColor();
 
-			ShapesEngine::UpdateShape(mModel->GetPointLight(i).GetShape(), mModel->GetScene(), &pointLightConstantData, sizeof(ObjectConstantBuffer));
+			RenderingEngine::Update(mModel->GetScene(), mModel->GetPointLight(i).GetDrawArguments(), &pointLightConstantData, sizeof(ObjectConstantBuffer));
 		}
 	}
 
@@ -257,7 +378,43 @@ namespace MVC
 
 		scene->LinkDynamicBuffer(RenderingEngine::CONSTANT_BUFFER, LIGHTCB, 0, 3);
 
-		ShapesEngine::RenderShape(*mModel->GetShape(mView->GetCurrentShape()), scene);
+		switch (mView->GetCurrentShape())
+		{
+			case BOX:
+			{
+				RenderingEngine::Render(mModel->GetScene(), mModel->box.GetDrawArguments());
+
+				break;
+			}
+
+			case PYRAMID:
+			{
+				RenderingEngine::Render(mModel->GetScene(), mModel->pyramid.GetDrawArguments());
+
+				break;
+			}
+
+			case SPHERE:
+			{
+				RenderingEngine::Render(mModel->GetScene(), mModel->sphere.GetDrawArguments());
+
+				break;
+			}
+
+			case CYLINDER:
+			{
+				RenderingEngine::Render(mModel->GetScene(), mModel->cylinder.GetDrawArguments());
+
+				break;
+			}
+
+			case CONE:
+			{
+				RenderingEngine::Render(mModel->GetScene(), mModel->cone.GetDrawArguments());
+
+				break;
+			}
+		}
 
 		if (mView->GetCurrentRenderOption() == TEXTURES_PLUS_SHADING || mView->GetCurrentRenderOption() == COLOR_PLUS_SHADING)
 		{
@@ -268,7 +425,7 @@ namespace MVC
 			unsigned int numPointLightsToRender = mView->GetCurrentLightSource() + 1;
 			for (unsigned int i = 0; i < numPointLightsToRender; ++i)
 			{
-				ShapesEngine::RenderShape(mModel->GetPointLight(i).GetShape(), scene);
+				RenderingEngine::Render(mModel->GetScene(), mModel->GetPointLight(i).GetDrawArguments());
 			}
 		}
 

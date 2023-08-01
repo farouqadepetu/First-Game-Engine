@@ -12,6 +12,7 @@
 #include "Pyramid.h"
 #include "CreateShapes.h"
 #include "Text.h"
+#include "DrawArguments.h"
 
 namespace GlobalVariables
 {
@@ -70,8 +71,8 @@ namespace GlobalVariables
 	inline ShapesEngine::Cylinder cylinder;
 	inline ShapesEngine::Sphere sphere;
 
-	//vector to store pointers to 3D shapes.
-	inline std::vector<ShapesEngine::ThreeDimensionalShape*> shapes;
+	//vector to the draw arguments of the shapes
+	inline std::vector<RenderingEngine::DrawArguments> shapes;
 
 	//Vector to store all the vertices of the 3D shapes.
 	inline std::vector<ShapesEngine::Vertex> vertexList;

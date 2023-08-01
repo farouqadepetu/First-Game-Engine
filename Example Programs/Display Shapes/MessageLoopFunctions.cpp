@@ -96,10 +96,11 @@ namespace MessageLoop
 		static float angularSpeed{ 45.0f };
 		MathEngine::Quaternion rotate(MathEngine::RotationQuaternion(angularSpeed * frameTime.deltaTime, vec3{ 0.0f, 1.0f, 0.0f }));
 
-		for (auto& i : shapes)
-		{
-			i->orientation = (MathEngine::Normalize(rotate * i->orientation));
-		}
+		box.SetOrientation(MathEngine::Normalize(rotate * box.GetOrientation()));
+		pyramid.SetOrientation(MathEngine::Normalize(rotate * box.GetOrientation()));
+		sphere.SetOrientation(MathEngine::Normalize(rotate * box.GetOrientation()));
+		cylinder.SetOrientation(MathEngine::Normalize(rotate * box.GetOrientation()));
+		cone.SetOrientation(MathEngine::Normalize(rotate * box.GetOrientation()));
 
 		box.UpdateModelMatrix();
 		pyramid.UpdateModelMatrix();
@@ -108,12 +109,26 @@ namespace MessageLoop
 		cone.UpdateModelMatrix();
 
 		ObjectConstants ob;
-		for (auto& i : shapes)
-		{
-			ob.MVP = Transpose(i->modelMatrix);
-			ob.color = i->color;
-			ShapesEngine::UpdateShape(*i, &scene, &ob, sizeof(ObjectConstants));
-		}
+		ob.MVP = Transpose(box.GetModelMatrix());
+		ob.color = box.GetColor();
+		RenderingEngine::Update(&scene, box.GetDrawArguments(), &ob, sizeof(ObjectConstants));
+
+		ob.MVP = Transpose(pyramid.GetModelMatrix());
+		ob.color = pyramid.GetColor();
+		RenderingEngine::Update(&scene, pyramid.GetDrawArguments(), &ob, sizeof(ObjectConstants));
+
+		ob.MVP = Transpose(sphere.GetModelMatrix());
+		ob.color = sphere.GetColor();
+		RenderingEngine::Update(&scene, sphere.GetDrawArguments(), &ob, sizeof(ObjectConstants));
+
+		ob.MVP = Transpose(cylinder.GetModelMatrix());
+		ob.color = cylinder.GetColor();
+		RenderingEngine::Update(&scene, cylinder.GetDrawArguments(), &ob, sizeof(ObjectConstants));
+
+		ob.MVP = Transpose(cone.GetModelMatrix());
+		ob.color = cone.GetColor();
+		RenderingEngine::Update(&scene, cone.GetDrawArguments(), &ob, sizeof(ObjectConstants));
+
 	}
 
 	void Draw(RenderingEngine::RenderScene& scene)
@@ -152,7 +167,7 @@ namespace MessageLoop
 		//Render all the shapes
 		for (const auto& i : shapes)
 		{
-			RenderShape(*i, &scene);
+			RenderingEngine::Render(&scene, i);
 		}
 
 		//All the commands needed after rendering the shapes.

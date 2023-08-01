@@ -132,9 +132,53 @@ namespace MessageLoop
 		//Rotate each shape around their local +y-axis.
 		if (playAnimation)
 		{
-			shapes.at(currentSelection.at(SHAPES))->orientation = MathEngine::Normalize(
-				MathEngine::RotationQuaternion(angularVelocity * frameTime.deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
-				shapes.at(currentSelection.at(SHAPES))->orientation);
+			switch (currentSelection.at(SHAPES))
+			{
+				case BOX:
+				{
+					box.SetOrientation(MathEngine::Normalize(
+						MathEngine::RotationQuaternion(angularVelocity * frameTime.deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
+						box.GetOrientation()));
+
+					break;
+				}
+
+				case PYRAMID:
+				{
+					pyramid.SetOrientation(MathEngine::Normalize(
+						MathEngine::RotationQuaternion(angularVelocity * frameTime.deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
+						pyramid.GetOrientation()));
+
+					break;
+				}
+
+				case SPHERE:
+				{
+					sphere.SetOrientation(MathEngine::Normalize(
+						MathEngine::RotationQuaternion(angularVelocity * frameTime.deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
+						sphere.GetOrientation()));
+
+					break;
+				}
+
+				case CYLINDER:
+				{
+					cylinder.SetOrientation(MathEngine::Normalize(
+						MathEngine::RotationQuaternion(angularVelocity * frameTime.deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
+						cylinder.GetOrientation()));
+
+					break;
+				}
+
+				case CONE:
+				{
+					cone.SetOrientation(MathEngine::Normalize(
+						MathEngine::RotationQuaternion(angularVelocity * frameTime.deltaTime, vec3{ 0.0f, 1.0f, 0.0f }) *
+						cone.GetOrientation()));
+
+					break;
+				}
+			}
 		}
 
 		//Update each shapes local to world matrix
@@ -145,14 +189,78 @@ namespace MessageLoop
 		cone.UpdateModelMatrix();
 
 		ObjectConstantBuffer objectConstantData;
-		objectConstantData.objectConstants.localToWorld = Transpose(shapes.at(currentSelection.at(SHAPES))->modelMatrix);
+		switch (currentSelection.at(SHAPES))
+		{
+			case BOX:
+			{
+				objectConstantData.objectConstants.localToWorld = Transpose(box.GetModelMatrix());
 
-		//Don't transpose because hlsl will transpose when copying the data over.
-		objectConstantData.objectConstants.inverseTransposeLocalToWorld = 
-			Inverse(shapes.at(currentSelection.at(SHAPES))->modelMatrix);
+				//Don't transpose because hlsl will transpose when copying the data over.
+				objectConstantData.objectConstants.inverseTransposeLocalToWorld =
+					Inverse(box.GetModelMatrix());
 
-		//Copy the shapes local to world matrix into the object constant buffer.
-		ShapesEngine::UpdateShape(*shapes.at(currentSelection.at(SHAPES)), shadingScene.get(), &objectConstantData, sizeof(ObjectConstantBuffer));
+				//Copy the shapes local to world matrix into the object constant buffer.
+				RenderingEngine::Update(shadingScene.get(), box.GetDrawArguments(), &objectConstantData, sizeof(ObjectConstantBuffer));
+
+				break;
+			}
+
+			case PYRAMID:
+			{
+				objectConstantData.objectConstants.localToWorld = Transpose(pyramid.GetModelMatrix());
+
+				//Don't transpose because hlsl will transpose when copying the data over.
+				objectConstantData.objectConstants.inverseTransposeLocalToWorld =
+					Inverse(pyramid.GetModelMatrix());
+
+				//Copy the shapes local to world matrix into the object constant buffer.
+				RenderingEngine::Update(shadingScene.get(), pyramid.GetDrawArguments(), &objectConstantData, sizeof(ObjectConstantBuffer));
+
+				break;
+			}
+
+			case SPHERE:
+			{
+				objectConstantData.objectConstants.localToWorld = Transpose(sphere.GetModelMatrix());
+
+				//Don't transpose because hlsl will transpose when copying the data over.
+				objectConstantData.objectConstants.inverseTransposeLocalToWorld =
+					Inverse(sphere.GetModelMatrix());
+
+				//Copy the shapes local to world matrix into the object constant buffer.
+				RenderingEngine::Update(shadingScene.get(), sphere.GetDrawArguments(), &objectConstantData, sizeof(ObjectConstantBuffer));
+
+				break;
+			}
+
+			case CYLINDER:
+			{
+				objectConstantData.objectConstants.localToWorld = Transpose(cylinder.GetModelMatrix());
+
+				//Don't transpose because hlsl will transpose when copying the data over.
+				objectConstantData.objectConstants.inverseTransposeLocalToWorld =
+					Inverse(cylinder.GetModelMatrix());
+
+				//Copy the shapes local to world matrix into the object constant buffer.
+				RenderingEngine::Update(shadingScene.get(), cylinder.GetDrawArguments(), &objectConstantData, sizeof(ObjectConstantBuffer));
+
+				break;
+			}
+
+			case CONE:
+			{
+				objectConstantData.objectConstants.localToWorld = Transpose(cone.GetModelMatrix());
+
+				//Don't transpose because hlsl will transpose when copying the data over.
+				objectConstantData.objectConstants.inverseTransposeLocalToWorld =
+					Inverse(cone.GetModelMatrix());
+
+				//Copy the shapes local to world matrix into the object constant buffer.
+				RenderingEngine::Update(shadingScene.get(), cone.GetDrawArguments(), &objectConstantData, sizeof(ObjectConstantBuffer));
+
+				break;
+			}
+		}
 	}
 
 	void Draw()
@@ -175,7 +283,43 @@ namespace MessageLoop
 		//Link light constant data to the pipeline
 		shadingScene->LinkDynamicBuffer(RenderingEngine::CONSTANT_BUFFER, LIGHTCB, 0, 3);
 
-		RenderShape(*shapes.at(currentSelection.at(SHAPES)), shadingScene.get());
+		switch (currentSelection.at(SHAPES))
+		{
+			case BOX:
+			{
+				RenderingEngine::Render(shadingScene.get(), box.GetDrawArguments());
+
+				break;
+			}
+
+			case PYRAMID:
+			{
+				RenderingEngine::Render(shadingScene.get(), pyramid.GetDrawArguments());
+
+				break;
+			}
+
+			case SPHERE:
+			{
+				RenderingEngine::Render(shadingScene.get(), sphere.GetDrawArguments());
+
+				break;
+			}
+
+			case CYLINDER:
+			{
+				RenderingEngine::Render(shadingScene.get(), cylinder.GetDrawArguments());
+
+				break;
+			}
+
+			case CONE:
+			{
+				RenderingEngine::Render(shadingScene.get(), cone.GetDrawArguments());
+
+				break;
+			}
+		}
 		
 		//All the commands needed after rendering the shapes.
 		shadingScene->AfterRenderObjects(true, true);

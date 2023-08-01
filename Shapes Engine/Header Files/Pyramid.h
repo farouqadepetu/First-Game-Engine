@@ -1,20 +1,27 @@
 #pragma once
 
 #include "ThreeDimensionalShape.h"
+#include "RenderingEngineUtility.h"
 
 namespace ShapesEngine
 {
 	/** @class Pyramid ""
-	*	@brief This class is used to create a pyramid.
+	*	@brief This class is used to render a pyramid.
 	*/
-	class Pyramid
+	class Pyramid : public ThreeDimensionalShapeAbstract
 	{
 	public:
 
 		/**@brief Creates a Pyramid object.
-		* Call InitializePyramid to initialize the pyramid.
+		* @param[in] width The width of the pyramid.
+		* @param[in] height The height of the pyramid.
+		* @param[in] depth The depth of the pyramid.
+		* @param[in] position The position of the pyramid.
+		* @param[in] orientation The orientation of the pyramid.
+		* @param[in] color The color of the pyramid.
 		*/
-		Pyramid();
+		Pyramid(float width, float height, float depth, const vec3& position, const MathEngine::Quaternion& orientation,
+			const RenderingEngine::Color& color);
 
 		/**@brief Initializes the properties of the pyramid.
 		*
@@ -25,52 +32,28 @@ namespace ShapesEngine
 		* @param[in] orientation The orientation of the pyramid.
 		* @param[in] color The color of the pyramid.
 		*/
-		void InitializePyramid(float width, float height, float depth, const vec3 position, const MathEngine::Quaternion orientation,
+		void InitializePyramid(float width, float height, float depth, const vec3& position, const MathEngine::Quaternion& orientation,
 			const RenderingEngine::Color& color);
 
-		/**@brief Returns the ThreeDimensionalShape object.
+		/**@brief Returns the dimensions of the pyramid.
+		* The x component is the width, the y component is the height and the z component is the depth.
 		*/
-		const ThreeDimensionalShape& GetShape() const;
+		vec3 GetDimensions() const override;
 
-		/**@brief Returns the ThreeDimensionalShape object.
+		/**@brief Sets the dimensions of the pyramid.
+		* The x component should be the width, the y component should be the height and the z component should be the depth.
 		*/
-		ThreeDimensionalShape& GetShape();
-
-		/**@brief Returns the width of the pyramid.
-		*/
-		float GetWidth() const;
-
-		/**@brief Returns the height of the pyramid.
-		*/
-		float GetHeight() const;
-
-		/**@brief Returns the depth of the pyramid.
-		*/
-		float GetDepth() const;
-
-		/**@brief Sets the width of the pyramid.
-		*/
-		void SetWidth(float width);
-
-		/**@brief Sets the height of the pyramid.
-		*/
-		void SetHeight(float height);
-
-		/**@brief Sets the depth of the pyramid.
-		*/
-		void SetDepth(float depth);
+		void SetDimensions(const vec3& dimensions) override;
 
 		/**@brief Updates the pyramids model matrix.
 		*/
-		void UpdateModelMatrix();
+		void UpdateModelMatrix() override;
 
 		/**@brief Returns the volume of the pyramid.
 		*/
-		float Volume();
+		float Volume() const override;
 
 	private:
-		ThreeDimensionalShape mShape;
-
 		float mWidth;
 		float mHeight;
 		float mDepth;

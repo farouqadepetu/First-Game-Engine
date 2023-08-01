@@ -1,4 +1,6 @@
 #include "RigidBody.h"
+#include <Windows.h>
+#include <string>
 
 namespace PhysicsEngine
 {
@@ -7,12 +9,15 @@ namespace PhysicsEngine
 		mOrientation{ 1.0f, 0.0f, 0.0f, 0.0f }, mAngularVelocity{ 0.0f, 0.0f, 0.0f }, mAngularMomentum{ 0.0f, 0.0f, 0.0f }
 	{}
 
-	void RigidBody::InitializeRigidBody(float massDensity, const MathEngine::Quaternion& initialOrientation, const std::vector<ShapesEngine::Triangle>& triangles)
+	void RigidBody::InitializeRigidBody(float massDensity, const MathEngine::Quaternion& initialOrientation, 
+		const std::vector<ShapesEngine::Triangle>& triangles, const mat3& scale)
 	{
 		if (massDensity <= 0.0f)
 		{
 			mMass = 0.0f;
 			mInverseMass = 0.0f;
+
+			SetOrientation(initialOrientation);
 		}
 		else
 		{
@@ -20,7 +25,7 @@ namespace PhysicsEngine
 			vec3 cm;
 			mat3 bodyInertiaTensor;
 
-			ComputeMassProperties(triangles, mass, cm, bodyInertiaTensor);
+			ComputeMassProperties(triangles, mass, cm, bodyInertiaTensor, scale);
 
 			SetMass((float)(mass * massDensity));
 
@@ -204,7 +209,32 @@ namespace PhysicsEngine
 
 			mCenterOfMass += mLinearVelocity * dt;
 
+
 			mAngularMomentum += mNetTorque * dt;
+
+			mAngularVelocity = mAngularMomentum * mInverseWorldCMInertiaTensor;
+
+			MathEngine::Quaternion dqdt = MathEngine::Quaternion{ 0.0f, mAngularVelocity } * mOrientation * 0.5f;
+
+			mOrientation += dqdt * dt;
+
+			mOrientation = Normalize(mOrientation);
+		}
+	}
+
+	void RigidBody::Integrate(const vec3& netForce, const vec3& netTorque, float dt)
+	{
+		//If inverse mass equals to 0 that means the rigid body has infinite mass and cannot be moved.
+		if (mInverseMass > 0.0f)
+		{
+			mLinearMomentum += netForce * dt;
+
+			mLinearVelocity = mLinearMomentum * mInverseMass;
+
+			mCenterOfMass += mLinearVelocity * dt;
+
+
+			mAngularMomentum += netTorque * dt;
 
 			mAngularVelocity = mAngularMomentum * mInverseWorldCMInertiaTensor;
 

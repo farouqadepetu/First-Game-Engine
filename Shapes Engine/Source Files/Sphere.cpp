@@ -2,47 +2,39 @@
 
 namespace ShapesEngine
 {
-	Sphere::Sphere() :
-		mRadius{ 1.0f }
-	{}
-
-	void Sphere::InitializeSphere(float radius, const vec3 position, const MathEngine::Quaternion orientation,
+	Sphere::Sphere(float radius, const vec3& position, const MathEngine::Quaternion& orientation,
 		const RenderingEngine::Color& color)
 	{
-		mShape.position = position;
-		mShape.orientation = orientation;
-		mShape.color = color;
-
-		mRadius = radius;
+		InitializeSphere(radius, position, orientation, color);
 	}
 
-	const ThreeDimensionalShape& Sphere::GetShape() const
+	void Sphere::InitializeSphere(float radius, const vec3& position, const MathEngine::Quaternion& orientation,
+		const RenderingEngine::Color& color)
 	{
-		return mShape;
+		mRenderObject.position = position;
+		mRenderObject.orientation = orientation;
+		mRenderObject.color = color;
+
+		mRadius = (radius <= 0.0f) ? 1.0f : radius;
 	}
 
-	ThreeDimensionalShape& Sphere::GetShape()
+	vec3 Sphere::GetDimensions() const
 	{
-		return mShape;
+		return vec3{ mRadius, mRadius, mRadius };
 	}
 
-	float Sphere::GetRadius() const
+	void Sphere::SetDimensions(const vec3& dimensions)
 	{
-		return mRadius;
-	}
-
-	void Sphere::SetRadius(float radius)
-	{
-		mRadius = radius;
+		mRadius = (dimensions.x <= 0.0f) ? 1.0f : dimensions.x;
 	}
 
 	void Sphere::UpdateModelMatrix()
 	{
-		mShape.modelMatrix = MathEngine::Scale4x4(mRadius, mRadius, mRadius) * MathEngine::QuaternionToRotationMatrixRow4x4(mShape.orientation) *
-			MathEngine::Translate(mShape.position);
+		mRenderObject.modelMatrix = MathEngine::Scale4x4(mRadius, mRadius, mRadius) * MathEngine::QuaternionToRotationMatrixRow4x4(mRenderObject.orientation) *
+			MathEngine::Translate(mRenderObject.position);
 	}
 
-	float Sphere::Volume()
+	float Sphere::Volume() const
 	{
 		return (4.0f / 3.0f) * PI * mRadius * mRadius * mRadius;
 	}

@@ -99,6 +99,12 @@
     <ClCompile Include="..\..\Shapes Engine\Source Files\Triangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Rendering Engine\Source Files\RenderingEngineUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Rendering Engine\Source Files\DrawArguments.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h">

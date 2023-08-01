@@ -124,7 +124,43 @@ namespace WindowProc
 					}
 					else if (LOWORD(wParam) == RESET_SHAPE)
 					{
-						shapes.at(currentSelection.at(SHAPES))->orientation = MathEngine::Quaternion{};
+						switch (currentSelection.at(SHAPES))
+						{
+							case BOX:
+							{
+								box.SetOrientation(MathEngine::Quaternion{});
+
+								break;
+							}
+
+							case PYRAMID:
+							{
+								pyramid.SetOrientation(MathEngine::Quaternion{});
+
+								break;
+							}
+
+							case SPHERE:
+							{
+								sphere.SetOrientation(MathEngine::Quaternion{});
+
+								break;
+							}
+
+							case CYLINDER:
+							{
+								cylinder.SetOrientation(MathEngine::Quaternion{});
+
+								break;
+							}
+
+							case CONE:
+							{
+								cone.SetOrientation(MathEngine::Quaternion{});
+
+								break;
+							}
+						}
 					}
 
 					enableCameraUserInput = false;

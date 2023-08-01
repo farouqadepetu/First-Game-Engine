@@ -15,13 +15,6 @@ namespace Init
 		sphere.InitializeSphere(1.0f, vec3{ 4.0f, 0.0f, 0.0f }, MathEngine::Quaternion{}, RenderingEngine::Color(0.0f, 1.0f, 0.0f, 1.0f));
 		cylinder.InitializeCylinder(1.0f, 1.0f, vec3{ 6.5f, 0.0f, 0.0f }, MathEngine::Quaternion{}, RenderingEngine::Color(0.0f, 0.0f, 1.0f, 1.0f));
 		cone.InitializeCone(1.0f, 1.0f, vec3{ 9.0f, 0.0f, 0.0f }, MathEngine::Quaternion{}, RenderingEngine::Color(0.0f, 1.0f, 1.0f, 1.0f));
-
-		shapes.push_back(&box.GetShape());
-		shapes.push_back(&pyramid.GetShape());
-		shapes.push_back(&sphere.GetShape());
-		shapes.push_back(&cylinder.GetShape());
-		shapes.push_back(&cone.GetShape());
-
 	}
 
 	void BuildCamera()
@@ -55,8 +48,9 @@ namespace Init
 		std::vector<ShapesEngine::Triangle> triangles;
 
 		ShapesEngine::CreateBox(vertices, triangles);
-		ShapesEngine::SetDrawArguments(box.GetShape(), triangles.size() * 3, indexList.size(), vertexList.size(), 0, 
-			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		box.SetDrawArguments(RenderingEngine::MakeDrawArguments(triangles.size() * 3, indexList.size(), vertexList.size(), 0,
+			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+		shapes.push_back(box.GetDrawArguments());
 
 		vertexList.insert(vertexList.end(), vertices.begin(), vertices.end());
 
@@ -70,8 +64,10 @@ namespace Init
 		triangles.clear();
 
 		ShapesEngine::CreatePyramid(vertices, triangles);
-		ShapesEngine::SetDrawArguments(pyramid.GetShape(), triangles.size() * 3, indexList.size(), vertexList.size(), 1,
-			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		pyramid.SetDrawArguments(RenderingEngine::MakeDrawArguments(triangles.size() * 3, indexList.size(), vertexList.size(), 1,
+			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+		shapes.push_back(pyramid.GetDrawArguments());
+
 
 		vertexList.insert(vertexList.end(), vertices.begin(), vertices.end());
 
@@ -85,8 +81,10 @@ namespace Init
 		triangles.clear();
 
 		ShapesEngine::CreateSphere(vertices, triangles);
-		ShapesEngine::SetDrawArguments(sphere.GetShape(), triangles.size() * 3, indexList.size(), vertexList.size(), 2,
-			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		sphere.SetDrawArguments(RenderingEngine::MakeDrawArguments(triangles.size() * 3, indexList.size(), vertexList.size(), 2,
+			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+		shapes.push_back(sphere.GetDrawArguments());
+
 
 		vertexList.insert(vertexList.end(), vertices.begin(), vertices.end());
 
@@ -100,8 +98,10 @@ namespace Init
 		triangles.clear();
 
 		ShapesEngine::CreateCylinder(vertices, triangles);
-		ShapesEngine::SetDrawArguments(cylinder.GetShape(), triangles.size() * 3, indexList.size(), vertexList.size(), 3,
-			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		cylinder.SetDrawArguments(RenderingEngine::MakeDrawArguments(triangles.size() * 3, indexList.size(), vertexList.size(), 3,
+			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+		shapes.push_back(cylinder.GetDrawArguments());
+
 
 		vertexList.insert(vertexList.end(), vertices.begin(), vertices.end());
 
@@ -115,8 +115,10 @@ namespace Init
 		triangles.clear();
 
 		ShapesEngine::CreateCone(vertices, triangles);
-		ShapesEngine::SetDrawArguments(cone.GetShape(), triangles.size() * 3, indexList.size(), vertexList.size(), 4,
-			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		cone.SetDrawArguments(RenderingEngine::MakeDrawArguments(triangles.size() * 3, indexList.size(), vertexList.size(), 4,
+			L"OBJECTCB", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+		shapes.push_back(cone.GetDrawArguments());
+
 
 		vertexList.insert(vertexList.end(), vertices.begin(), vertices.end());
 

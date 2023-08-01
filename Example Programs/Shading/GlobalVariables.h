@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "PerspectiveProjection.h"
 #include "Text.h"
+#include "DrawArguments.h"
 
 struct ObjectConstants
 {
@@ -142,15 +143,13 @@ namespace GlobalVariables
 	enum LightSourceNames { POINT_LIGHT, DIRECTIONAL_LIGHT, POINT_PLUS_DIRECTIONAL_LIGHT };
 	enum SelectionNames { SHADING, SHAPES, MATERIALS, LIGHT_SOURCE };
 	enum ButtonNames { PLAY_PAUSE, RESET_CAMERA, RESET_SHAPE };
+	enum ShapeNames { BOX, PYRAMID, CYLINDER, CONE, SPHERE };
 
 	inline ShapesEngine::Box box;
 	inline ShapesEngine::Pyramid pyramid;
 	inline ShapesEngine::Cone cone;
 	inline ShapesEngine::Cylinder cylinder;
 	inline ShapesEngine::Sphere sphere;
-
-	//vector to store pointers to 3D shapes.
-	inline std::vector<ShapesEngine::ThreeDimensionalShape*> shapes;
 
 	//Vector to store all the vertices of the 3D shapes.
 	inline std::vector<ShapesEngine::Vertex> vertexList;

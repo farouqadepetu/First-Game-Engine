@@ -2,69 +2,43 @@
 
 namespace ShapesEngine
 {
-	Box::Box() :
-		mWidth{ 1.0f }, mHeight{ 1.0f }, mDepth{ 1.0f }
-	{}
-
-	void Box::InitializeBox(float width, float height, float depth, const vec3 position, const MathEngine::Quaternion orientation,
+	Box::Box(float width, float height, float depth, const vec3& position, const MathEngine::Quaternion& orientation,
 		const RenderingEngine::Color& color)
 	{
-		mShape.position = position;
-		mShape.orientation = orientation;
-		mShape.color = color;
-
-		mWidth = width;
-		mHeight = height;
-		mDepth = depth;
+		InitializeBox(width, height, depth, position, orientation, color);
 	}
 
-	const ThreeDimensionalShape& Box::GetShape() const
+	void Box::InitializeBox(float width, float height, float depth, const vec3& position, const MathEngine::Quaternion& orientation,
+		const RenderingEngine::Color& color)
 	{
-		return mShape;
+		mRenderObject.position = position;
+		mRenderObject.orientation = orientation;
+		mRenderObject.color = color;
+
+		mWidth = (width <= 0.0f) ? 1.0f : width;
+		mHeight = (height <= 0.0f) ? 1.0f : height;
+		mDepth = (depth <= 0.0f) ? 1.0f : depth;
 	}
 
-	ThreeDimensionalShape& Box::GetShape()
+	vec3 Box::GetDimensions() const
 	{
-		return mShape;
+		return vec3{ mWidth, mHeight, mDepth };
 	}
 
-	float Box::GetWidth() const
+	void Box::SetDimensions(const vec3& dimensions)
 	{
-		return mWidth;
-	}
-
-	float Box::GetHeight() const
-	{
-		return mHeight;
-	}
-
-	float Box::GetDepth() const
-	{
-		return mDepth;
-	}
-
-	void Box::SetWidth(float width)
-	{
-		mWidth = width;
-	}
-
-	void Box::SetHeight(float height)
-	{
-		mHeight = height;
-	}
-
-	void Box::SetDepth(float depth)
-	{
-		mDepth = depth;
+		mWidth = (dimensions.x <= 0.0f) ? 1.0f : dimensions.x;
+		mHeight = (dimensions.y <= 0.0f) ? 1.0f : dimensions.y;
+		mDepth = (dimensions.z <= 0.0f) ? 1.0f : dimensions.z;
 	}
 
 	void Box::UpdateModelMatrix()
 	{
-		mShape.modelMatrix = MathEngine::Scale4x4(mWidth, mHeight, mDepth) * MathEngine::QuaternionToRotationMatrixRow4x4(mShape.orientation) *
-			MathEngine::Translate(mShape.position);
+		mRenderObject.modelMatrix = MathEngine::Scale4x4(mWidth, mHeight, mDepth) * MathEngine::QuaternionToRotationMatrixRow4x4(mRenderObject.orientation) *
+			MathEngine::Translate(mRenderObject.position);
 	}
 
-	float Box::Volume()
+	float Box::Volume() const
 	{
 		return mWidth * mHeight * mDepth;
 	}

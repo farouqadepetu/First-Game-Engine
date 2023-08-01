@@ -10,11 +10,11 @@ namespace PhysicsEngine
 	*/
 	vec3 GravitationalForce(float mass, float gravityAcceleration, const vec3& direction);
 
-	/**brief Returns the force due to drag (e.g. air resistance, friction)
+	/**brief Returns the force due to drag.
 	*
-	* Formula used is F = -cv, where v is the velocity of the object and c is the drag coefficient.
+	* Formula used is F = -v(k1|v| + k2|v|^2), where v is the velocity of the object and k1 and k2 are the drag coefficients.
 	*/
-	vec3 DragForce(float dragCoefficent, const vec3& velocity);
+	vec3 DragForce(float k1, float k2, const vec3& velocity);
 
 	/**brief Returns a force that is being applied to an object.
 	*

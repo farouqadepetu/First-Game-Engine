@@ -1,6 +1,4 @@
 #include "Model.h"
-#include <Windows.h>
-#include <string>
 
 namespace MVC
 {
@@ -8,29 +6,17 @@ namespace MVC
 	{
 		for (unsigned int i = 0; i < 5; ++i)
 		{
-			mShapes.push_back(nullptr);
-			mRigidBodies.push_back(nullptr);
+			mPreviousRigidShapes.emplace_back();
+			mInterpolatedRigidShapes.emplace_back();
+			mCurrentRigidShapes.emplace_back();
 		}
 
-		mShapes.at(RIGID_BOX) = &mInterpolatedBox.GetShape();
-		mRigidBodies.at(RIGID_BOX) = &mCurrentBox.GetRigidBody();
 		CreateBox();
-
-		mShapes.at(RIGID_CONE) = &mInterpolatedCone.GetShape();
-		mRigidBodies.at(RIGID_CONE) = &mCurrentCone.GetRigidBody();
 		CreateCone();
-
-		mShapes.at(RIGID_CYLINDER) = &mInterpolatedCylinder.GetShape();
-		mRigidBodies.at(RIGID_CYLINDER) = &mCurrentCylinder.GetRigidBody();
 		CreateCylinder();
-
-		mShapes.at(RIGID_SPHERE) = &mInterpolatedSphere.GetShape();
-		mRigidBodies.at(RIGID_SPHERE) = &mCurrentSphere.GetRigidBody();
 		CreateSphere();
-
-		mShapes.at(RIGID_PYRAMID) = &mInterpolatedPyramid.GetShape();
-		mRigidBodies.at(RIGID_PYRAMID) = &mCurrentPyramid.GetRigidBody();
 		CreatePyramid();
+		CreateBoundingVolumes();
 	}
 
 	void Model::CreateBox()
@@ -40,14 +26,42 @@ namespace MVC
 
 		ShapesEngine::CreateBox(vertices, triangles);
 
-		mCurrentBox.InitializeRigidBox(5.0f, 1.0f, 1.0f, 1.0f, vec3{ 0.0f, 0.0f, 0.0f }, MathEngine::Quaternion{},
-			RenderingEngine::Color(1.0f, 0.0f, 0.0f, 1.0f), vertices, triangles);
+		vec3 position{ -2.0f, 0.0f, 0.0f };
+		MathEngine::Quaternion orientation{};
+		RenderingEngine::Color color(1.0f, 0.0f, 0.0f, 1.0f);
+		RenderingEngine::Color boundingVolumeColor(1.0f, 1.0f, 0.0f, 1.0f);
+		float massDensity{ 1.0f };
+		float width{ 1.0f };
+		float height{ 1.0f };
+		float depth{ 1.0f };
 
-		mPreviousBox = mCurrentBox;
-		mInterpolatedBox = mCurrentBox;
+		/*mPreviousRigidShapes.at(RIGID_BOX).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Box>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));
 
-		SetDrawArguments(*mShapes.at(RIGID_BOX), (unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
-			RIGID_BOX, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		mInterpolatedRigidShapes.at(RIGID_BOX).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Box>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));
+
+		mCurrentRigidShapes.at(RIGID_BOX).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Box>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));*/
+
+		mPreviousRigidShapes.at(RIGID_BOX).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Box>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mInterpolatedRigidShapes.at(RIGID_BOX).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Box>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mCurrentRigidShapes.at(RIGID_BOX).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Box>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mInterpolatedRigidShapes.at(RIGID_BOX).SetDrawArguments(
+			RenderingEngine::MakeDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
+				RIGID_BOX, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -66,14 +80,41 @@ namespace MVC
 
 		ShapesEngine::CreateCone(vertices, triangles);
 
-		mCurrentCone.InitializeRigidCone(2.0f, 2.0f, 1.0f, vec3{ 5.0f, 0.0f, 0.0f }, MathEngine::Quaternion{},
-			RenderingEngine::Color(1.0f, 1.0f, 0.0f, 1.0f), vertices, triangles);
+		vec3 position{ 4.0f, 0.0f, 0.0f };
+		MathEngine::Quaternion orientation{};
+		RenderingEngine::Color color(1.0f, 0.5f, 0.5f, 1.0f);
+		RenderingEngine::Color boundingVolumeColor(1.0f, 1.0f, 0.0f, 1.0f);
+		float massDensity{ 1.0f };
+		float radius{ 1.0f };
+		float height{ 1.0f };
 
-		mPreviousCone = mCurrentCone;
-		mInterpolatedCone = mCurrentCone;
+		/*mPreviousRigidShapes.at(RIGID_CONE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cone>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));
 
-		SetDrawArguments(*mShapes.at(RIGID_CONE), (unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
-			RIGID_CONE, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		mInterpolatedRigidShapes.at(RIGID_CONE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cone>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));
+
+		mCurrentRigidShapes.at(RIGID_CONE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cone>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));*/
+
+		mPreviousRigidShapes.at(RIGID_CONE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cone>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mInterpolatedRigidShapes.at(RIGID_CONE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cone>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mCurrentRigidShapes.at(RIGID_CONE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cone>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mInterpolatedRigidShapes.at(RIGID_CONE).SetDrawArguments(
+			RenderingEngine::MakeDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
+				RIGID_CONE, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -92,14 +133,41 @@ namespace MVC
 
 		ShapesEngine::CreateCylinder(vertices, triangles);
 
-		mCurrentCylinder.InitializeRigidCylinder(2.0f, 2.0f, 1.0f, vec3{ 10.0f, 0.0f, 0.0f }, MathEngine::Quaternion{},
-			RenderingEngine::Color(1.0f, 0.0f, 1.0f, 1.0f), vertices, triangles);
+		vec3 position{ 10.0f, 0.0f, 0.0f };
+		MathEngine::Quaternion orientation{};
+		RenderingEngine::Color color(1.0f, 0.0f, 1.0f, 1.0f);
+		RenderingEngine::Color boundingVolumeColor(1.0f, 1.0f, 0.0f, 1.0f);
+		float massDensity{ 1.0f };
+		float radius{ 1.0f };
+		float height{ 1.0f };
 
-		mPreviousCylinder = mCurrentCylinder;
-		mInterpolatedCylinder = mCurrentCylinder;
+		/*mPreviousRigidShapes.at(RIGID_CYLINDER).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cylinder>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));
 
-		SetDrawArguments(*mShapes.at(RIGID_CYLINDER), (unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
-			RIGID_CYLINDER, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		mInterpolatedRigidShapes.at(RIGID_CYLINDER).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cylinder>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));
+
+		mCurrentRigidShapes.at(RIGID_CYLINDER).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cylinder>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));*/
+
+		mPreviousRigidShapes.at(RIGID_CYLINDER).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cylinder>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mInterpolatedRigidShapes.at(RIGID_CYLINDER).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cylinder>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mCurrentRigidShapes.at(RIGID_CYLINDER).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Cylinder>(radius, height, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mInterpolatedRigidShapes.at(RIGID_CYLINDER).SetDrawArguments(
+			RenderingEngine::MakeDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
+				RIGID_CYLINDER, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -118,14 +186,40 @@ namespace MVC
 
 		ShapesEngine::CreateSphere(vertices, triangles);
 
-		mCurrentSphere.InitializeRigidSphere(2.0f, 1.0f, vec3{ 15.0f, 0.0f, 0.0f }, MathEngine::Quaternion{},
-			RenderingEngine::Color(0.2f, 0.1f, 1.0f, 1.0f), vertices, triangles);
+		vec3 position{ 16.0f, 0.0f, 0.0f };
+		MathEngine::Quaternion orientation{};
+		RenderingEngine::Color color(0.2f, 0.1f, 1.0f, 1.0f);
+		RenderingEngine::Color boundingVolumeColor(1.0f, 1.0f, 0.0f, 1.0f);
+		float massDensity{ 0.75f };
+		float radius{ 1.0f };;
 
-		mPreviousSphere = mCurrentSphere;
-		mInterpolatedSphere = mCurrentSphere;
+		/*mPreviousRigidShapes.at(RIGID_SPHERE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Sphere>(radius, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));
 
-		SetDrawArguments(*mShapes.at(RIGID_SPHERE), (unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
-			RIGID_SPHERE, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		mInterpolatedRigidShapes.at(RIGID_SPHERE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Sphere>(radius, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));
+
+		mCurrentRigidShapes.at(RIGID_SPHERE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Sphere>(radius, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));*/
+
+		mPreviousRigidShapes.at(RIGID_SPHERE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Sphere>(radius, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mInterpolatedRigidShapes.at(RIGID_SPHERE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Sphere>(radius, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mCurrentRigidShapes.at(RIGID_SPHERE).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Sphere>(radius, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mInterpolatedRigidShapes.at(RIGID_SPHERE).SetDrawArguments(
+			RenderingEngine::MakeDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
+				RIGID_SPHERE, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -144,14 +238,42 @@ namespace MVC
 
 		ShapesEngine::CreatePyramid(vertices, triangles);
 
-		mCurrentPyramid.InitializeRigidPyramid(5.0f, 1.0f, 1.0f, 1.0f, vec3{ 20.0f, 0.0f, 0.0f }, MathEngine::Quaternion{},
-			RenderingEngine::Color(0.0f, 0.4f, 0.3f, 1.0f), vertices, triangles);
+		vec3 position{ 22.0f, 0.0f, 0.0f };
+		MathEngine::Quaternion orientation{};
+		RenderingEngine::Color color(0.0f, 0.4f, 0.3f, 1.0f);
+		RenderingEngine::Color boundingVolumeColor(1.0f, 1.0f, 0.0f, 1.0f);
+		float massDensity{ 2.0f };
+		float width{ 1.0f };
+		float height{ 5.0f };
+		float depth{ 1.0f };
 
-		mPreviousPyramid = mCurrentPyramid;
-		mInterpolatedPyramid = mCurrentPyramid;
+		/*mPreviousRigidShapes.at(RIGID_PYRAMID).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Pyramid>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));
 
-		SetDrawArguments(*mShapes.at(RIGID_PYRAMID), (unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
-			RIGID_PYRAMID, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		mInterpolatedRigidShapes.at(RIGID_PYRAMID).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Pyramid>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));
+
+		mCurrentRigidShapes.at(RIGID_PYRAMID).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Pyramid>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingBox>(vertices, boundingVolumeColor));*/
+
+		mPreviousRigidShapes.at(RIGID_PYRAMID).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Pyramid>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mInterpolatedRigidShapes.at(RIGID_PYRAMID).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Pyramid>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mCurrentRigidShapes.at(RIGID_PYRAMID).InitializeRigidShape(massDensity, triangles,
+			std::make_unique<ShapesEngine::Pyramid>(width, height, depth, position, orientation, color),
+			std::make_unique<PhysicsEngine::BoundingSphere>(vertices, boundingVolumeColor));
+
+		mInterpolatedRigidShapes.at(RIGID_PYRAMID).SetDrawArguments(
+			RenderingEngine::MakeDrawArguments((unsigned int)triangles.size() * 3, (unsigned int)mIndexList.size(), (int)mVertexList.size(),
+				RIGID_PYRAMID, L"Object Constant Buffer", 0, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 		mVertexList.insert(mVertexList.end(), vertices.begin(), vertices.end());
 
@@ -160,6 +282,23 @@ namespace MVC
 			mIndexList.push_back(i.p0);
 			mIndexList.push_back(i.p1);
 			mIndexList.push_back(i.p2);
+		}
+	}
+
+	void Model::CreateBoundingVolumes()
+	{
+		RenderingEngine::DrawArguments sphereDrawArgs(mInterpolatedRigidShapes.at(RIGID_SPHERE).GetDrawArguments());
+		RenderingEngine::DrawArguments boxDrawArgs(mInterpolatedRigidShapes.at(RIGID_BOX).GetDrawArguments());
+
+		for (unsigned int i = 0; i < 5; ++i)
+		{
+			/*mInterpolatedRigidShapes.at(i).SetBoundingVolumeDrawArguments(
+				RenderingEngine::MakeDrawArguments(boxDrawArgs.indexCount, boxDrawArgs.locationOfFirstIndex, boxDrawArgs.indexOfFirstVertex,
+					i + 5, boxDrawArgs.constantBufferKey, boxDrawArgs.rootParameterIndex, boxDrawArgs.primtive));*/
+
+			mInterpolatedRigidShapes.at(i).SetBoundingVolumeDrawArguments(
+				RenderingEngine::MakeDrawArguments(sphereDrawArgs.indexCount, sphereDrawArgs.locationOfFirstIndex, sphereDrawArgs.indexOfFirstVertex,
+					i + 5, sphereDrawArgs.constantBufferKey, sphereDrawArgs.rootParameterIndex, sphereDrawArgs.primtive));
 		}
 	}
 
@@ -173,6 +312,7 @@ namespace MVC
 
 	void Model::Simulate(float renderTime)
 	{
+		static float total{ 0.0f };
 		//set the max number of simulation updates in one frame to 25
 		if (renderTime > 0.25f)
 		{
@@ -184,13 +324,15 @@ namespace MVC
 		//simulate until accumulator < simulation time
 		while (mAccumulator >= mSimulationTime)
 		{
-			mPreviousBox = mCurrentBox;
-			mPreviousCone = mCurrentCone;
-			mPreviousCylinder = mCurrentCylinder;
-			mPreviousSphere = mCurrentSphere;
-			mPreviousPyramid = mCurrentPyramid;
+			for (unsigned int i = 0; i < 5; ++i)
+			{
+				vec3 force(NetForce(mCurrentRigidShapes.at(i).GetMass(), mCurrentRigidShapes.at(i).GetLinearVelocity()));
 
-			SimulateRigidBodies();
+				vec3 torque(NetTorque(force, mCurrentRigidShapes.at(i).GetAngularVelocity(),
+					mCurrentRigidShapes.at(i).GetCenterOfMass(), mCurrentRigidShapes.at(i).GetCenterOfMass() + vec3{ 0.5f, 0.0f, 0.0f }));
+
+				PhysicsEngine::SimulateRigidShape(mPreviousRigidShapes.at(i), mCurrentRigidShapes.at(i), force, torque, mSimulationTime);
+			}
 
 			mAccumulator -= mSimulationTime;
 		}
@@ -199,86 +341,72 @@ namespace MVC
 		mAlpha = mAccumulator / mSimulationTime;
 
 		//Interpolate to avoid stuttering.
-		PhysicsEngine::Interpolate(mPreviousBox.GetRigidBody(), mCurrentBox.GetRigidBody(), mInterpolatedBox.GetRigidBody(), mAlpha);
-		PhysicsEngine::Interpolate(mPreviousCone.GetRigidBody(), mCurrentCone.GetRigidBody(), mInterpolatedCone.GetRigidBody(), mAlpha);
-		PhysicsEngine::Interpolate(mPreviousCylinder.GetRigidBody(), mCurrentCylinder.GetRigidBody(), mInterpolatedCylinder.GetRigidBody(), mAlpha);
-		PhysicsEngine::Interpolate(mPreviousSphere.GetRigidBody(), mCurrentSphere.GetRigidBody(), mInterpolatedSphere.GetRigidBody(), mAlpha);
-		PhysicsEngine::Interpolate(mPreviousPyramid.GetRigidBody(), mCurrentPyramid.GetRigidBody(), mInterpolatedPyramid.GetRigidBody(), mAlpha);
+		for (unsigned int i = 0; i < 5; ++i)
+		{
+			PhysicsEngine::Interpolate(mPreviousRigidShapes.at(i), mCurrentRigidShapes.at(i), mInterpolatedRigidShapes.at(i), mAlpha);
+		}
 	}
 
 	void Model::UpdateModels(RenderingEngine::RenderScene* scene, const MathEngine::Matrix4x4& viewMatrix, const MathEngine::Matrix4x4& projectionMatrix)
 	{
-		mInterpolatedBox.UpdateModelMatrix();
-		mInterpolatedCone.UpdateModelMatrix();
-		mInterpolatedCylinder.UpdateModelMatrix();
-		mInterpolatedSphere.UpdateModelMatrix();
-		mInterpolatedPyramid.UpdateModelMatrix();
-
 		ObjectConstants data;
-		for (const auto& i : mShapes)
+		for (auto& i : mInterpolatedRigidShapes)
 		{
-			data.MVP = MathEngine::Transpose(i->modelMatrix * viewMatrix * projectionMatrix);
-			data.color = i->color;
-			ShapesEngine::UpdateShape(*i, scene, &data, sizeof(ObjectConstants));
+			i.UpdateModelMatrix();
+			data.MVP = MathEngine::Transpose(i.GetModelMatrix() * viewMatrix * projectionMatrix);
+			data.color = i.GetColor();
+			RenderingEngine::Update(scene, i.GetDrawArguments(), &data, sizeof(ObjectConstants));
+
+			data.MVP = MathEngine::Transpose(i.GetBoundingVolumeModelMatrix() * viewMatrix * projectionMatrix);
+			data.color = i.GetBoundingVolumeColor();
+			RenderingEngine::Update(scene, i.GetBoundingVolumeDrawArguments(), &data, sizeof(ObjectConstants));
 		}
 	}
 
 	void Model::RenderModels(RenderingEngine::RenderScene* scene)
 	{
-		for (const auto& i : mShapes)
+		for (const auto& i : mInterpolatedRigidShapes)
 		{
-			ShapesEngine::RenderShape(*i, scene);
+			RenderingEngine::Render(scene, i.GetDrawArguments());
+
+			RenderingEngine::Render(scene, i.GetBoundingVolumeDrawArguments());
 		}
 	}
 
-	void Model::SimulateRigidBodies()
+	vec3 Model::NetForce(float mass, const vec3& linearVelocity)
 	{
-		for (auto& i : mRigidBodies)
-		{
-			vec3 direction{ 0.0f, -1.0f, 0.0f };
-			i->ResetForce();
-			i->AddForce(PhysicsEngine::GravitationalForce(i->GetMass(), 9.81f, direction));
-			i->AddForce(PhysicsEngine::DragForce(10.0f, i->GetLinearVelocity()));
+		return PhysicsEngine::GravitationalForce(mass, 9.81f, vec3{ 0.0f, -1.0f, 0.0f }) + PhysicsEngine::DragForce(10.0f, 0.0f, linearVelocity);
+	}
 
-			i->ResetTorque();
-			i->AddTorque(i->GetNetForce(), i->GetCenterOfMass() + vec3{ 0.5f, 0.0f, 0.0f });
-
-			i->Integrate(mSimulationTime);
-		}
+	vec3 Model::NetTorque(const vec3& force, const vec3& angularVelocity, const vec3& centerOfMass, const vec3& point)
+	{
+		return MathEngine::CrossProduct(point - centerOfMass, force); //PhysicsEngine::DragForce(2.0f, 0.0f, angularVelocity);
 	}
 
 	void Model::Reset()
 	{
-		mCurrentBox.SetPosition(vec3{ 0.0f, 0.0f, 0.0f });
-		mCurrentCone.SetPosition(vec3{ 5.0f, 0.0f, 0.0f });
-		mCurrentCylinder.SetPosition(vec3{ 10.0f, 0.0f, 0.0f });
-		mCurrentSphere.SetPosition(vec3{ 15.0f, 0.0f, 0.0f });
-		mCurrentPyramid.SetPosition(vec3{ 20.0f, 0.0f, 0.0f });
-
-		for (auto& i : mRigidBodies)
+		vec3 position{ -2.0f, 0.0f, 0.0f };
+		for (unsigned int i = 0; i < 5; ++i)
 		{
-			i->SetOrientation(MathEngine::Quaternion{});
-			i->SetLinearMomentum(vec3{ 0.0f, 0.0f, 0.0f });
-			i->SetAngularMomentum(vec3{ 0.0f, 0.0f, 0.0f });
+			mPreviousRigidShapes.at(i).SetPosition(position);
+			mPreviousRigidShapes.at(i).SetOrientation(MathEngine::Quaternion{});
+			mPreviousRigidShapes.at(i).SetLinearMomentum(vec3{ 0.0f, 0.0f, 0.0f });
+			mPreviousRigidShapes.at(i).SetAngularMomentum(vec3{ 0.0f, 0.0f, 0.0f });
+
+			mInterpolatedRigidShapes.at(i).SetPosition(position);
+			mInterpolatedRigidShapes.at(i).SetOrientation(MathEngine::Quaternion{});
+			mInterpolatedRigidShapes.at(i).SetLinearMomentum(vec3{ 0.0f, 0.0f, 0.0f });
+			mInterpolatedRigidShapes.at(i).SetAngularMomentum(vec3{ 0.0f, 0.0f, 0.0f });
+
+			mCurrentRigidShapes.at(i).SetPosition(position);
+			mCurrentRigidShapes.at(i).SetOrientation(MathEngine::Quaternion{});
+			mCurrentRigidShapes.at(i).SetLinearMomentum(vec3{ 0.0f, 0.0f, 0.0f });
+			mCurrentRigidShapes.at(i).SetAngularMomentum(vec3{ 0.0f, 0.0f, 0.0f });
+			position += vec3{ 6.0f, 0.0f, 0.0f };
 		}
 
 		mAccumulator = 0.0f;
 		mAlpha = 0.0f;
-
-		mPreviousBox = mCurrentBox;
-		PhysicsEngine::Interpolate(mPreviousBox.GetRigidBody(), mCurrentBox.GetRigidBody(), mInterpolatedBox.GetRigidBody(), mAlpha);
-
-		mPreviousCone = mCurrentCone;
-		PhysicsEngine::Interpolate(mPreviousCone.GetRigidBody(), mCurrentCone.GetRigidBody(), mInterpolatedCone.GetRigidBody(), mAlpha);
-
-		mPreviousCylinder = mCurrentCylinder;
-		PhysicsEngine::Interpolate(mPreviousCylinder.GetRigidBody(), mCurrentCylinder.GetRigidBody(), mInterpolatedCylinder.GetRigidBody(), mAlpha);
-
-		mPreviousSphere = mCurrentSphere;
-		PhysicsEngine::Interpolate(mPreviousSphere.GetRigidBody(), mCurrentSphere.GetRigidBody(), mInterpolatedSphere.GetRigidBody(), mAlpha);
-
-		mPreviousPyramid = mCurrentPyramid;
-		PhysicsEngine::Interpolate(mPreviousPyramid.GetRigidBody(), mCurrentPyramid.GetRigidBody(), mInterpolatedPyramid.GetRigidBody(), mAlpha);
 	}
-	
+
 }
