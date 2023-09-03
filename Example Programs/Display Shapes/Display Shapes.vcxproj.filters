@@ -117,4 +117,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\pixelShader.hlsl" />
+    <FxCompile Include="Shaders\vertexShader.hlsl" />
+  </ItemGroup>
 </Project>

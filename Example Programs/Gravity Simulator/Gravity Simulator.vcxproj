@@ -173,6 +173,8 @@
     <ClCompile Include="View.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Math Engine\MathEngine.h" />
+    <ClInclude Include="..\..\Rendering Engine\Header Files\RenderingEngineUtility.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Structures.h" />

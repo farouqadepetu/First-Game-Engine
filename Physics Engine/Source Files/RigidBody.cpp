@@ -1,6 +1,4 @@
 #include "RigidBody.h"
-#include <Windows.h>
-#include <string>
 
 namespace PhysicsEngine
 {
@@ -212,7 +210,10 @@ namespace PhysicsEngine
 
 			mAngularMomentum += mNetTorque * dt;
 
-			mAngularVelocity = mAngularMomentum * mInverseWorldCMInertiaTensor;
+			MathEngine::Matrix3x3 rOrientation(QuaternionToRotationMatrixRow3x3(mOrientation));
+			MathEngine::Matrix3x3 inverseWorldInertiaTensor = rOrientation * mInverseBodyInertiaTensor * Transpose(rOrientation);
+
+			mAngularVelocity = mAngularMomentum * inverseWorldInertiaTensor;
 
 			MathEngine::Quaternion dqdt = MathEngine::Quaternion{ 0.0f, mAngularVelocity } * mOrientation * 0.5f;
 
@@ -236,7 +237,10 @@ namespace PhysicsEngine
 
 			mAngularMomentum += netTorque * dt;
 
-			mAngularVelocity = mAngularMomentum * mInverseWorldCMInertiaTensor;
+			MathEngine::Matrix3x3 rOrientation(QuaternionToRotationMatrixRow3x3(mOrientation));
+			MathEngine::Matrix3x3 inverseWorldInertiaTensor = rOrientation * mInverseBodyInertiaTensor * Transpose(rOrientation);
+
+			mAngularVelocity = mAngularMomentum * inverseWorldInertiaTensor;
 
 			MathEngine::Quaternion dqdt = MathEngine::Quaternion{ 0.0f, mAngularVelocity } * mOrientation * 0.5f;
 
